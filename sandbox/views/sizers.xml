@@ -26,6 +26,7 @@
                sizer:flag='once:{wx.ALIGN_TOP|wx.TOP}'
                sizer:border='once:{10}'
                call:SetBackgroundColour='white'>
+               <StaticText call:SetLabel='static text' />
         </Panel>
     </BoxSizer>
 </BoxSizer>
