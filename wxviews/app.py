@@ -26,11 +26,9 @@ def _register_binding_factory():
     ioc.register_single('binding_factory', factory)
 
 def _register_rendering_steps():
-    ioc.register_single('rendering_steps', [apply_attributes, render_children], ControlNode)
+    ioc.register_single('rendering_steps', [apply_attributes, render_children])
     ioc.register_single('rendering_steps', [apply_attributes, render_children,
                                             lambda node: node.control.Show()], FrameNode)
-    ioc.register_single('rendering_steps', [apply_attributes, render_children], AppNode)
-    ioc.register_single('rendering_steps', [apply_attributes, render_children], SizerNode)
 
 def launch(root_view=None):
     '''Runs application. Widgets are created from passed xml_files'''

@@ -13,7 +13,7 @@ class ControlArgs(NodeArgs):
     def get_args(self, inst_type=None):
         if issubclass(inst_type, Sizer):
             return NodeArgs.Result([], {})
-        if issubclass(inst_type, ControlNode):
+        if issubclass(inst_type, Node):
             return super().get_args(inst_type)
         return NodeArgs.Result([self['parent']], {})
 

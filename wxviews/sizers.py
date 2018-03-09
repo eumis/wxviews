@@ -15,7 +15,7 @@ class SizerNode(ControlNode):
         for child_node in self._child_nodes:
             self.control.Add(child_node.control, *child_node.sizer_args, **child_node.sizer_kwargs)
         if not isinstance(self._parent_node, SizerNode):
-            self._parent_node.control.SetSizer(self.control)
+            self._parent.SetSizer(self.control)
 
     def get_node_args(self, xml_node: XmlNode):
         return ControlArgs(xml_node, self, self._parent)

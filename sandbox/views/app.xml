@@ -4,36 +4,12 @@
      xmlns:call='wxviews.modifiers.call'
      xmlns:sizer_args='wxviews.modifiers.set_sizer_args'
      xmlns:sizer='wxviews.modifiers.set_sizer_kwargs'
+     xmlns:wxv='wxviews'
 
      import:wx='wx'>
     <Frame call:SetTitle='title world'>
         <Panel call:SetBackgroundColour='gray'>
-            <BoxSizer call:SetOrientation='once:{wx.VERTICAL}'>
-                <Panel sizer:proportion='once:{1}'
-                       sizer:flag='once:{wx.EXPAND|wx.ALL}'
-                       sizer:border='once:{20}'
-                       call:SetBackgroundColour='white'>
-                </Panel>
-                <BoxSizer call:SetOrientation='once:{wx.HORIZONTAL}'
-                          sizer:proportion='once:{1}'
-                          sizer:flag='once:{wx.EXPAND|wx.ALL}'>
-                    <Panel sizer:proportion='once:{1}'
-                        sizer:flag='once:{wx.EXPAND|wx.RIGHT}'
-                        sizer:border='once:{10}'
-                        call:SetBackgroundColour='white'>
-                    </Panel>
-                    <Panel sizer:proportion='once:{1}'
-                        sizer:flag='once:{wx.EXPAND|wx.ALL}'
-                        sizer:border='once:{10}'
-                        call:SetBackgroundColour='white'>
-                    </Panel>
-                    <Panel sizer:proportion='once:{2}'
-                        sizer:flag='once:{wx.ALIGN_TOP|wx.TOP}'
-                        sizer:border='once:{10}'
-                        call:SetBackgroundColour='white'>
-                    </Panel>
-                </BoxSizer>
-            </BoxSizer>
+            <wxv:View name='sizers' />
         </Panel>
     </Frame>
 </App>
