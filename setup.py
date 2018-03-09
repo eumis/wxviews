@@ -5,7 +5,7 @@ def setup_package():
         name='wxviews',
         version='0.0.1',
         description='Package for creating wxPython applications in declarative way.',
-        url='https://github.com/eumis/wxPython',
+        url='https://github.com/eumis/wxviews',
         author='eumis(Eugen Misievich)',
         author_email='misievich@gmail.com',
         license='MIT',
