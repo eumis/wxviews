@@ -1,6 +1,6 @@
 # wxviews
 
-[pyviews](https://github.com/eumis/pyviews) adapter for tkinter. It allows to create ui widgets using xml with binding.
+[pyviews](https://github.com/eumis/pyviews) adapter for wxpython. It allows to create ui widgets using xml with binding.
 
 ## Installation
 
