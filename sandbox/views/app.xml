@@ -1,9 +1,39 @@
 <?xml version="1.0"?>
 <App xmlns='wx'
-     xmlns:call='wxviews.modifiers.call'>
+     xmlns:import='pyviews.rendering.modifiers.import_global'
+     xmlns:call='wxviews.modifiers.call'
+     xmlns:sizer_args='wxviews.modifiers.set_sizer_args'
+     xmlns:sizer='wxviews.modifiers.set_sizer_kwargs'
+
+     import:wx='wx'>
     <Frame call:SetTitle='title world'>
-        <Panel>
-            <StaticText call:SetLabel='Hello World'/>
+        <Panel call:SetBackgroundColour='gray'>
+            <BoxSizer call:SetOrientation='once:{wx.VERTICAL}'>
+                <Panel sizer:proportion='once:{1}'
+                       sizer:flag='once:{wx.EXPAND|wx.ALL}'
+                       sizer:border='once:{20}'
+                       call:SetBackgroundColour='white'>
+                </Panel>
+                <BoxSizer call:SetOrientation='once:{wx.HORIZONTAL}'
+                          sizer:proportion='once:{1}'
+                          sizer:flag='once:{wx.EXPAND|wx.ALL}'>
+                    <Panel sizer:proportion='once:{1}'
+                        sizer:flag='once:{wx.EXPAND|wx.RIGHT}'
+                        sizer:border='once:{10}'
+                        call:SetBackgroundColour='white'>
+                    </Panel>
+                    <Panel sizer:proportion='once:{1}'
+                        sizer:flag='once:{wx.EXPAND|wx.ALL}'
+                        sizer:border='once:{10}'
+                        call:SetBackgroundColour='white'>
+                    </Panel>
+                    <Panel sizer:proportion='once:{2}'
+                        sizer:flag='once:{wx.ALIGN_TOP|wx.TOP}'
+                        sizer:border='once:{10}'
+                        call:SetBackgroundColour='white'>
+                    </Panel>
+                </BoxSizer>
+            </BoxSizer>
         </Panel>
     </Frame>
 </App>

@@ -7,7 +7,8 @@ from pyviews.rendering.binding import BindingFactory, add_default_rules
 from pyviews.rendering.dependencies import register_defaults
 from pyviews.rendering.views import render_view
 from wxviews.rendering import convert_to_node
-from wxviews.widgets import AppNode, FrameNode, ControlNode
+from wxviews.node import AppNode, FrameNode, ControlNode
+from wxviews.sizers import SizerNode
 
 def register_dependencies():
     '''Registers all dependencies needed for application'''
@@ -29,6 +30,7 @@ def _register_rendering_steps():
     ioc.register_single('rendering_steps', [apply_attributes, render_children,
                                             lambda node: node.control.Show()], FrameNode)
     ioc.register_single('rendering_steps', [apply_attributes, render_children], AppNode)
+    ioc.register_single('rendering_steps', [apply_attributes, render_children], SizerNode)
 
 def launch(root_view=None):
     '''Runs application. Widgets are created from passed xml_files'''

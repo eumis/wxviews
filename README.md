@@ -1,6 +1,33 @@
 # wxviews
 
-Pyviews adapter for wxpython.
+[pyviews](https://github.com/eumis/pyviews) adapter for tkinter. It allows to create ui widgets using xml with binding.
+
+## Installation
+
+Install using pip:
+
+`pip install wxviews`
+
+To install dev version:
+
+`pip install git+https://github.com/eumis/wxviews.git@dev`
+
+## Sandbox application
+
+To get started using pyviews see sandbox app.
+
+Clone repository to folder([project_root])
+
+Run following command to install pyviews package
+
+`pip install [project_root] -e`
+
+To run sandbox app execute following commands
+
+```cmd
+cd [project_root]\sandbox
+python run.py
+```
 
 ## License
 
