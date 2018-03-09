@@ -4,10 +4,6 @@
 
 ## Installation
 
-Install using pip:
-
-`pip install wxviews`
-
 To install dev version:
 
 `pip install git+https://github.com/eumis/wxviews.git@dev`
