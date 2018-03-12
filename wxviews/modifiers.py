@@ -1,5 +1,7 @@
 '''wxviews default modifiers'''
 
+import wx
+from pyviews.core.ioc import inject
 from wxviews.node import ControlNode
 
 def call(node, key, value):
@@ -14,3 +16,10 @@ def set_sizer_args(node: ControlNode, key, value):
 def set_sizer_kwargs(node: ControlNode, key, value):
     '''Modifier - sets option argument for sizer add method'''
     node.sizer_kwargs[key] = value
+
+@inject('custom_events')
+def bind(node: ControlNode, key, command, custom_events=None):
+    '''Binds node to event'''
+    source = custom_events if key in custom_events else wx.__dict__
+    event = source[key]
+    node.bind(event, command)

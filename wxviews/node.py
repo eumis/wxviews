@@ -1,6 +1,7 @@
 '''wx control nodes'''
 
-from wx.core import Control, Frame, Sizer
+from wx import Control, Frame, Sizer
+from wx.core import PyEventBinder
 from pyviews.core.node import Node, NodeArgs
 from pyviews.core.xml import XmlNode
 
@@ -24,6 +25,10 @@ class ControlNode(Node):
         self.control = control
         self.sizer_args = []
         self.sizer_kwargs = {}
+
+    def bind(self, event: PyEventBinder, command):
+        '''Binds control to event'''
+        self.control.Bind(event, command)
 
     def get_node_args(self, xml_node: XmlNode):
         return ControlArgs(xml_node, self, self.control)
