@@ -1,17 +1,23 @@
 '''Customizing of wx parsing'''
 
 from wx import App, Frame, Control, Sizer, BoxSizer
-from pyviews.core.node import NodeArgs
-from wxviews.node import AppNode, FrameNode, ControlNode
+from pyviews.core.node import RenderArgs
+from pyviews.rendering.core import create_inst
+from wxviews.node import AppNode, ControlNode, FrameNode
 from wxviews.sizers import SizerNode
 
-def convert_to_node(inst, args: NodeArgs):
+_TYPE_TO_NODE_MAP = {
+    App: AppNode,
+    Frame: FrameNode
+}
+
+def convert_to_node(inst, args: RenderArgs):
     '''Wraps instance with ControlNode'''
-    node_args = (inst, args['xml_node'], args['parent_context'])
-    if isinstance(inst, App):
-        return AppNode(*node_args)
-    if isinstance(inst, Frame):
-        return FrameNode(*node_args)
+    args['wx_inst'] = inst
     if isinstance(inst, Sizer):
-        return SizerNode(*node_args, parent_node=args['parent_node'], parent=args['parent'])
-    return ControlNode(*node_args)
+        return create_inst(SizerNode, args)
+    try:
+        node_class = _TYPE_TO_NODE_MAP[inst.__class__]
+        return create_inst(node_class, args)
+    except KeyError:
+        return create_inst(ControlNode, args)

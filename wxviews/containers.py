@@ -8,21 +8,24 @@ from pyviews.core.xml import XmlNode
 from pyviews.core.observable import InheritedDict
 from pyviews.core.node import Node
 from pyviews.rendering.views import get_view_root
-from wxviews.node import ControlArgs
+from wxviews.node import WxRenderArgs
 
 class Container(Node):
     '''Used to combine some xml elements'''
-    def __init__(self, parent, xml_node: XmlNode, parent_context=None):
+    def __init__(self, parent, xml_node: XmlNode, parent_context=None, sizer=None):
         super().__init__(xml_node, parent_context)
         self.parent = parent
+        self._sizer = sizer
 
-    def get_node_args(self, xml_node):
-        return ControlArgs(xml_node, self, self.parent)
+    def get_render_args(self, xml_node):
+        args = WxRenderArgs(xml_node, self, self.parent)
+        args['sizer'] = self._sizer
+        return args
 
 class View(Container):
     '''Loads xml from anothre file'''
-    def __init__(self, parent, xml_node: XmlNode, parent_context=None):
-        super().__init__(parent, xml_node, parent_context)
+    def __init__(self, parent, xml_node: XmlNode, parent_context=None, sizer=None):
+        super().__init__(parent, xml_node, parent_context, sizer)
         self._name = None
         self._rendered = False
 
@@ -45,14 +48,14 @@ class View(Container):
         self.destroy_children()
         try:
             root_xml = get_view_root(self.name)
-            self._child_nodes = [render(root_xml, self.get_node_args(root_xml))]
+            self._child_nodes = [render(root_xml, self.get_render_args(root_xml))]
         except FileNotFoundError:
             self._child_nodes = []
 
 class For(Container):
     '''Renders children for every item in items collection'''
-    def __init__(self, parent, xml_node: XmlNode, parent_context=None):
-        super().__init__(parent, xml_node, parent_context)
+    def __init__(self, parent, xml_node: XmlNode, parent_context=None, sizer=None):
+        super().__init__(parent, xml_node, parent_context, sizer)
         self._items = []
         self._rendered = False
         self._child_count = 0
@@ -102,7 +105,7 @@ class For(Container):
         nodes = self.xml_node.children
         for index, item in items:
             for xml_node in nodes:
-                args = self.get_node_args(xml_node, index, item)
+                args = self.get_render_args(xml_node, index, item)
                 self._child_nodes.append(render(xml_node, args))
 
     def render_children(self):
@@ -111,8 +114,8 @@ class For(Container):
         self.destroy_children()
         self._render_children([(i, item) for i, item in enumerate(self._items)])
 
-    def get_node_args(self, xml_node: XmlNode, index=None, item=None):
-        args = super().get_node_args(xml_node)
+    def get_render_args(self, xml_node: XmlNode, index=None, item=None):
+        args = super().get_render_args(xml_node)
         context = args['parent_context'].copy()
         item_globals = InheritedDict(context['globals'])
         item_globals['index'] = index
@@ -123,8 +126,8 @@ class For(Container):
 
 class If(Container):
     '''Renders children if condition is True'''
-    def __init__(self, parent, xml_node: XmlNode, parent_context=None):
-        super().__init__(parent, xml_node, parent_context)
+    def __init__(self, parent, xml_node: XmlNode, parent_context=None, sizer=None):
+        super().__init__(parent, xml_node, parent_context, sizer)
         self._condition = False
         self._rendered = False
 

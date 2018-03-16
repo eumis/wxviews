@@ -7,8 +7,9 @@ from pyviews.rendering.binding import BindingFactory, add_default_rules
 from pyviews.rendering.dependencies import register_defaults
 from pyviews.rendering.views import render_view
 from wxviews.rendering import convert_to_node
-from wxviews.node import AppNode, FrameNode, ControlNode
-from wxviews.sizers import SizerNode
+from wxviews.node import AppNode, FrameNode, show_frame
+from wxviews.sizers import SizerNode, set_sizer, add_to_sizer
+from wxviews.containers import Container, View, For, If
 
 def register_dependencies():
     '''Registers all dependencies needed for application'''
@@ -27,12 +28,31 @@ def _register_binding_factory():
     ioc.register_single('binding_factory', factory)
 
 def _register_rendering_steps():
-    ioc.register_single('rendering_steps', [apply_attributes, render_children])
-    ioc.register_single('rendering_steps', [apply_attributes, render_children,
-                                            lambda node: node.control.Show()], FrameNode)
+    ioc.register_single('rendering_steps', [apply_attributes, render_children, add_to_sizer])
+    ioc.register_single('rendering_steps',
+                        [apply_attributes, render_children],
+                        AppNode)
+    ioc.register_single('rendering_steps',
+                        [apply_attributes, render_children, show_frame],
+                        FrameNode)
+    ioc.register_single('rendering_steps',
+                        [apply_attributes, render_children, set_sizer, add_to_sizer],
+                        SizerNode)
+    ioc.register_single('rendering_steps',
+                        [apply_attributes, render_children],
+                        Container)
+    ioc.register_single('rendering_steps',
+                        [apply_attributes, render_children],
+                        If)
+    ioc.register_single('rendering_steps',
+                        [apply_attributes, render_children],
+                        For)
+    ioc.register_single('rendering_steps',
+                        [apply_attributes, render_children],
+                        View)
 
 def launch(root_view=None):
     '''Runs application. Widgets are created from passed xml_files'''
     root_view = 'root' if root_view is None else root_view
     root = render_view(root_view)
-    root.control.MainLoop()
+    root.wx_instance.MainLoop()

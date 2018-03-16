@@ -1,37 +1,46 @@
 '''wx control nodes'''
 
-from wx import Control, Frame, Sizer
+from wx import Control, Frame, Sizer, GridSizer
 from wx.core import PyEventBinder
-from pyviews.core.node import Node, NodeArgs
+from pyviews.core.node import Node, RenderArgs
 from pyviews.core.xml import XmlNode
+from pyviews.rendering.core import render_step
 
-class ControlArgs(NodeArgs):
-    '''NodeArgs for ControlNode'''
-    def __init__(self, xml_node, parent_node=None, parent_control=None):
+class WxRenderArgs(RenderArgs):
+    '''RenderArgs for ControlNode'''
+    def __init__(self, xml_node, parent_node=None, parent=None):
         super().__init__(xml_node, parent_node)
-        self['parent'] = parent_control
+        self['parent'] = parent
+        self['sizer'] = None
 
-    def get_args(self, inst_type=None):
+    def get_args(self, inst_type):
+        if issubclass(inst_type, GridSizer):
+            return RenderArgs.Result([0, 0, 0], {})
         if issubclass(inst_type, Sizer):
-            return NodeArgs.Result([], {})
+            return RenderArgs.Result([], {})
         if issubclass(inst_type, Node):
             return super().get_args(inst_type)
-        return NodeArgs.Result([self['parent']], {})
+        return RenderArgs.Result([self['parent']], {})
 
 class ControlNode(Node):
     '''Wrapper under wx control'''
-    def __init__(self, control, xml_node: XmlNode, parent_context=None):
+    def __init__(self, wx_inst, xml_node: XmlNode, parent_context=None):
         super().__init__(xml_node, parent_context)
-        self.control = control
+        self._control = wx_inst
         self.sizer_args = []
         self.sizer_kwargs = {}
 
+    @property
+    def wx_instance(self):
+        '''wx control that wrapped by node'''
+        return self._control
+
     def bind(self, event: PyEventBinder, command):
         '''Binds control to event'''
-        self.control.Bind(event, command)
+        self._control.Bind(event, command)
 
-    def get_node_args(self, xml_node: XmlNode):
-        return ControlArgs(xml_node, self, self.control)
+    def get_render_args(self, xml_node: XmlNode):
+        return WxRenderArgs(xml_node, self, self._control)
 
 class FrameNode(ControlNode):
     '''Wrapper under wx Frame'''
@@ -39,5 +48,10 @@ class FrameNode(ControlNode):
 
 class AppNode(ControlNode):
     '''Wrapper under wx App'''
-    def get_node_args(self, xml_node: XmlNode):
-        return ControlArgs(xml_node, self, None)
+    def get_render_args(self, xml_node: XmlNode):
+        return WxRenderArgs(xml_node, self, None)
+
+@render_step
+def show_frame(node: FrameNode):
+    '''Calls frame show'''
+    node.wx_instance.Show()

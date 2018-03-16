@@ -7,15 +7,15 @@ from wxviews.node import ControlNode
 def call(node, key, value):
     '''calls control method'''
     args = value if isinstance(value, list) or isinstance(value, tuple) else [value]
-    getattr(node.control, key)(*args)
+    method = getattr(node.wx_instance, key) if hasattr(node, 'wx_instance') else getattr(node, key)
+    method(*args)
 
-def set_sizer_args(node: ControlNode, key, value):
+def setup_sizer(node: ControlNode, key, value):
     '''Modifier - sets argument for sizer add method'''
-    node.sizer_args.append(value)
-
-def set_sizer_kwargs(node: ControlNode, key, value):
-    '''Modifier - sets option argument for sizer add method'''
-    node.sizer_kwargs[key] = value
+    if key == 'args':
+        node.sizer_args = value
+    if key == 'kwargs':
+        node.sizer_kwargs = value
 
 @inject('custom_events')
 def bind(node: ControlNode, key, command, custom_events=None):

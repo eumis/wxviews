@@ -4,7 +4,7 @@ import wx
 from wx.lib.newevent import NewEvent
 from pyviews.core.ioc import Scope, register_single, scope
 from pyviews.testing import case
-from wxviews.modifiers import call as call_mod, set_sizer_args, set_sizer_kwargs, bind
+from wxviews.modifiers import call as call_mod, setup_sizer, bind
 
 
 class ModifiersTest(TestCase):
@@ -23,32 +23,32 @@ class ModifiersTest(TestCase):
         call_mod(node, key, args)
 
         msg = 'call should call method by key'
-        self.assertTrue(getattr(node.control, key).called, msg)
+        self.assertTrue(getattr(node.wx_instance, key).called, msg)
 
         msg = 'call should pass arguments to method'
-        self.assertEqual(getattr(node.control, key).call_args, call_args, msg)
+        self.assertEqual(getattr(node.wx_instance, key).call_args, call_args, msg)
 
-    @case('key', 'value')
-    @case('another key', 1)
-    @case('key', ['value'])
-    def test_set_sizer_args(self, key, value):
+    @case([])
+    @case([1, 2])
+    @case(['value', 2])
+    def test_setup_sizer_args(self, value):
         node = Mock()
         node.sizer_args = []
-        set_sizer_args(node, key, value)
+        setup_sizer(node, 'args', value)
 
-        msg = 'set_sizer_args should add value to sizer_args property'
-        self.assertEqual(node.sizer_args[0], value, msg)
+        msg = 'setup_sizer should set sizer_args property if "args" key passed'
+        self.assertEqual(node.sizer_args, value, msg)
 
-    @case('key', 'value')
-    @case('another key', 1)
-    @case('key', ['value'])
-    def test_set_sizer_kwargs(self, key, value):
+    @case({'key': 'value'})
+    @case({'key': 'value', 'another key': 2})
+    @case({})
+    def test_setup_sizer_kwargs(self, kwargs):
         node = Mock()
         node.sizer_kwargs = {}
-        set_sizer_kwargs(node, key, value)
+        setup_sizer(node, 'kwargs', kwargs)
 
-        msg = 'set_sizer_args should add value to sizer_args property'
-        self.assertEqual(node.sizer_kwargs[key], value, msg)
+        msg = 'setup_sizer should set sizer_kwargs property if "kwargs" key passed'
+        self.assertEqual(node.sizer_kwargs, kwargs, msg)
 
     @scope('ModifierTest')
     @case('EVT_MENU', lambda ev: None)

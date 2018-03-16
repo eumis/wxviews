@@ -1,32 +1,55 @@
 <BoxSizer xmlns='wx'
+          xmlns:wxv='wxviews'
           xmlns:import='pyviews.rendering.modifiers.import_global'
           xmlns:call='wxviews.modifiers.call'
-          xmlns:sizer='wxviews.modifiers.set_sizer_kwargs'
+          xmlns:sizer='wxviews.modifiers.setup_sizer'
 
-          call:SetOrientation='once:{wx.VERTICAL}'>
-    <Panel sizer:proportion='once:{1}'
-           sizer:flag='once:{wx.EXPAND|wx.ALL}'
-           sizer:border='once:{20}'
+          call:SetOrientation='{wx.VERTICAL}'>
+
+    <StaticText call:SetLabel='Panel with border 20'
+                sizer:kwargs='once:{{"flag":wx.EXPAND|wx.ALL}}'/>
+    <Panel sizer:args='{[1, wx.EXPAND|wx.ALL, 20]}'
            call:SetBackgroundColour='white'>
+    <StaticText call:SetLabel='Text inside panel'
+                sizer:kwargs='once:{{"flag":wx.EXPAND|wx.ALL}}'/>
+
     </Panel>
+
+    <StaticText call:SetLabel='Box sizer'
+                sizer:kwargs='once:{{"flag": wx.EXPAND|wx.ALL}}'/>
     <BoxSizer call:SetOrientation='once:{wx.HORIZONTAL}'
-              sizer:proportion='once:{1}'
-              sizer:flag='once:{wx.EXPAND|wx.ALL}'>
-        <Panel sizer:proportion='once:{1}'
-               sizer:flag='once:{wx.EXPAND|wx.RIGHT}'
-               sizer:border='once:{10}'
-               call:SetBackgroundColour='white'>
-        </Panel>
-        <Panel sizer:proportion='once:{1}'
-               sizer:flag='once:{wx.EXPAND|wx.ALL}'
-               sizer:border='once:{10}'
-               call:SetBackgroundColour='white'>
-        </Panel>
-        <Panel sizer:proportion='once:{2}'
-               sizer:flag='once:{wx.ALIGN_TOP|wx.TOP}'
-               sizer:border='once:{10}'
-               call:SetBackgroundColour='white'>
-               <StaticText call:SetLabel='static text' />
-        </Panel>
+              sizer:args='{[1, wx.EXPAND|wx.ALL]}'>
+        <Panel sizer:args='{[1, wx.EXPAND|wx.RIGHT, 10]}'
+               call:SetBackgroundColour='white'/>
+        <Panel sizer:args='{[1, wx.EXPAND|wx.ALL, 10]}'
+               call:SetBackgroundColour='white'/>
+        <Panel sizer:args='{[2, wx.ALIGN_TOP|wx.ALL, 10]}'
+               call:SetBackgroundColour='white'/>
     </BoxSizer>
+
+    <StaticText call:SetLabel='Grid sizer'
+                sizer:kwargs='once:{{"flag":wx.EXPAND|wx.ALL}}'/>
+    <GridSizer init_args='{(4,4,1,1)}'
+               sizer:args='{[1, wx.EXPAND|wx.ALL, 1]}'>
+        <wxv:For items='{list(range(16))}'>
+            <Panel sizer:args='{[0, wx.EXPAND]}'
+                   call:SetBackgroundColour='white'>
+                <StaticText call:SetLabel='{str(index)}'/>
+            </Panel>
+        </wxv:For>
+    </GridSizer>
+
+    <StaticText call:SetLabel='FlexGrid sizer'
+                sizer:kwargs='once:{{"flag":wx.EXPAND|wx.ALL}}'/>
+    <FlexGridSizer init_args='{(3,2,1,1)}'
+                   sizer:args='{[1, wx.EXPAND|wx.ALL, 1]}'
+                   call:AddGrowableRow='{(2,1)}'
+                   call:AddGrowableCol='{(1,1)}'>
+        <wxv:For items='{list(range(6))}'>
+            <Panel sizer:args='{[0, wx.EXPAND]}'
+                   call:SetBackgroundColour='white'>
+                <StaticText call:SetLabel='{str(index)}'/>
+            </Panel>
+        </wxv:For>
+    </FlexGridSizer>
 </BoxSizer>
