@@ -6,7 +6,7 @@ from pyviews.core.xml import XmlAttr
 from pyviews.core.observable import InheritedDict
 from pyviews.core.compilation import Expression
 from pyviews.rendering.expression import is_code_expression, parse_expression
-from pyviews.rendering.pipeline import apply_attribute
+from pyviews.rendering.pipeline import apply_attribute, render_children
 from wxviews.core.node import WxNode
 
 def get_wx_pipeline() -> RenderingPipeline:
@@ -14,7 +14,8 @@ def get_wx_pipeline() -> RenderingPipeline:
     return RenderingPipeline(steps=[
         init_instance,
         setup_setter,
-        apply_attributes
+        apply_attributes,
+        render_wx_children
     ])
 
 def init_instance(node: WxNode, instance_type: type = None, parent=None, **args):
@@ -48,3 +49,9 @@ def apply_attributes(node: WxNode, **args):
     attrs = [attr for attr in node.xml_node.attrs if attr.namespace != 'init']
     for attr in attrs:
         apply_attribute(node, attr)
+
+def render_wx_children(node: WxNode, **args):
+    '''Renders WxNode children'''
+    render_children(node,
+                    parent=node.instance,
+                    node_globals=node.node_globals)

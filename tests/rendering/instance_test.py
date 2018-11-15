@@ -8,7 +8,8 @@ from pyviews.core.xml import XmlAttr
 from pyviews.core.observable import InheritedDict
 from pyviews.testing import case
 from wxviews.core.node import WxNode
-from wxviews.rendering.instance import init_instance, setup_setter, apply_attributes
+from wxviews.rendering.instance import init_instance, setup_setter
+from wxviews.rendering.instance import apply_attributes, render_wx_children
 
 class init_instance_tests(TestCase):
     def test_creates_instance(self):
@@ -48,7 +49,7 @@ class init_instance_tests(TestCase):
     @case(XmlAttr('one', '1', None))
     @case(XmlAttr('one', '{1 + 1}', ''))
     @case(XmlAttr('value', '{value}', 'wxviews.import_globa'))
-    def test_should_skip_not_init_attrs(self, attr):
+    def test_skip_not_init_attrs(self, attr):
         node = Mock(xml_node=Mock(children=[attr]))
         instance_type = Mock()
 
@@ -65,7 +66,7 @@ class setup_setter_tests(TestCase):
         setup_setter(node)
         node.set_attr(key, value)
 
-    def test_setup_setter_sets_properties(self):
+    def test_sets_properties(self):
         node, key, value = self._data()
         setter = Mock()
         node.properties = {key:Mock(set=setter)}
@@ -75,7 +76,7 @@ class setup_setter_tests(TestCase):
         msg = 'setup_setter should setup set to properties'
         self.assertEqual(setter.call_args, call(value), msg)
 
-    def test_setup_setter_sets_node_property(self):
+    def test_sets_node_property(self):
         node, key, value = self._data()
         setattr(node, key, None)
 
@@ -84,7 +85,7 @@ class setup_setter_tests(TestCase):
         msg = 'setup_setter should setup set to node property'
         self.assertEqual(getattr(node, key), value, msg)
 
-    def test_setup_setter_sets_instance_property(self):
+    def test_sets_instance_property(self):
         node, key, value = self._data()
         class Instance:
             pass
@@ -100,7 +101,7 @@ class setup_setter_tests(TestCase):
 class apply_attributes_tests(TestCase):
     @patch('wxviews.rendering.instance.apply_attribute')
     @case(XmlAttr('key', 'value', 'init'))
-    def test_should_skip_init_attributes(self, apply_attribute: Mock, attr):
+    def test_skip_init_attributes(self, apply_attribute: Mock, attr):
         node = Mock(xml_node=Mock(attrs=[attr]))
 
         apply_attributes(node)
@@ -111,7 +112,7 @@ class apply_attributes_tests(TestCase):
     @patch('wxviews.rendering.instance.apply_attribute')
     @case([XmlAttr('key', 'value')])
     @case([XmlAttr('key', 'value', ''), XmlAttr('other_key', 1, 'some namespace')])
-    def test_should_apply_attributes(self, apply_attribute: Mock, attrs):
+    def test_apply_attributes(self, apply_attribute: Mock, attrs):
         apply_attribute.reset_mock()
         node = Mock(xml_node=Mock(attrs=attrs))
 
@@ -119,6 +120,17 @@ class apply_attributes_tests(TestCase):
 
         msg = 'should apply passed attributes'
         self.assertEqual(apply_attribute.call_args_list, [call(node, attr) for attr in attrs], msg)
+
+class render_wx_children_tests(TestCase):
+    @patch('wxviews.rendering.instance.render_children')
+    def test_passes_child_args(self, render_children: Mock):
+        node = Mock(instance=Mock(), node_globals=Mock())
+        expected_args = {'parent': node.instance, 'node_globals': node.node_globals}
+
+        render_wx_children(node)
+
+        msg = 'should pass right child args to render_children'
+        self.assertEqual(render_children.call_args, call(node, **expected_args), msg)
 
 if __name__ == '__main__':
     main()
