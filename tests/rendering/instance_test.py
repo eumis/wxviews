@@ -3,12 +3,12 @@
 # pylint: disable=C0111,C0103
 
 from unittest import TestCase, main
-from unittest.mock import Mock, call
+from unittest.mock import Mock, call, patch
 from pyviews.core.xml import XmlAttr
 from pyviews.core.observable import InheritedDict
 from pyviews.testing import case
 from wxviews.core.node import WxNode
-from wxviews.rendering.instance import init_instance, setup_setter
+from wxviews.rendering.instance import init_instance, setup_setter, apply_attributes
 
 class init_instance_tests(TestCase):
     def test_creates_instance(self):
@@ -96,6 +96,29 @@ class setup_setter_tests(TestCase):
 
         msg = 'setup_setter should setup set to instance property'
         self.assertEqual(getattr(inst, key), value, msg)
+
+class apply_attributes_tests(TestCase):
+    @patch('wxviews.rendering.instance.apply_attribute')
+    @case(XmlAttr('key', 'value', 'init'))
+    def test_should_skip_init_attributes(self, apply_attribute: Mock, attr):
+        node = Mock(xml_node=Mock(attrs=[attr]))
+
+        apply_attributes(node)
+
+        msg = 'should skip attributes with "init" namespace'
+        self.assertFalse(apply_attribute.called, msg)
+
+    @patch('wxviews.rendering.instance.apply_attribute')
+    @case([XmlAttr('key', 'value')])
+    @case([XmlAttr('key', 'value', ''), XmlAttr('other_key', 1, 'some namespace')])
+    def test_should_apply_attributes(self, apply_attribute: Mock, attrs):
+        apply_attribute.reset_mock()
+        node = Mock(xml_node=Mock(attrs=attrs))
+
+        apply_attributes(node)
+
+        msg = 'should apply passed attributes'
+        self.assertEqual(apply_attribute.call_args_list, [call(node, attr) for attr in attrs], msg)
 
 if __name__ == '__main__':
     main()
