@@ -2,11 +2,9 @@
 
 from os.path import abspath
 from pyviews.core import ioc
-from pyviews.rendering.core import apply_attributes, render_children
 from pyviews.rendering.binding import BindingFactory, add_default_rules
-from pyviews.rendering.dependencies import register_defaults
+from pyviews.dependencies import register_defaults
 from pyviews.rendering.views import render_view
-from wxviews.rendering import convert_to_node
 from wxviews.node import AppNode, FrameNode, show_frame
 from wxviews.sizers import SizerNode, set_sizer, add_to_sizer
 from wxviews.containers import Container, View, For, If
