@@ -1,23 +1,30 @@
 '''Customizing of wx parsing'''
 
-from wx import App, Frame, Control, Sizer, BoxSizer
-from pyviews.core.node import RenderArgs
-from pyviews.rendering.core import create_inst
-from wxviews.node import AppNode, ControlNode, FrameNode
-from wxviews.sizers import SizerNode
+from pyviews.core.xml import XmlNode, XmlAttr
+from pyviews.core.observable import InheritedDict
+from pyviews.core.compilation import Expression
+from pyviews.core.node import Node
+from pyviews.rendering.expression import is_code_expression, parse_expression
+from pyviews.rendering.node import create_inst, get_inst_type
+from wxviews.core.node import WxNode
 
-_TYPE_TO_NODE_MAP = {
-    App: AppNode,
-    Frame: FrameNode
-}
+def create_node(xml_node: XmlNode, node_globals: InheritedDict = None, **init_args) -> Node:
+    '''Creates node from xml node using namespace as module and tag name as class name'''
+    inst_type = get_inst_type(xml_node)
+    args = {**init_args, **_get_init_args(xml_node, node_globals), **{'xml_node': xml_node}}
+    inst = create_inst(inst_type, **args)
+    if not isinstance(inst, Node):
+        inst = WxNode(inst, xml_node, node_globals=node_globals)
+    return inst
 
-def convert_to_node(inst, args: RenderArgs):
-    '''Wraps instance with ControlNode'''
-    args['wx_inst'] = inst
-    if isinstance(inst, Sizer):
-        return create_inst(SizerNode, args)
-    try:
-        node_class = _TYPE_TO_NODE_MAP[inst.__class__]
-        return create_inst(node_class, args)
-    except KeyError:
-        return create_inst(ControlNode, args)
+def _get_init_args(xml_node, node_globals: InheritedDict) -> dict:
+    init_attrs = [attr for attr in xml_node.children if attr.namespace == 'init']
+    return {attr.name: _get_init_value(attr, node_globals) for attr in init_attrs}
+
+def _get_init_value(attr: XmlAttr, node_globals: InheritedDict):
+    stripped_value = attr.value.strip() if attr.value else ''
+    if is_code_expression(stripped_value):
+        body = parse_expression(stripped_value)[1]
+        parameters = node_globals.to_dictionary() if node_globals else {}
+        return Expression(body).execute(parameters)
+    return attr.value

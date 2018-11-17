@@ -1,3 +1,4 @@
 setuptools
 pyviews
+wxpython
 -e .

@@ -8,6 +8,7 @@ from pyviews.rendering.views import render_view
 from wxviews.node import AppNode, FrameNode, show_frame
 from wxviews.sizers import SizerNode, set_sizer, add_to_sizer
 from wxviews.containers import Container, View, For, If
+from pyviews.dependencies import create_node
 
 def register_dependencies():
     '''Registers all dependencies needed for application'''
