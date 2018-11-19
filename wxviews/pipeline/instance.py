@@ -1,4 +1,5 @@
 '''Rendering pipeline for WxNode'''
+
 # pylint: disable=W0613
 
 from pyviews import RenderingPipeline

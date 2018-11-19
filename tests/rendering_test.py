@@ -10,6 +10,26 @@ from pyviews.testing import case
 from wxviews.rendering import create_node
 from wxviews.core.node import WxNode
 
+class SomeNode(Node):
+    def __init__(self, xml_node, **init_args):
+        self._xml_node = xml_node
+        self.init_args = init_args
+
+class OtherNode(WxNode):
+    def __init__(self, xml_node, **init_args):
+        self._xml_node = xml_node
+        self.init_args = init_args
+
+class WxInstance:
+    def __init__(self, parent, **init_args):
+        self.parent = parent
+        self.init_args = init_args
+
+class OtherWxInstance:
+    def __init__(self, parent, **init_args):
+        self.parent = parent
+        self.init_args = init_args
+
 class create_node_tests(TestCase):
     def _setup_mocks(self, get_inst_type: Mock, inst_type, attrs=None):
         attrs = attrs if attrs else []
@@ -17,16 +37,6 @@ class create_node_tests(TestCase):
         get_inst_type.side_effect = lambda *a, **k: inst_type
 
         return xml_node
-
-    class SomeNode(Node):
-        def __init__(self, xml_node, **init_args):
-            self.xml_node = xml_node
-            self.init_args = init_args
-
-    class OtherNode(WxNode):
-        def __init__(self, xml_node, **init_args):
-            self.xml_node = xml_node
-            self.init_args = init_args
 
     @patch('wxviews.rendering.get_inst_type')
     @case(Node)
@@ -47,23 +57,13 @@ class create_node_tests(TestCase):
     def test_passes_init_args_to_node(self, get_inst_type: Mock, inst_type, init_args):
         xml_node = self._setup_mocks(get_inst_type, inst_type)
 
-        actual_node = create_node(xml_node)
+        actual_node = create_node(xml_node, **init_args)
 
         msg = 'should pass xml_node as argument'
         self.assertEqual(actual_node.xml_node, xml_node, msg)
 
         msg = 'should pass init_args'
         self.assertEqual(actual_node.init_args, init_args, msg)
-
-    class WxInstance:
-        def __init__(self, parent, **init_args):
-            self.parent = parent
-            self.init_args = init_args
-
-    class OtherWxInstance:
-        def __init__(self, parent, **init_args):
-            self.parent = parent
-            self.init_args = init_args
 
     @patch('wxviews.rendering.get_inst_type')
     @case(WxInstance, WxNode)
@@ -109,31 +109,19 @@ class create_node_tests(TestCase):
         actual_node = create_node(xml_node)
 
         msg = 'should pass parent to instance constructor'
-        self.assertDictEqual(actual_node.instance.args, args, msg)
+        self.assertDictEqual(actual_node.instance.init_args, args, msg)
 
     @patch('wxviews.rendering.get_inst_type')
     @case(XmlAttr('init', '1'))
     @case(XmlAttr('init', '1', ''))
     @case(XmlAttr('init', '1', 'some_namespace'))
-    def test_skips_not_init_attrs(self, get_inst_type: Mock, create_inst: Mock, attr: XmlAttr):
-        xml_node = self._setup_mocks(get_inst_type, inst_type)
+    def test_skips_not_init_attrs(self, get_inst_type: Mock, attr: XmlAttr):
+        xml_node = self._setup_mocks(get_inst_type, WxInstance, [attr])
 
-        create_node(xml_node)
+        actual_node = create_node(xml_node)
 
-        msg = 'should skipe attributes with not "init" namespace'
-        self.assertEqual(create_inst.call_args, call(inst_type, xml_node=xml_node), msg)
-
-    @patch('wxviews.rendering.create_inst')
-    @patch('wxviews.rendering.get_inst_type')
-    def test_wraps_instance_to_WxNode(self, get_inst_type: Mock, create_inst: Mock):
-        xml_node = self._setup_mocks(get_inst_type)[0]
-        inst = Mock()
-        create_inst.side_effect = lambda *a, **k: inst
-
-        actual = create_node(xml_node)
-
-        msg = 'should wrap created instance to WxNode and return this node'
-        self.assertEqual(actual.instance, inst, msg)
+        msg = 'should pass parent to instance constructor'
+        self.assertDictEqual(actual_node.instance.init_args, {}, msg)
 
 if __name__ == '__main__':
     main()
