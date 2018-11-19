@@ -1,15 +1,13 @@
 <?xml version="1.0"?>
 <App xmlns='wx'
      xmlns:import='pyviews.rendering.modifiers.import_global'
-     xmlns:call='wxviews.modifiers.call'
-     xmlns:sizer_args='wxviews.modifiers.set_sizer_args'
-     xmlns:sizer='wxviews.modifiers.set_sizer_kwargs'
      xmlns:wxv='wxviews'
+     xmlns:init='init'
 
      import:wx='wx'>
-    <Frame call:SetTitle='title world'>
-        <Panel call:SetBackgroundColour='gray'>
+    <Frame init:title='hello world'>
+        <!-- <Panel call:SetBackgroundColour='gray'>
             <wxv:View name='sizers' />
-        </Panel>
+        </Panel> -->
     </Frame>
 </App>

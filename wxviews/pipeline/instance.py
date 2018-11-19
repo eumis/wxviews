@@ -36,3 +36,25 @@ def render_wx_children(node: WxNode, **args):
     render_children(node,
                     parent=node.instance,
                     node_globals=node.node_globals)
+
+def get_frame_pipeline():
+    '''Returns rendering pipeline for Frame'''
+    return RenderingPipeline(steps=[
+        setup_setter,
+        apply_attributes,
+        render_wx_children,
+        lambda node, **args: node.instance.Show()
+    ])
+
+def get_app_pipeline():
+    '''Returns rendering pipeline for App'''
+    return RenderingPipeline(steps=[
+        setup_setter,
+        apply_attributes,
+        render_app_children,
+    ])
+
+def render_app_children(node: WxNode, **args):
+    '''Renders App children'''
+    render_children(node,
+                    node_globals=node.node_globals)

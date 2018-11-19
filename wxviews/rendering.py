@@ -8,17 +8,28 @@ from pyviews.rendering.expression import is_code_expression, parse_expression
 from pyviews.rendering.node import create_inst, get_inst_type
 from wxviews.core.node import WxNode
 
-def create_node(xml_node: XmlNode, node_globals: InheritedDict = None, **init_args) -> Node:
+# def create_node(xml_node: XmlNode, node_globals: InheritedDict = None, **init_args) -> Node:
+#     '''Creates node from xml node using namespace as module and tag name as class name'''
+#     inst_type = get_inst_type(xml_node)
+#     args = {**init_args, **_get_init_args(xml_node, node_globals), **{'xml_node': xml_node}}
+#     inst = create_inst(inst_type, **args)
+#     if not isinstance(inst, Node):
+#         inst = WxNode(inst, xml_node, node_globals=node_globals)
+#     return inst
+
+def create_node(xml_node: XmlNode, parent=None,
+                node_globals: InheritedDict = None, **init_args) -> Node:
     '''Creates node from xml node using namespace as module and tag name as class name'''
     inst_type = get_inst_type(xml_node)
-    args = {**init_args, **_get_init_args(xml_node, node_globals), **{'xml_node': xml_node}}
-    inst = create_inst(inst_type, **args)
-    if not isinstance(inst, Node):
-        inst = WxNode(inst, xml_node, node_globals=node_globals)
-    return inst
+    if issubclass(inst_type, Node):
+        args = {**init_args, **{'xml_node': xml_node}}
+        return create_inst(inst_type, **args)
+    else:
+        inst = inst_type(parent, **_get_init_args(xml_node, node_globals))
+        return WxNode(inst, xml_node, node_globals=node_globals)
 
 def _get_init_args(xml_node, node_globals: InheritedDict) -> dict:
-    init_attrs = [attr for attr in xml_node.children if attr.namespace == 'init']
+    init_attrs = [attr for attr in xml_node.attrs if attr.namespace == 'init']
     return {attr.name: _get_init_value(attr, node_globals) for attr in init_attrs}
 
 def _get_init_value(attr: XmlAttr, node_globals: InheritedDict):
