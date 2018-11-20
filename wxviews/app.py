@@ -57,12 +57,15 @@
 #     root.wx_instance.MainLoop()
 
 from os.path import abspath
-from wx import Frame, App
+from wx import Frame, App # pylint: disable=E0611
 from pyviews.core import ioc
 from pyviews.rendering.binding import BindingFactory, add_default_rules
 from pyviews.rendering.views import render_view
 from pyviews.dependencies import register_defaults
+from wxviews.core.containers import Container, View, For, If
 from wxviews.pipeline.instance import get_frame_pipeline, get_wx_pipeline, get_app_pipeline
+from wxviews.pipeline.containers import get_container_pipeline, get_view_pipeline
+from wxviews.pipeline.containers import get_for_pipeline, get_if_pipeline
 from wxviews.rendering import create_node
 
 def register_dependencies():
@@ -77,6 +80,10 @@ def register_dependencies():
     ioc.register_single('pipeline', get_wx_pipeline())
     ioc.register_single('pipeline', get_app_pipeline(), App)
     ioc.register_single('pipeline', get_frame_pipeline(), Frame)
+    ioc.register_single('pipeline', get_container_pipeline(), Container)
+    ioc.register_single('pipeline', get_view_pipeline(), View)
+    ioc.register_single('pipeline', get_for_pipeline(), For)
+    ioc.register_single('pipeline', get_if_pipeline(), If)
 
 def _register_binding_factory():
     factory = BindingFactory()

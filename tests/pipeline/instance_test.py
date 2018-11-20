@@ -4,8 +4,8 @@
 
 from unittest import TestCase, main
 from unittest.mock import Mock, call, patch
-from pyviews.core.xml import XmlAttr
 from pyviews.testing import case
+from pyviews.core.xml import XmlAttr
 from wxviews.core.node import WxNode
 from wxviews.pipeline.instance import setup_setter, apply_attributes, render_wx_children
 
