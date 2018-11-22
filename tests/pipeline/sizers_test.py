@@ -5,7 +5,7 @@
 from unittest import TestCase, main
 from unittest.mock import Mock, call, patch
 from wxviews.pipeline.common import instance_node_setter
-from wxviews.pipeline.sizers import setup_setter, render_sizer_children
+from wxviews.pipeline.sizers import setup_setter, render_sizer_children, set_sizer_to_parent
 
 class setup_setter_tests(TestCase):
     def test_sets_instance_property(self):
@@ -30,6 +30,16 @@ class render_sizer_children_tests(TestCase):
 
         msg = 'should pass right child args to render_children'
         self.assertEqual(render_children.call_args, call(node, **expected_args), msg)
+
+class set_sizer_to_parent_tests(TestCase):
+    def test_calls_parent_SetSizer(self):
+        node = Mock()
+        parent = Mock()
+
+        set_sizer_to_parent(node, parent=parent)
+
+        msg = 'should call SetSizer of parent and pass sizer as argument'
+        self.assertEqual(parent.SetSizer.call_args, call(node.instance), msg)
 
 if __name__ == '__main__':
     main()

@@ -12,7 +12,8 @@ def get_sizer_pipeline() -> RenderingPipeline:
     return RenderingPipeline(steps=[
         setup_setter,
         apply_attributes,
-        render_sizer_children
+        render_sizer_children,
+        set_sizer_to_parent
     ])
 
 def setup_setter(node: SizerNode, **args):
@@ -25,3 +26,7 @@ def render_sizer_children(node: SizerNode, parent=None, **args):
                     parent=parent,
                     node_globals=node.node_globals,
                     sizer=node.instance)
+
+def set_sizer_to_parent(node, parent=None, **args):
+    '''Pass sizer to parent SetSizer'''
+    parent.SetSizer(node.instance)

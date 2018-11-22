@@ -20,7 +20,7 @@ def create_node(xml_node: XmlNode, parent=None,
     elif issubclass(inst_type, Sizer):
         args = get_attr_args(xml_node, 'init', node_globals)
         inst = inst_type(**args)
-        return SizerNode(inst, xml_node)
+        return SizerNode(inst, xml_node, node_globals=node_globals)
     else:
         args = get_attr_args(xml_node, 'init', node_globals)
         inst = inst_type(parent, **args)
