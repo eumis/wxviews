@@ -19,11 +19,12 @@ def render_container_children(node, **args):
     '''Renders container children'''
     render_children(node, **_get_child_args(node, **args))
 
-def _get_child_args(node: Container, parent=None, **args):
+def _get_child_args(node: Container, parent=None, sizer=None, **args):
     return {
         'parent_node': node,
         'parent': parent,
         'node_globals': node.node_globals,
+        'sizer': sizer
     }
 
 

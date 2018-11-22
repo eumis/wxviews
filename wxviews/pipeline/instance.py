@@ -3,40 +3,37 @@
 # pylint: disable=W0613
 
 from pyviews import RenderingPipeline
-from pyviews.rendering.pipeline import apply_attribute, render_children
+from pyviews.rendering.pipeline import render_children
+from wxviews.pipeline.common import instance_node_setter, apply_attributes
 from wxviews.core.node import WxNode
+from wxviews.rendering import get_attr_args
 
 def get_wx_pipeline() -> RenderingPipeline:
     '''Returns rendering pipeline for WxNode'''
     return RenderingPipeline(steps=[
         setup_setter,
         apply_attributes,
+        add_to_sizer,
         render_wx_children
     ])
 
 def setup_setter(node: WxNode, **args):
     '''Sets attr_setter for WxNode'''
-    node.attr_setter = _wx_setter
+    node.attr_setter = instance_node_setter
 
-def _wx_setter(node: WxNode, key, value):
-    if key in node.properties:
-        node.properties[key].set(value)
-    elif hasattr(node, key):
-        setattr(node, key, value)
-    elif hasattr(node.instance, key):
-        setattr(node.instance, key, value)
+def add_to_sizer(node: WxNode, sizer=None, **args):
+    '''Adds to wx instance to sizer'''
+    if sizer is None:
+        return
+    args = get_attr_args(node.xml_node, 'sizer', node.node_globals)
+    sizer.Add(node, **args)
 
-def apply_attributes(node: WxNode, **args):
-    '''Applies attributes for node'''
-    attrs = [attr for attr in node.xml_node.attrs if attr.namespace != 'init']
-    for attr in attrs:
-        apply_attribute(node, attr)
-
-def render_wx_children(node: WxNode, **args):
+def render_wx_children(node: WxNode, sizer=None, **args):
     '''Renders WxNode children'''
     render_children(node,
                     parent=node.instance,
-                    node_globals=node.node_globals)
+                    node_globals=node.node_globals,
+                    sizer=sizer)
 
 def get_frame_pipeline():
     '''Returns rendering pipeline for Frame'''

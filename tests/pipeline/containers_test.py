@@ -1,6 +1,6 @@
 '''Containers rendering pipeline tests'''
 
-# pylint: disable=C0111,C0103,C0301
+# pylint: disable=C0111,C0103,C0301,W0613
 
 from math import floor
 from unittest import TestCase, main
@@ -21,13 +21,15 @@ class render_container_children_tests(TestCase):
         xml_node = Mock(children=nodes)
         node = Container(xml_node)
         parent = Mock()
+        sizer = Mock()
         child_args = {
             'parent_node': node,
             'parent': parent,
-            'node_globals': node.node_globals
+            'node_globals': node.node_globals,
+            'sizer': sizer
         }
 
-        render_container_children(node, parent=parent)
+        render_container_children(node, parent=parent, sizer=sizer)
 
         msg = 'should render all xml children for every item'
         self.assertEqual(render_children.call_args, call(node, **child_args), msg)

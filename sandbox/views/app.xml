@@ -6,7 +6,7 @@
 
      import:wx='wx'>
     <Frame init:title='hello world'>
-        <!-- <Panel call:SetBackgroundColour='gray'>
+        <!-- <Panel BackgroundColor='gray'>
             <wxv:View name='sizers' />
         </Panel> -->
     </Frame>

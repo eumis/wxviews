@@ -3,12 +3,14 @@
 # pylint: disable=C0111,C0103,  w0231
 
 from unittest import TestCase, main
-from unittest.mock import Mock, call, patch
+from unittest.mock import Mock, patch
+from wx import Sizer # pylint: disable=E0611
 from pyviews.core.xml import XmlAttr
 from pyviews.core.node import Node
 from pyviews.testing import case
-from wxviews.rendering import create_node
 from wxviews.core.node import WxNode
+from wxviews.core.sizers import SizerNode
+from wxviews.rendering import create_node, get_attr_args
 
 class SomeNode(Node):
     def __init__(self, xml_node, **init_args):
@@ -28,6 +30,10 @@ class WxInstance:
 class OtherWxInstance:
     def __init__(self, parent, **init_args):
         self.parent = parent
+        self.init_args = init_args
+
+class AnySizer(Sizer):
+    def __init__(self, **init_args):
         self.init_args = init_args
 
 class create_node_tests(TestCase):
@@ -68,6 +74,7 @@ class create_node_tests(TestCase):
     @patch('wxviews.rendering.get_inst_type')
     @case(WxInstance, WxNode)
     @case(OtherWxInstance, WxNode)
+    @case(AnySizer, SizerNode)
     def test_creates_instance(self, get_inst_type: Mock, inst_type, node_type):
         xml_node = self._setup_mocks(get_inst_type, inst_type)
 
@@ -103,6 +110,9 @@ class create_node_tests(TestCase):
     @case(OtherWxInstance,
           [XmlAttr('key', '{"v" + "alue"}', 'init'), XmlAttr('one', '1', 'init')],
           {'key': 'value', 'one': '1'})
+    @case(AnySizer,
+          [XmlAttr('key', '{"v" + "alue"}', 'sizer'), XmlAttr('one', '1', 'sizer')],
+          {'key': 'value', 'one': '1'})
     def test_passes_init_attrs_to_instance(self, get_inst_type: Mock, inst_type, attrs, args):
         xml_node = self._setup_mocks(get_inst_type, inst_type, attrs)
 
@@ -112,9 +122,9 @@ class create_node_tests(TestCase):
         self.assertDictEqual(actual_node.instance.init_args, args, msg)
 
     @patch('wxviews.rendering.get_inst_type')
-    @case(XmlAttr('init', '1'))
-    @case(XmlAttr('init', '1', ''))
-    @case(XmlAttr('init', '1', 'some_namespace'))
+    @case(XmlAttr('key', '1'))
+    @case(XmlAttr('key', '1', ''))
+    @case(XmlAttr('key', '1', 'some_namespace'))
     def test_skips_not_init_attrs(self, get_inst_type: Mock, attr: XmlAttr):
         xml_node = self._setup_mocks(get_inst_type, WxInstance, [attr])
 
@@ -122,6 +132,28 @@ class create_node_tests(TestCase):
 
         msg = 'should pass parent to instance constructor'
         self.assertDictEqual(actual_node.instance.init_args, {}, msg)
+
+class get_attr_args_tests(TestCase):
+    @case('init', [], {})
+    @case('init', [XmlAttr('key', 'value', 'init')], {'key': 'value'})
+    @case('init',
+          [XmlAttr('key', 'value', 'init'), XmlAttr('one', '{1}', 'init')],
+          {'key': 'value', 'one': 1})
+    @case('init',
+          [XmlAttr('key', '{"v" + "alue"}', 'init'), XmlAttr('one', '1', 'init')],
+          {'key': 'value', 'one': '1'})
+    @case('sizer', [XmlAttr('key', 'value', 'sizer')], {'key': 'value'})
+    @case('sizer',
+          [XmlAttr('key', 'value', 'sizer'), XmlAttr('another key', '{1}', 'init')],
+          {'key': 'value'})
+    @case('sizer', [XmlAttr('key', 'value', 'init')], {})
+    def test_returns_attr_with_values_with_passed_namespace(self, namespace, attrs, args):
+        xml_node = Mock(attrs=attrs)
+
+        actual = get_attr_args(xml_node, namespace)
+
+        msg = 'should pass parent to instance constructor'
+        self.assertDictEqual(actual, args, msg)
 
 if __name__ == '__main__':
     main()

@@ -2,29 +2,32 @@
           xmlns:wxv='wxviews'
           xmlns:import='pyviews.rendering.modifiers.import_global'
           xmlns:call='wxviews.modifiers.call'
-          xmlns:sizer='wxviews.modifiers.setup_sizer'
+          xmlns:init='init'
+          xmlns:sizer='sizer'
 
-          call:SetOrientation='{wx.VERTICAL}'>
+          init:orient='{wx.VERTICAL}'>
 
-    <StaticText call:SetLabel='Panel with border 20'
-                sizer:kwargs='once:{{"flag":wx.EXPAND|wx.ALL}}'/>
-    <Panel sizer:args='{[1, wx.EXPAND|wx.ALL, 20]}'
-           call:SetBackgroundColour='white'>
-    <StaticText call:SetLabel='Text inside panel'
-                sizer:kwargs='once:{{"flag":wx.EXPAND|wx.ALL}}'/>
+    <StaticText Label='Panel with border 20'
+                sizer:flag='{wx.expand|wx.all}' />
+    <Panel sizer:proportion='{1}'
+           sizer:flag='{wx.expand|wx.all}'
+           sizer:border='{20}'
+           BackgroundColor='white'>
+        <StaticText Label='Text inside panel'
+                    sizer:flag='{wx.expand|wx.all}' />
 
     </Panel>
-
+<!-- 
     <StaticText call:SetLabel='Box sizer'
                 sizer:kwargs='once:{{"flag": wx.EXPAND|wx.ALL}}'/>
     <BoxSizer call:SetOrientation='once:{wx.HORIZONTAL}'
               sizer:args='{[1, wx.EXPAND|wx.ALL]}'>
         <Panel sizer:args='{[1, wx.EXPAND|wx.RIGHT, 10]}'
-               call:SetBackgroundColour='white'/>
+               BackgroundColor='white'/>
         <Panel sizer:args='{[1, wx.EXPAND|wx.ALL, 10]}'
-               call:SetBackgroundColour='white'/>
+               BackgroundColor='white'/>
         <Panel sizer:args='{[2, wx.ALIGN_TOP|wx.ALL, 10]}'
-               call:SetBackgroundColour='white'/>
+               BackgroundColor='white'/>
     </BoxSizer>
 
     <StaticText call:SetLabel='Grid sizer'
@@ -33,7 +36,7 @@
                sizer:args='{[1, wx.EXPAND|wx.ALL, 1]}'>
         <wxv:For items='{list(range(16))}'>
             <Panel sizer:args='{[0, wx.EXPAND]}'
-                   call:SetBackgroundColour='white'>
+                   BackgroundColor='white'>
                 <StaticText call:SetLabel='{str(index)}'/>
             </Panel>
         </wxv:For>
@@ -47,9 +50,9 @@
                    call:AddGrowableCol='{(1,1)}'>
         <wxv:For items='{list(range(6))}'>
             <Panel sizer:args='{[0, wx.EXPAND]}'
-                   call:SetBackgroundColour='white'>
+                   BackgroundColor='white'>
                 <StaticText call:SetLabel='{str(index)}'/>
             </Panel>
         </wxv:For>
-    </FlexGridSizer>
+    </FlexGridSizer> -->
 </BoxSizer>
