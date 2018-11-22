@@ -5,16 +5,17 @@
           xmlns:init='init'
           xmlns:sizer='sizer'
 
-          init:orient='{wx.VERTICAL}'>
+          import:wx='wx'
+          init:orient='{8}'>
 
     <StaticText Label='Panel with border 20'
-                sizer:flag='{wx.expand|wx.all}' />
+                sizer:flag='{wx.EXPAND|wx.ALL}' />
     <Panel sizer:proportion='{1}'
-           sizer:flag='{wx.expand|wx.all}'
+           sizer:flag='{wx.EXPAND|wx.ALL}'
            sizer:border='{20}'
            BackgroundColor='white'>
         <StaticText Label='Text inside panel'
-                    sizer:flag='{wx.expand|wx.all}' />
+                    sizer:flag='{wx.EXPAND|wx.ALL}' />
 
     </Panel>
 <!-- 

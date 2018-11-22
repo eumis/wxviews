@@ -37,7 +37,8 @@ class add_to_sizer_tests(TestCase):
     def _get_mocks(self, attrs=None, node_globals=None):
         attrs = attrs if attrs else []
         xml_node = Mock(attrs=attrs)
-        return (Mock(xml_node=xml_node, node_globals=node_globals), Mock())
+        node = Mock(xml_node=xml_node, node_globals=node_globals, instace=Mock())
+        return (node, Mock())
 
     def test_calls_sizer_add(self):
         node, sizer = self._get_mocks()
@@ -45,7 +46,7 @@ class add_to_sizer_tests(TestCase):
         add_to_sizer(node, sizer=sizer)
 
         msg = 'add_to_sizer should call sizer.add for passed node'
-        self.assertEqual(sizer.Add.call_args, call(node), msg)
+        self.assertEqual(sizer.Add.call_args, call(node.instance), msg)
 
     @case([], {})
     @case([XmlAttr('key', 'value', 'sizer')], {'key': 'value'})
@@ -62,7 +63,7 @@ class add_to_sizer_tests(TestCase):
         add_to_sizer(node, sizer=sizer)
 
         msg = 'add_to_sizer should pass attrs values with namespace "sizer" as args'
-        self.assertEqual(sizer.Add.call_args, call(node, **args), msg)
+        self.assertEqual(sizer.Add.call_args, call(node.instance, **args), msg)
 
     def test_skips_if_sizer_missed(self):
         node = self._get_mocks()[0]

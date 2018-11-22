@@ -19,13 +19,14 @@ class render_sizer_children_tests(TestCase):
     @patch('wxviews.pipeline.sizers.render_children')
     def test_passes_child_args(self, render_children: Mock):
         node = Mock(instance=Mock(), node_globals=Mock())
+        parent = Mock()
         expected_args = {
-            'parent': node.instance,
+            'parent': parent,
             'node_globals': node.node_globals,
             'sizer': node.instance
         }
 
-        render_sizer_children(node)
+        render_sizer_children(node, parent=parent)
 
         msg = 'should pass right child args to render_children'
         self.assertEqual(render_children.call_args, call(node, **expected_args), msg)

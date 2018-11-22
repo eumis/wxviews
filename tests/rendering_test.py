@@ -111,7 +111,7 @@ class create_node_tests(TestCase):
           [XmlAttr('key', '{"v" + "alue"}', 'init'), XmlAttr('one', '1', 'init')],
           {'key': 'value', 'one': '1'})
     @case(AnySizer,
-          [XmlAttr('key', '{"v" + "alue"}', 'sizer'), XmlAttr('one', '1', 'sizer')],
+          [XmlAttr('key', '{"v" + "alue"}', 'init'), XmlAttr('one', '1', 'init')],
           {'key': 'value', 'one': '1'})
     def test_passes_init_attrs_to_instance(self, get_inst_type: Mock, inst_type, attrs, args):
         xml_node = self._setup_mocks(get_inst_type, inst_type, attrs)

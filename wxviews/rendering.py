@@ -18,7 +18,7 @@ def create_node(xml_node: XmlNode, parent=None,
         args = {**init_args, **{'xml_node': xml_node}}
         return create_inst(inst_type, **args)
     elif issubclass(inst_type, Sizer):
-        args = get_attr_args(xml_node, 'sizer', node_globals)
+        args = get_attr_args(xml_node, 'init', node_globals)
         inst = inst_type(**args)
         return SizerNode(inst, xml_node)
     else:

@@ -6,7 +6,6 @@ from pyviews.core.ioc import Scope, register_single, scope
 from pyviews.testing import case
 from wxviews.modifiers import call as call_mod, setup_sizer, bind
 
-
 class ModifiersTest(TestCase):
     def setUp(self):
         with Scope('ModifierTest'):

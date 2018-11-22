@@ -26,7 +26,7 @@ def add_to_sizer(node: WxNode, sizer=None, **args):
     if sizer is None:
         return
     args = get_attr_args(node.xml_node, 'sizer', node.node_globals)
-    sizer.Add(node, **args)
+    sizer.Add(node.instance, **args)
 
 def render_wx_children(node: WxNode, sizer=None, **args):
     '''Renders WxNode children'''

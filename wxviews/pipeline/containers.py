@@ -41,7 +41,7 @@ def render_view_children(node: View, **args):
     '''Finds view by name attribute and renders it as view node child'''
     if node.name:
         view_root = get_view_root(node.name)
-        child_args = _get_child_args(node)
+        child_args = _get_child_args(node, **args)
         node.set_content(render(view_root, **child_args))
 
 def rerender_on_view_change(node: View, **args):
@@ -66,18 +66,18 @@ def get_for_pipeline() -> RenderingPipeline:
 
 def render_for_items(node: For, **args):
     '''Renders For children'''
-    _render_for_children(node, node.items)
+    _render_for_children(node, node.items, **args)
 
-def _render_for_children(node: For, items: list, index_shift=0):
+def _render_for_children(node: For, items: list, index_shift=0, **args):
     item_xml_nodes = node.xml_node.children
     for index, item in enumerate(items):
         for xml_node in item_xml_nodes:
-            child_args = _get_for_child_args(node, index + index_shift, item)
+            child_args = _get_for_child_args(node, index + index_shift, item, **args)
             child = render(xml_node, **child_args)
             node.add_child(child)
 
-def _get_for_child_args(node: For, index, item):
-    child_args = _get_child_args(node)
+def _get_for_child_args(node: For, index, item, **args):
+    child_args = _get_child_args(node, **args)
     child_globals = InheritedDict(child_args['node_globals'])
     child_globals['index'] = index
     child_globals['item'] = item
@@ -139,7 +139,7 @@ def get_if_pipeline() -> RenderingPipeline:
 def render_if(node: If, **args):
     '''Renders children nodes if condition is true'''
     if node.condition:
-        render_children(node, **_get_child_args(node))
+        render_children(node, **_get_child_args(node, **args))
 
 def subscribe_to_condition_change(node: If, pipeline: RenderingPipeline = None, **args):
     '''Rerenders if on condition change'''

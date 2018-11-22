@@ -19,9 +19,9 @@ def setup_setter(node: SizerNode, **args):
     '''Sets attr_setter for WxNode'''
     node.attr_setter = instance_node_setter
 
-def render_sizer_children(node: SizerNode, **args):
+def render_sizer_children(node: SizerNode, parent=None, **args):
     '''Renders sizer children'''
     render_children(node,
-                    parent=node.instance,
+                    parent=parent,
                     node_globals=node.node_globals,
                     sizer=node.instance)
