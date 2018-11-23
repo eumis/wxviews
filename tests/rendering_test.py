@@ -4,7 +4,7 @@
 
 from unittest import TestCase, main
 from unittest.mock import Mock, patch
-from wx import Sizer # pylint: disable=E0611
+from wx import Sizer, GridSizer # pylint: disable=E0611
 from pyviews.core.xml import XmlAttr
 from pyviews.core.node import Node
 from pyviews.testing import case
@@ -34,6 +34,10 @@ class OtherWxInstance:
 
 class AnySizer(Sizer):
     def __init__(self, **init_args):
+        self.init_args = init_args
+
+class AnyGridSizer(GridSizer):
+    def __init__(self, *init_args):
         self.init_args = init_args
 
 class create_node_tests(TestCase):
@@ -75,6 +79,7 @@ class create_node_tests(TestCase):
     @case(WxInstance, WxNode)
     @case(OtherWxInstance, WxNode)
     @case(AnySizer, SizerNode)
+    @case(AnyGridSizer, SizerNode)
     def test_creates_instance(self, get_inst_type: Mock, inst_type, node_type):
         xml_node = self._setup_mocks(get_inst_type, inst_type)
 
@@ -113,13 +118,16 @@ class create_node_tests(TestCase):
     @case(AnySizer,
           [XmlAttr('key', '{"v" + "alue"}', 'init'), XmlAttr('one', '1', 'init')],
           {'key': 'value', 'one': '1'})
+    @case(AnyGridSizer,
+          [XmlAttr('key', '{"v" + "alue"}', 'init'), XmlAttr('one', '1', 'init')],
+          ('value', '1'))
     def test_passes_init_attrs_to_instance(self, get_inst_type: Mock, inst_type, attrs, args):
         xml_node = self._setup_mocks(get_inst_type, inst_type, attrs)
 
         actual_node = create_node(xml_node)
 
         msg = 'should pass parent to instance constructor'
-        self.assertDictEqual(actual_node.instance.init_args, args, msg)
+        self.assertEqual(actual_node.instance.init_args, args, msg)
 
     @patch('wxviews.rendering.get_inst_type')
     @case(XmlAttr('key', '1'))

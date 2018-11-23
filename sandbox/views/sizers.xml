@@ -26,15 +26,15 @@
         <BoxSizer init:orient='{wx.HORIZONTAL}'
                   sizer:proportion='{1}'
                   sizer:flag='{wx.EXPAND|wx.ALL}'>
-            <Panel BackgroundColor='white'
+            <Panel BackgroundColor='red'
                    sizer:proportion='{1}'
                    sizer:flag='{wx.EXPAND|wx.RIGHT}'
                    sizer:border='{10}'/>
-            <Panel BackgroundColor='white'
+            <Panel BackgroundColor='green'
                    sizer:proportion='{1}'
                    sizer:flag='{wx.EXPAND|wx.ALL}'
                    sizer:border='{10}'/>
-            <Panel BackgroundColor='white'
+            <Panel BackgroundColor='blue'
                    sizer:proportion='{2}'
                    sizer:flag='{wx.ALIGN_TOP|wx.ALL}'
                    sizer:border='{10}'/>
@@ -42,20 +42,31 @@
 
         <StaticText Label='Grid sizer'
                     sizer:flag='{wx.EXPAND|wx.ALL}'/>
-        <!-- <GridSizer init_args='{(4,4,1,1)}'
-                   sizer:args='{[1, wx.EXPAND|wx.ALL, 1]}'>
+        <GridSizer init:rows='{4}'
+                   init:cols='{4}'
+                   init:vgap='{1}'
+                   init:hgap='{1}'
+                   sizer:proportion='{1}'
+                   sizer:flag='{wx.EXPAND|wx.ALL}'
+                   sizer:border='{1}'>
             <wxv:For items='{list(range(16))}'>
-                <Panel sizer:args='{[0, wx.EXPAND]}'
+                <Panel sizer:proportion='{0}'
+                       sizer:flag='{wx.EXPAND}'
                        BackgroundColor='white'>
                     <StaticText call:SetLabel='{str(index)}'/>
                 </Panel>
             </wxv:For>
         </GridSizer>
 
-        <StaticText call:SetLabel='FlexGrid sizer'
-                    sizer:kwargs='once:{{"flag":wx.EXPAND|wx.ALL}}'/>
-        <FlexGridSizer init_args='{(3,2,1,1)}'
-                       sizer:args='{[1, wx.EXPAND|wx.ALL, 1]}'
+        <!-- <StaticText Label='FlexGrid sizer'
+                    sizer:flag='{wx.EXPAND|wx.ALL}'/>
+        <FlexGridSizer init:rows='{3}'
+                       init:cols='{2}'
+                       init:vgap='{1}'
+                       init:hgap='{1}'
+                       sizer:proportion='{1}'
+                       sizer:flag='{wx.EXPAND|wx.ALL}'
+                       sizer:border='{1}'
                        call:AddGrowableRow='{(2,1)}'
                        call:AddGrowableCol='{(1,1)}'>
             <wxv:For items='{list(range(6))}'>

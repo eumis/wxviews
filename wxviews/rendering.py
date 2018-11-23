@@ -1,6 +1,6 @@
 '''Customizing of wx parsing'''
 
-from wx import Sizer # pylint: disable=E0611
+from wx import Sizer, GridSizer # pylint: disable=E0611
 from pyviews.core.xml import XmlNode, XmlAttr
 from pyviews.core.observable import InheritedDict
 from pyviews.core.compilation import Expression
@@ -17,6 +17,10 @@ def create_node(xml_node: XmlNode, parent=None,
     if issubclass(inst_type, Node):
         args = {**init_args, **{'xml_node': xml_node}}
         return create_inst(inst_type, **args)
+    elif issubclass(inst_type, GridSizer):
+        args = _get_attr_args_values(xml_node, 'init', node_globals)
+        inst = inst_type(*args)
+        return SizerNode(inst, xml_node, node_globals=node_globals)
     elif issubclass(inst_type, Sizer):
         args = get_attr_args(xml_node, 'init', node_globals)
         inst = inst_type(**args)
@@ -25,6 +29,10 @@ def create_node(xml_node: XmlNode, parent=None,
         args = get_attr_args(xml_node, 'init', node_globals)
         inst = inst_type(parent, **args)
         return WxNode(inst, xml_node, node_globals=node_globals)
+
+def _get_attr_args_values(xml_node, namespace: str, node_globals: InheritedDict = None) -> dict:
+    init_attrs = [attr for attr in xml_node.attrs if attr.namespace == namespace]
+    return [_get_init_value(attr, node_globals) for attr in init_attrs]
 
 def get_attr_args(xml_node, namespace: str, node_globals: InheritedDict = None) -> dict:
     '''Returs args from attributes with provided namespace'''
