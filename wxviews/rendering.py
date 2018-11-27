@@ -6,7 +6,7 @@ from pyviews.core.observable import InheritedDict
 from pyviews.core.compilation import Expression
 from pyviews.core.node import Node
 from pyviews.rendering.expression import is_code_expression, parse_expression
-from pyviews.rendering.node import create_inst, get_inst_type
+from pyviews.rendering.node import get_inst_type, get_init_args
 from wxviews.core.node import WxNode
 from wxviews.core.sizers import SizerNode
 
@@ -16,7 +16,11 @@ def create_node(xml_node: XmlNode, parent=None,
     inst_type = get_inst_type(xml_node)
     if issubclass(inst_type, Node):
         args = {**init_args, **{'xml_node': xml_node}}
-        return create_inst(inst_type, **args)
+        if parent is not None:
+            args['parent'] = parent
+        if node_globals is not None:
+            args['node_globals'] = node_globals
+        return _create_inst(inst_type, **args)
     elif issubclass(inst_type, GridSizer):
         args = _get_attr_args_values(xml_node, 'init', node_globals)
         inst = inst_type(*args)
@@ -29,6 +33,11 @@ def create_node(xml_node: XmlNode, parent=None,
         args = get_attr_args(xml_node, 'init', node_globals)
         inst = inst_type(parent, **args)
         return WxNode(inst, xml_node, node_globals=node_globals)
+
+def _create_inst(inst_type, **init_args):
+    '''Creates class instance with args'''
+    args, kwargs = get_init_args(inst_type, init_args, True)
+    return inst_type(*args, **kwargs)
 
 def _get_attr_args_values(xml_node, namespace: str, node_globals: InheritedDict = None) -> dict:
     init_attrs = [attr for attr in xml_node.attrs if attr.namespace == namespace]

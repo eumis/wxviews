@@ -14,18 +14,21 @@ from wxviews.pipeline.containers import get_if_pipeline, render_if, subscribe_to
 
 class render_container_children_tests(TestCase):
     @patch('wxviews.pipeline.containers.render_children')
+    @patch('wxviews.pipeline.containers.InheritedDict')
     @case([])
     @case(['item1'])
     @case(['item1', 'item2'])
-    def test_renders_child(self, render_children: Mock, nodes):
+    def test_renders_child(self, inherited_dict:Mock, render_children: Mock, nodes):
         xml_node = Mock(children=nodes)
         node = Container(xml_node)
         parent = Mock()
+        child_globals = Mock()
+        inherited_dict.side_effect = lambda globs: child_globals
         sizer = Mock()
         child_args = {
             'parent_node': node,
             'parent': parent,
-            'node_globals': node.node_globals,
+            'node_globals': child_globals,
             'sizer': sizer
         }
 
@@ -45,7 +48,7 @@ class render_view_children_tests(TestCase):
         child = Mock()
         render.side_effect = lambda r, **args: child if r == view_root else None
 
-        node = Mock()
+        node = Mock(node_globals={})
         node.set_content = Mock()
         node.name = view_name
 

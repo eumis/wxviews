@@ -7,6 +7,7 @@ from unittest.mock import Mock, patch
 from wx import Sizer, GridSizer # pylint: disable=E0611
 from pyviews.core.xml import XmlAttr
 from pyviews.core.node import Node
+from pyviews.core.observable import InheritedDict
 from pyviews.testing import case
 from wxviews.core.node import WxNode
 from wxviews.core.sizers import SizerNode
@@ -63,7 +64,7 @@ class create_node_tests(TestCase):
     @patch('wxviews.rendering.get_inst_type')
     @case(SomeNode, {})
     @case(SomeNode, {'one': 1})
-    @case(OtherNode, {'key': 'value', 'two': 2})
+    @case(OtherNode, {'parent': Mock(), 'node_globals': InheritedDict(), 'key': 'value'})
     def test_passes_init_args_to_node(self, get_inst_type: Mock, inst_type, init_args):
         xml_node = self._setup_mocks(get_inst_type, inst_type)
 

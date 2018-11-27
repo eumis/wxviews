@@ -4,6 +4,8 @@
 
 from pyviews.core.node import InstanceNode
 from pyviews.rendering.pipeline import apply_attribute
+from wxviews.core.node import WxNode
+from wxviews.rendering import get_attr_args
 
 def instance_node_setter(node: InstanceNode, key, value):
     '''Sets default wxviews attr_setter'''
@@ -19,3 +21,10 @@ def apply_attributes(node: InstanceNode, **args):
     attrs = [attr for attr in node.xml_node.attrs if attr.namespace not in ['init', 'sizer']]
     for attr in attrs:
         apply_attribute(node, attr)
+
+def add_to_sizer(node: WxNode, sizer=None, **args):
+    '''Adds to wx instance to sizer'''
+    if sizer is None:
+        return
+    args = get_attr_args(node.xml_node, 'sizer', node.node_globals)
+    sizer.Add(node.instance, **args)

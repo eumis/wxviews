@@ -23,7 +23,7 @@ def _get_child_args(node: Container, parent=None, sizer=None, **args):
     return {
         'parent_node': node,
         'parent': parent,
-        'node_globals': node.node_globals,
+        'node_globals': InheritedDict(node.node_globals),
         'sizer': sizer
     }
 
@@ -78,10 +78,9 @@ def _render_for_children(node: For, items: list, index_shift=0, **args):
 
 def _get_for_child_args(node: For, index, item, **args):
     child_args = _get_child_args(node, **args)
-    child_globals = InheritedDict(child_args['node_globals'])
+    child_globals = child_args['node_globals']
     child_globals['index'] = index
     child_globals['item'] = item
-    child_args['node_globals'] = child_globals
     return child_args
 
 def rerender_on_items_change(node: For, **args):
