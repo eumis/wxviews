@@ -22,10 +22,10 @@ class ModifiersTest(TestCase):
         call_mod(node, key, args)
 
         msg = 'call should call method by key'
-        self.assertTrue(getattr(node.wx_instance, key).called, msg)
+        self.assertTrue(getattr(node.instance, key).called, msg)
 
         msg = 'call should pass arguments to method'
-        self.assertEqual(getattr(node.wx_instance, key).call_args, call_args, msg)
+        self.assertEqual(getattr(node.instance, key).call_args, call_args, msg)
 
     @case([])
     @case([1, 2])
