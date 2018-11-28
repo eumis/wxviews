@@ -5,8 +5,11 @@
 from unittest import TestCase, main
 from unittest.mock import Mock, call, patch
 from wx import Sizer # pylint: disable=E0611
+from pyviews.testing import case
+from wxviews.core.sizers import GrowableCol, GrowableRow
 from wxviews.pipeline.common import instance_node_setter
 from wxviews.pipeline.sizers import setup_setter, render_sizer_children, set_sizer_to_parent
+from wxviews.pipeline.sizers import add_growable_row_to_sizer, add_growable_col_to_sizer
 
 class setup_setter_tests(TestCase):
     def test_sets_instance_property(self):
@@ -66,6 +69,36 @@ class set_sizer_to_parent_tests(TestCase):
             set_sizer_to_parent(node, parent=None)
         except:
             self.fail('should pass if parent is None')
+
+class add_growable_row_to_sizer_tests(TestCase):
+    @case({'idx': 1}, call(1, 0))
+    @case({'idx': 1, 'proportion': 1}, call(1, 1))
+    @case({'proportion': 1}, call(None, 1))
+    def test_calls_AddGrowableRow(self, properties: dict, expected_call: call):
+        node = GrowableRow(Mock())
+        sizer = Mock()
+        for key, value in properties.items():
+            node.set_attr(key, value)
+
+        add_growable_row_to_sizer(node, sizer=sizer)
+
+        msg = 'should call AddGrowableRow with parameters'
+        self.assertEqual(sizer.AddGrowableRow.call_args, expected_call, msg)
+
+class add_growable_col_to_sizer_tests(TestCase):
+    @case({'idx': 1}, call(1, 0))
+    @case({'idx': 1, 'proportion': 1}, call(1, 1))
+    @case({'proportion': 1}, call(None, 1))
+    def test_calls_AddGrowableCol(self, properties: dict, expected_call: call):
+        node = GrowableCol(Mock())
+        sizer = Mock()
+        for key, value in properties.items():
+            node.set_attr(key, value)
+
+        add_growable_col_to_sizer(node, sizer=sizer)
+
+        msg = 'should call AddGrowableCol with parameters'
+        self.assertEqual(sizer.AddGrowableCol.call_args, expected_call, msg)
 
 if __name__ == '__main__':
     main()

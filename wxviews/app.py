@@ -63,11 +63,12 @@ from pyviews.rendering.binding import BindingFactory, add_default_rules
 from pyviews.rendering.views import render_view
 from pyviews.dependencies import register_defaults
 from wxviews.core.containers import Container, View, For, If
-from wxviews.core.sizers import SizerNode
+from wxviews.core.sizers import SizerNode, GrowableCol, GrowableRow
 from wxviews.pipeline.instance import get_frame_pipeline, get_wx_pipeline, get_app_pipeline
 from wxviews.pipeline.containers import get_container_pipeline, get_view_pipeline
 from wxviews.pipeline.containers import get_for_pipeline, get_if_pipeline
 from wxviews.pipeline.sizers import get_sizer_pipeline
+from wxviews.pipeline.sizers import get_growable_row_pipeline, get_growable_col_pipeline
 from wxviews.rendering import create_node
 
 def register_dependencies():
@@ -87,6 +88,8 @@ def register_dependencies():
     ioc.register_single('pipeline', get_for_pipeline(), For)
     ioc.register_single('pipeline', get_if_pipeline(), If)
     ioc.register_single('pipeline', get_sizer_pipeline(), SizerNode)
+    ioc.register_single('pipeline', get_growable_row_pipeline(), GrowableRow)
+    ioc.register_single('pipeline', get_growable_col_pipeline(), GrowableCol)
 
 def _register_binding_factory():
     factory = BindingFactory()

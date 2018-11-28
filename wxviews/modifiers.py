@@ -2,12 +2,13 @@
 
 import wx
 from pyviews.core.ioc import inject
+from pyviews.core.node import Node
 from wxviews.core.node import WxNode
 
-def call(node, key, value):
+def call(node: Node, key: str, value):
     '''calls control method'''
     args = value if isinstance(value, list) or isinstance(value, tuple) else [value]
-    method = getattr(node.wx_instance, key) if hasattr(node, 'wx_instance') else getattr(node, key)
+    method = getattr(node.instance, key) if hasattr(node, 'instance') else getattr(node, key)
     method(*args)
 
 def setup_sizer(node: WxNode, key, value):

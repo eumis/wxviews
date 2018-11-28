@@ -2,11 +2,11 @@
 
 # pylint: disable=W0613
 
-from wx import Sizer # pylint: disable=E0611
+from wx import FlexGridSizer # pylint: disable=E0611
 from pyviews import RenderingPipeline
 from pyviews.core.observable import InheritedDict
 from pyviews.rendering.pipeline import render_children
-from wxviews.core.sizers import SizerNode
+from wxviews.core.sizers import SizerNode, GrowableRow, GrowableCol
 from wxviews.pipeline.common import instance_node_setter, apply_attributes, add_to_sizer
 
 def get_sizer_pipeline() -> RenderingPipeline:
@@ -35,3 +35,25 @@ def set_sizer_to_parent(node, parent=None, sizer=None, **args):
     '''Pass sizer to parent SetSizer'''
     if parent is not None and sizer is None:
         parent.SetSizer(node.instance)
+
+def get_growable_row_pipeline() -> RenderingPipeline:
+    '''Returns rendering pipeline for GrowableRow'''
+    return RenderingPipeline(steps=[
+        apply_attributes,
+        add_growable_row_to_sizer
+    ])
+
+def add_growable_row_to_sizer(node: GrowableRow, sizer: FlexGridSizer, **args):
+    '''Calls AddGrowableRow for sizer'''
+    sizer.AddGrowableRow(node.idx, node.proportion)
+
+def get_growable_col_pipeline() -> RenderingPipeline:
+    '''Returns rendering pipeline for GrowableRow'''
+    return RenderingPipeline(steps=[
+        apply_attributes,
+        add_growable_col_to_sizer
+    ])
+
+def add_growable_col_to_sizer(node: GrowableRow, sizer: FlexGridSizer, **args):
+    '''Calls AddGrowableCol for sizer'''
+    sizer.AddGrowableCol(node.idx, node.proportion)
