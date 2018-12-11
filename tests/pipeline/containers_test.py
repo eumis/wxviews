@@ -38,17 +38,13 @@ class render_container_children_tests(TestCase):
         self.assertEqual(render_children.call_args, call(node, **child_args), msg)
 
 class render_view_children_tests(TestCase):
-    @patch('wxviews.pipeline.containers.get_view_root')
-    @patch('wxviews.pipeline.containers.render')
-    def test_renders_child(self, render: Mock, get_view_root: Mock):
+    @patch('wxviews.pipeline.containers.render_view')
+    def test_renders_view(self, render_view: Mock):
         view_name = 'name'
-        view_root = Mock()
-        get_view_root.side_effect = lambda name: view_root if name == view_name else None
-
         child = Mock()
-        render.side_effect = lambda r, **args: child if r == view_root else None
+        render_view.side_effect = lambda name, **args: child if name == view_name else None
 
-        node = Mock(node_globals={})
+        node = Mock(node_globals=None)
         node.set_content = Mock()
         node.name = view_name
 
@@ -57,11 +53,35 @@ class render_view_children_tests(TestCase):
         msg = 'should render view by node name and set result as view child'
         self.assertEqual(node.set_content.call_args, call(child), msg)
 
-    @patch('wxviews.pipeline.containers.get_view_root')
-    @patch('wxviews.pipeline.containers.render')
+    @patch('wxviews.pipeline.containers.render_view')
+    @patch('wxviews.pipeline.containers.InheritedDict')
+    def test_renders_view_with_args(self, inherit_dict:Mock, render_view: Mock):
+        view_name = 'name'
+        inherit_dict.side_effect = lambda source: source
+        render_view.side_effect = lambda name, **args: args
+
+        node = Mock()
+        node.node_globals = Mock()
+        node.set_content = Mock()
+        node.name = view_name
+        parent = Mock()
+        sizer = Mock()
+        args = {
+            'parent_node': node,
+            'parent': parent,
+            'node_globals': inherit_dict(node.node_globals),
+            'sizer': sizer
+        }
+
+        render_view_children(node, parent=parent, sizer=sizer)
+
+        msg = 'should render view by node name and set result as view child'
+        self.assertEqual(node.set_content.call_args, call(args), msg)
+
+    @patch('wxviews.pipeline.containers.render_view')
     @case('')
     @case(None)
-    def test_not_render_empty_view_name(self, render: Mock, get_view_root: Mock, view_name):
+    def test_not_render_empty_view_name(self, render_view: Mock, view_name):
         node = Mock()
         node.set_content = Mock()
         node.name = view_name
@@ -69,7 +89,7 @@ class render_view_children_tests(TestCase):
         render_view_children(node)
 
         msg = 'should not render view if name is empty or None'
-        self.assertFalse(node.set_content.called or render.called, msg)
+        self.assertFalse(node.set_content.called or render_view.called, msg)
 
 class rerender_on_view_change_tests(TestCase):
     @patch('wxviews.pipeline.containers.render_view_children')
@@ -88,12 +108,11 @@ class rerender_on_view_change_tests(TestCase):
         msg = 'render_view_children should be called on view change'
         self.assertEqual(render_view_children.call_args, call(node, **args), msg)
 
-    @patch('wxviews.pipeline.containers.get_view_root')
-    @patch('wxviews.pipeline.containers.render')
+    @patch('wxviews.pipeline.containers.render_view')
     @case('')
     @case(None)
-    def test_not_render_empty_name(self, render: Mock, get_view_root: Mock, view_name):
-        render.reset_mock()
+    def test_not_render_empty_name(self, render_view: Mock, view_name):
+        render_view.reset_mock()
         node = View(Mock())
         node.set_content = Mock()
         node.destroy_children = Mock()
@@ -103,7 +122,7 @@ class rerender_on_view_change_tests(TestCase):
         node.name = view_name
 
         msg = 'should not render in case name is not set or empty'
-        self.assertFalse(render.called or node.set_content.called, msg)
+        self.assertFalse(render_view.called or node.set_content.called, msg)
 
     @patch('wxviews.pipeline.containers.render_view_children')
     def test_not_rerender_same_view(self, render_view_children: Mock):

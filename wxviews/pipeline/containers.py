@@ -2,9 +2,10 @@
 
 # pylint: disable=W0613
 
-from pyviews import RenderingPipeline, get_view_root
+from pyviews import RenderingPipeline
 from pyviews.core.observable import InheritedDict
 from pyviews.rendering.pipeline import apply_attributes, render_children
+from pyviews.rendering.views import render_view
 from pyviews.services import render
 from wxviews.core.containers import Container, View, For, If
 
@@ -40,9 +41,9 @@ def get_view_pipeline() -> RenderingPipeline:
 def render_view_children(node: View, **args):
     '''Finds view by name attribute and renders it as view node child'''
     if node.name:
-        view_root = get_view_root(node.name)
         child_args = _get_child_args(node, **args)
-        node.set_content(render(view_root, **child_args))
+        content = render_view(node.name, **child_args)
+        node.set_content(content)
 
 def rerender_on_view_change(node: View, **args):
     '''Subscribes to name change and renders new view'''
