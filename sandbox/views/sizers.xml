@@ -67,6 +67,7 @@
                        sizer:proportion='{1}'
                        sizer:flag='{wx.EXPAND|wx.ALL}'
                        sizer:border='{1}'>
+            <wxv:Call method='AddGrowableRow' idx='{2}' proportion='{1}' />
             <wxv:GrowableRow idx='{2}' proportion='{1}' />
             <wxv:GrowableCol idx='{1}' proportion='{1}' />
             <wxv:For items='{list(range(6))}'>
