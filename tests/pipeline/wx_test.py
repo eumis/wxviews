@@ -4,20 +4,11 @@
 
 from unittest import TestCase, main
 from unittest.mock import Mock, call, patch
-from wxviews.pipeline.common import instance_node_setter
-from wxviews.pipeline.instance import setup_setter, render_wx_children
-
-class setup_setter_tests(TestCase):
-    def test_sets_instance_property(self):
-        node = Mock()
-        setup_setter(node)
-
-        msg = 'setup_setter should set instance_node_setter'
-        self.assertEqual(node.attr_setter, instance_node_setter, msg)
+from wxviews.pipeline.wx import render_wx_children
 
 class render_wx_children_tests(TestCase):
-    @patch('wxviews.pipeline.instance.render_children')
-    @patch('wxviews.pipeline.instance.InheritedDict')
+    @patch('wxviews.pipeline.wx.render_children')
+    @patch('wxviews.pipeline.wx.InheritedDict')
     def test_passes_child_args(self, inherited_dict: Mock, render_children: Mock):
         node = Mock(instance=Mock(), node_globals=Mock())
         sizer = Mock()

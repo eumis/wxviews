@@ -7,7 +7,16 @@ from unittest.mock import Mock, call, patch
 from pyviews.testing import case
 from pyviews.core.node import InstanceNode
 from pyviews.core.xml import XmlAttr
-from wxviews.pipeline.common import instance_node_setter, apply_attributes, add_to_sizer
+from wxviews.pipeline.common import setup_instance_node_setter, instance_node_setter, apply_attributes, add_to_sizer
+
+class setup_instance_node_setter_tests(TestCase):
+    def test_sets_attr_setter(self):
+        node = Mock()
+
+        setup_instance_node_setter(node)
+
+        msg = 'setup_instance_node_setter should set attr_setter'
+        self.assertEqual(node.attr_setter, instance_node_setter, msg)
 
 class instance_node_setter_tests(TestCase):
     def _data(self, inst=None):

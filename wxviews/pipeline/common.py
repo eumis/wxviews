@@ -7,6 +7,10 @@ from pyviews.rendering.pipeline import apply_attribute
 from wxviews.core.node import WxNode
 from wxviews.rendering import get_attr_args
 
+def setup_instance_node_setter(node: WxNode, **args):
+    '''Sets attr_setter for WxNode'''
+    node.attr_setter = instance_node_setter
+
 def instance_node_setter(node: InstanceNode, key, value):
     '''Sets default wxviews attr_setter'''
     if key in node.properties:
