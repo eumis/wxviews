@@ -1,6 +1,7 @@
 <wxv:Container xmlns='wx'
                xmlns:wxv='wxviews'
                xmlns:import='pyviews.rendering.modifiers.import_global'
+               xmlns:global='pyviews.rendering.modifiers.set_global'
                xmlns:init='init'
                xmlns:sizer='sizer'
 
@@ -66,10 +67,12 @@
                        init:hgap='{1}'
                        sizer:proportion='{1}'
                        sizer:flag='{wx.EXPAND|wx.ALL}'
-                       sizer:border='{1}'>
-            <wxv:Call method='AddGrowableRow' idx='{2}' proportion='{1}' />
-            <wxv:GrowableRow idx='{2}' proportion='{1}' />
-            <wxv:GrowableCol idx='{1}' proportion='{1}' />
+                       sizer:border='{1}'
+                       global:sizer='once:{node.instance}'>
+            <wxv:Code>
+                sizer.AddGrowableRow(2, 1)
+                sizer.AddGrowableCol(1, 1)
+            </wxv:Code>
             <wxv:For items='{list(range(6))}'>
                 <Panel sizer:proportion='{0}'
                        sizer:flag='{wx.EXPAND}'
