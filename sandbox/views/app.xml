@@ -6,6 +6,9 @@
 
      import:wx='wx'>
     <Frame init:title='hello world'>
+        <MenuBar>
+            <Menu title='Views' />
+        </MenuBar>
         <Panel BackgroundColour='gray'>
             <wxv:View name='sizers' />
         </Panel>

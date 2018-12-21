@@ -54,6 +54,6 @@ def get_growable_col_pipeline() -> RenderingPipeline:
         add_growable_col_to_sizer
     ])
 
-def add_growable_col_to_sizer(node: GrowableRow, sizer: FlexGridSizer, **args):
+def add_growable_col_to_sizer(node: GrowableCol, sizer: FlexGridSizer, **args):
     '''Calls AddGrowableCol for sizer'''
     sizer.AddGrowableCol(node.idx, node.proportion)

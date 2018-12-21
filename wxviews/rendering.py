@@ -1,6 +1,6 @@
 '''Customizing of wx parsing'''
 
-from wx import Sizer, GridSizer # pylint: disable=E0611
+from wx import Sizer, GridSizer, MenuBar, Menu # pylint: disable=E0611
 from pyviews.core.xml import XmlNode, XmlAttr
 from pyviews.core.observable import InheritedDict
 from pyviews.core.compilation import Expression
@@ -29,6 +29,8 @@ def create_node(xml_node: XmlNode, parent=None,
         args = get_attr_args(xml_node, 'init', node_globals)
         inst = inst_type(**args)
         return SizerNode(inst, xml_node, node_globals=node_globals)
+    elif issubclass(inst_type, MenuBar) or issubclass(inst_type, Menu):
+        return WxNode(inst_type(), xml_node, node_globals=node_globals)
     else:
         args = get_attr_args(xml_node, 'init', node_globals)
         inst = inst_type(parent, **args)
