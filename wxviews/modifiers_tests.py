@@ -1,4 +1,4 @@
-from unittest import TestCase, main
+from unittest import TestCase
 from unittest.mock import Mock, call
 import wx
 from wx.lib.newevent import NewEvent
@@ -79,6 +79,3 @@ class ModifiersTest(TestCase):
     def test_bind_raises(self, event_key):
         with self.assertRaises(KeyError):
             bind(Mock(), event_key, lambda ev: None)
-
-if __name__ == '__main__':
-    main()
