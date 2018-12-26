@@ -7,6 +7,11 @@
      import:wx='wx'>
     <Frame init:title='hello world'>
         <MenuBar>
+            <Menu title='File'>
+                <MenuItem init:id='{wx.ID_EXIT}'
+                          Text='once:{"&amp;Quit\tCtrl+Q"}'
+                          Help='Quit the Application' />
+            </Menu>
             <Menu title='Views' />
         </MenuBar>
         <Panel BackgroundColour='gray'>

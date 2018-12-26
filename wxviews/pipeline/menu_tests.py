@@ -3,10 +3,10 @@
 from typing import Any
 from unittest import TestCase, main
 from unittest.mock import Mock, call
-from wx import Frame, MenuBar # pylint: disable=E0611
+from wx import Frame, MenuBar, Menu # pylint: disable=E0611
 from pyviews import InstanceNode, Property
 from pyviews.testing import case
-from wxviews.pipeline.menu import set_to_frame, add_menu_properties, set_to_menu_bar
+from wxviews.pipeline.menu import set_to_frame, add_menu_properties, set_to_menu_bar, set_to_menu
 
 class EmptyClass:
     pass
@@ -52,7 +52,7 @@ class MenuBarStub(MenuBar):
 class set_to_menu_bar_tests(TestCase):
     @case(Mock())
     @case(EmptyClass())
-    def test_raises_for_parent_not_frame(self, parent: Any):
+    def test_raises_for_parent_not_MenuBar(self, parent: Any):
         node = Mock()
 
         msg = 'should raise TypeError if parent is not Frame'
@@ -68,8 +68,31 @@ class set_to_menu_bar_tests(TestCase):
 
         set_to_menu_bar(node, parent=menu_bar)
 
-        msg = 'should call SetMenuBar on frame and pass menu bar instance'
+        msg = 'should call Append on menu baar and pass menu instance'
         self.assertEqual(menu_bar.Append.call_args, call(node.instance, title), msg)
+
+class MenuStub(Menu):
+    def __init__(self):
+        self.Append = Mock()
+
+class set_to_menu_tests(TestCase):
+    @case(Mock())
+    @case(EmptyClass())
+    def test_raises_for_parent_not_Menu(self, parent: Any):
+        node = Mock()
+
+        msg = 'should raise TypeError if parent is not Frame'
+        with self.assertRaises(TypeError, msg=msg):
+            set_to_menu(node, parent=parent)
+
+    def test_sets_item_to_menu(self):
+        node = Mock()
+        menu = MenuStub()
+
+        set_to_menu(node, parent=menu)
+
+        msg = 'should call Appendon menu and pass item instance'
+        self.assertEqual(menu.Append.call_args, call(node.instance), msg)
 
 if __name__ == '__main__':
     main()

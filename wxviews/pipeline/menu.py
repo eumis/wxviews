@@ -2,7 +2,8 @@
 
 # pylint: disable=W0613
 
-from wx import Frame, MenuBar # pylint: disable=E0611
+from wx import Frame, MenuBar, Menu # pylint: disable=E0611
+from wx import ID_EXIT
 from pyviews import RenderingPipeline, InstanceNode, Property
 from pyviews.core.observable import InheritedDict
 from pyviews.rendering.pipeline import render_children
@@ -31,6 +32,8 @@ def set_to_frame(node: InstanceNode, parent: Frame = None, **args):
         raise TypeError(msg)
     parent.SetMenuBar(node.instance)
 
+
+
 def get_menu_pipeline():
     '''Return render pipeline for Menu'''
     return RenderingPipeline(steps=[
@@ -46,8 +49,25 @@ def add_menu_properties(node: InstanceNode, **args):
     node.properties['title'] = Property('title')
 
 def set_to_menu_bar(node: InstanceNode, parent: MenuBar = None, **args):
-    '''Sets menu for parent MenuBar'''
+    '''Adds menu to parent MenuBar'''
     if not isinstance(parent, MenuBar):
         msg = 'parent for Menu should be MenuBar, but it is {0}'.format(parent)
         raise TypeError(msg)
     parent.Append(node.instance, node.properties['title'].get())
+
+
+
+def get_menu_item_pipeline() -> RenderingPipeline:
+    '''Returns rendering pipeline for menu item'''
+    return RenderingPipeline(steps=[
+        setup_instance_node_setter,
+        apply_attributes,
+        set_to_menu
+    ])
+
+def set_to_menu(node: InstanceNode, parent: Menu = None, **args):
+    '''Adds menu item to parent Menu'''
+    if not isinstance(parent, Menu):
+        msg = 'parent for MenuItem should be Menu, but it is {0}'.format(parent)
+        raise TypeError(msg)
+    parent.Append(node.instance)
