@@ -21,6 +21,7 @@ def render_menu_children(node: InstanceNode, **args):
     '''Renders sizer children'''
     render_children(node,
                     parent_node=node,
+                    parent=node.instance,
                     node_globals=InheritedDict(node.node_globals))
 
 def set_to_frame(node: InstanceNode, parent: Frame = None, **args):
@@ -33,6 +34,7 @@ def set_to_frame(node: InstanceNode, parent: Frame = None, **args):
 def get_menu_pipeline():
     '''Return render pipeline for Menu'''
     return RenderingPipeline(steps=[
+        add_menu_properties,
         setup_instance_node_setter,
         apply_attributes,
         render_menu_children,
@@ -48,4 +50,4 @@ def set_to_menu_bar(node: InstanceNode, parent: MenuBar = None, **args):
     if not isinstance(parent, MenuBar):
         msg = 'parent for Menu should be MenuBar, but it is {0}'.format(parent)
         raise TypeError(msg)
-    parent.Append(node.instance, node.title)
+    parent.Append(node.instance, node.properties['title'].get())

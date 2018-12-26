@@ -4,7 +4,7 @@ from typing import Any
 from unittest import TestCase, main
 from unittest.mock import Mock, call
 from wx import Frame, MenuBar # pylint: disable=E0611
-from pyviews import InstanceNode
+from pyviews import InstanceNode, Property
 from pyviews.testing import case
 from wxviews.pipeline.menu import set_to_frame, add_menu_properties, set_to_menu_bar
 
@@ -60,13 +60,16 @@ class set_to_menu_bar_tests(TestCase):
             set_to_menu_bar(node, parent=parent)
 
     def test_sets_menu_to_bar(self):
-        node = Mock(title='some title')
+        title = 'some title'
+        node = Mock(properties={})
+        node.properties['title'] = Property('title')
+        node.properties['title'].set(title)
         menu_bar = MenuBarStub()
 
         set_to_menu_bar(node, parent=menu_bar)
 
         msg = 'should call SetMenuBar on frame and pass menu bar instance'
-        self.assertEqual(menu_bar.Append.call_args, call(node.instance, node.title), msg)
+        self.assertEqual(menu_bar.Append.call_args, call(node.instance, title), msg)
 
 if __name__ == '__main__':
     main()
