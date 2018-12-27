@@ -48,11 +48,18 @@ def render_view_children(node: View, **args):
 def rerender_on_view_change(node: View, **args):
     '''Subscribes to name change and renders new view'''
     node.name_changed = lambda n, val, old, a=args: _rerender_view(n, a) \
-                                    if val != old else None
+                                    if _is_different(val, old) else None
+
+def _is_different(one: str, two: str):
+    empty_values = [None, '']
+    return one != two and\
+           not (one in empty_values and two in empty_values)
 
 def _rerender_view(node: View, args: dict):
     node.destroy_children()
     render_view_children(node, **args)
+    if 'parent' in args:
+        args['parent'].Layout()
 
 
 
@@ -88,10 +95,12 @@ def rerender_on_items_change(node: For, **args):
     node.items_changed = lambda n, v, o, a=args: _on_items_changed(n, **a) \
                                      if v != o else None
 
-def _on_items_changed(node: For, **args):
+def _on_items_changed(node: For, parent=None, **args):
     _destroy_overflow(node)
     _update_existing(node)
     _create_not_existing(node)
+    if parent:
+        parent.Layout()
 
 def _destroy_overflow(node: For):
     try:
@@ -132,7 +141,7 @@ def get_if_pipeline() -> RenderingPipeline:
     return RenderingPipeline(steps=[
         apply_attributes,
         render_if,
-        subscribe_to_condition_change
+        rerender_on_condition_change
     ])
 
 def render_if(node: If, **args):
@@ -140,12 +149,14 @@ def render_if(node: If, **args):
     if node.condition:
         render_children(node, **_get_child_args(node, **args))
 
-def subscribe_to_condition_change(node: If, pipeline: RenderingPipeline = None, **args):
+def rerender_on_condition_change(node: If, **args):
     '''Rerenders if on condition change'''
     node.condition_changed = lambda n, v, o: _on_condition_change(n, v, o, **args)
 
-def _on_condition_change(node: If, val: bool, old: bool, **args):
+def _on_condition_change(node: If, val: bool, old: bool, parent=None, **args):
     if val == old:
         return
     node.destroy_children()
     render_if(node, **args)
+    if parent:
+        parent.Layout()
