@@ -56,7 +56,6 @@ def _rerender_view(node: View, args: dict):
 
 
 
-
 def get_for_pipeline() -> RenderingPipeline:
     '''Returns setup for For node'''
     return RenderingPipeline(steps=[

@@ -34,7 +34,7 @@ def render_sizer_children(node: SizerNode, parent=None, **args):
 def set_sizer_to_parent(node, parent=None, sizer=None, **args):
     '''Pass sizer to parent SetSizer'''
     if parent is not None and sizer is None:
-        parent.SetSizer(node.instance)
+        parent.SetSizer(node.instance, True)
 
 def get_growable_row_pipeline() -> RenderingPipeline:
     '''Returns rendering pipeline for GrowableRow'''

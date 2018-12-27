@@ -51,7 +51,7 @@ class set_sizer_to_parent_tests(TestCase):
         set_sizer_to_parent(node, parent=parent)
 
         msg = 'should call SetSizer of parent and pass sizer as argument'
-        self.assertEqual(parent.SetSizer.call_args, call(node.instance), msg)
+        self.assertEqual(parent.SetSizer.call_args, call(node.instance, True), msg)
 
     def test_not_calls_SetSizer_if_parent_sizer(self):
         node = Mock()

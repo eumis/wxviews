@@ -17,7 +17,7 @@ def get_wx_pipeline() -> RenderingPipeline:
         render_wx_children
     ])
 
-def render_wx_children(node: WxNode, sizer=None, **args):
+def render_wx_children(node: WxNode, **args):
     '''Renders WxNode children'''
     render_children(node,
                     parent=node.instance,
@@ -44,4 +44,5 @@ def get_app_pipeline():
 def render_app_children(node: WxNode, **args):
     '''Renders App children'''
     render_children(node,
+                    parent_node=node,
                     node_globals=InheritedDict(node.node_globals))

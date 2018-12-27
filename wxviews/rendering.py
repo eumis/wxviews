@@ -10,8 +10,11 @@ from pyviews.rendering.node import get_inst_type, get_init_args
 from wxviews.core.node import WxNode
 from wxviews.core.sizers import SizerNode
 
-def create_node(xml_node: XmlNode, parent=None,
-                node_globals: InheritedDict = None, **init_args) -> Node:
+def create_node(xml_node: XmlNode,
+                parent=None,
+                node_globals: InheritedDict = None,
+                sizer=None,
+                **init_args) -> Node:
     '''Creates node from xml node using namespace as module and tag name as class name'''
     inst_type = get_inst_type(xml_node)
     if issubclass(inst_type, Node):
@@ -28,7 +31,7 @@ def create_node(xml_node: XmlNode, parent=None,
     elif issubclass(inst_type, Sizer):
         args = get_attr_args(xml_node, 'init', node_globals)
         inst = inst_type(**args)
-        return SizerNode(inst, xml_node, node_globals=node_globals)
+        return SizerNode(inst, xml_node, node_globals=node_globals, parent=parent, sizer=sizer)
     elif issubclass(inst_type, MenuBar) or issubclass(inst_type, Menu):
         return WxNode(inst_type(), xml_node, node_globals=node_globals)
     else:

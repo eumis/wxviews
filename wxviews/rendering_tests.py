@@ -1,6 +1,4 @@
-'''Rendering tests'''
-
-# pylint: disable=C0111,C0103,  w0231
+# pylint: disable=C0111,C0103, W0231
 
 from unittest import TestCase, main
 from unittest.mock import Mock, patch
