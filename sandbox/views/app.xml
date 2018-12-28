@@ -21,7 +21,7 @@
                 id = get_view_id(index)
                 frame.Bind(wx.EVT_MENU, lambda evt, v=view: change_view(v), id=id)
 
-            frame.Bind(wx.EVT_MENU, lambda evt: frame.Close(), id=wx.ID_EXIT) 
+            frame.Bind(wx.EVT_MENU, lambda evt: wx.Exit(), id=wx.ID_EXIT) 
         </wxv:Code>
         <MenuBar>
             <Menu title='File'>
