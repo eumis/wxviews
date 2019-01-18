@@ -3,7 +3,7 @@
 from os.path import abspath
 from wx import Frame, App, MenuBar, Menu, MenuItem # pylint: disable=E0611
 from pyviews.core import ioc
-from pyviews.rendering.binding import BindingFactory, add_default_rules
+from pyviews.rendering.binding import Binder, add_default_rules
 from pyviews.rendering.views import render_view
 from pyviews.dependencies import register_defaults
 from wxviews.core.containers import Container, View, For, If
@@ -23,7 +23,7 @@ def register_dependencies():
     ioc.register_single('views_folder', abspath('views'))
     ioc.register_single('view_ext', 'xml')
     ioc.register_func('create_node', create_node)
-    _register_binding_factory()
+    _register_binder()
 
     ioc.register_single('pipeline', get_wx_pipeline())
     ioc.register_single('pipeline', get_app_pipeline(), App)
@@ -39,10 +39,10 @@ def register_dependencies():
     ioc.register_single('pipeline', get_menu_pipeline(), Menu)
     ioc.register_single('pipeline', get_menu_item_pipeline(), MenuItem)
 
-def _register_binding_factory():
-    factory = BindingFactory()
-    add_default_rules(factory)
-    ioc.register_single('binding_factory', factory)
+def _register_binder():
+    binder = Binder()
+    add_default_rules(binder)
+    ioc.register_single('binder', binder)
 
 def launch(root_view=None, **render_args):
     '''Runs application. Widgets are created from passed xml_files'''
