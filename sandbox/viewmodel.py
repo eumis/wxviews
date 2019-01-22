@@ -8,3 +8,8 @@ class SandboxViews(ObservableEntity):
         super().__init__()
         self.all = views
         self.current = views[0]
+
+class TwoWaysViewModel(ObservableEntity):
+    def __init__(self):
+        super().__init__()
+        self.textctrl_value = ''

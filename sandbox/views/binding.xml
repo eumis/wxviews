@@ -1,0 +1,18 @@
+<wxv:Container xmlns='wx'
+               xmlns:wxv='wxviews'
+               xmlns:init='init'
+               xmlns:sizer='sizer'
+
+               xmlns:import='wxviews.import_global'
+               xmlns:global='wxviews.set_global'
+               xmlns:bind='wxviews.bind'
+
+               import:wx='wx'
+               import:TwoWaysViewModel='viewmodel.TwoWaysViewModel'
+               global:vm='{TwoWaysViewModel()}'>
+
+    <BoxSizer init:orient='{wx.VERTICAL}'>
+        <TextCtrl Value='{{vm.textctrl_value}}' />
+        <StaticText Label='{vm.textctrl_value}' />
+    </BoxSizer>
+</wxv:Container>
