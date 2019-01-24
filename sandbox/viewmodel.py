@@ -12,4 +12,5 @@ class SandboxViews(ObservableEntity):
 class TwoWaysViewModel(ObservableEntity):
     def __init__(self):
         super().__init__()
-        self.textctrl_value = ''
+        self.text_value = ''
+        self.bool_value = False

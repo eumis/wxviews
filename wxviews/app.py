@@ -8,7 +8,7 @@ from pyviews.rendering.views import render_view
 from pyviews.dependencies import register_defaults
 from wxviews.core.containers import Container, View, For, If
 from wxviews.core.sizers import SizerNode, GrowableCol, GrowableRow
-from wxviews.core.binding import TextTwoWaysRule
+from wxviews.core.binding import TextTwoWaysRule, CheckBoxTwoWaysRule
 from wxviews.pipeline.wx import get_frame_pipeline, get_wx_pipeline, get_app_pipeline
 from wxviews.pipeline.containers import get_container_pipeline, get_view_pipeline
 from wxviews.pipeline.containers import get_for_pipeline, get_if_pipeline
@@ -44,6 +44,7 @@ def _register_binder():
     binder = Binder()
     add_default_rules(binder)
     binder.add_rule('twoways', TextTwoWaysRule())
+    binder.add_rule('twoways', CheckBoxTwoWaysRule())
     ioc.register_single('binder', binder)
 
 def launch(root_view=None, **render_args):
