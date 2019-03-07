@@ -2,11 +2,10 @@
 
 # pylint: disable=W0613
 
-from pyviews import RenderingPipeline
-from pyviews.core.observable import InheritedDict
-from pyviews.rendering.pipeline import render_children
-from wxviews.pipeline.common import setup_instance_node_setter, apply_attributes, add_to_sizer
-from wxviews.core.node import WxNode
+from pyviews.core import InheritedDict
+from pyviews.rendering import RenderingPipeline, render_children
+from wxviews.core import WxNode
+from .common import setup_instance_node_setter, apply_attributes, add_to_sizer
 
 def get_wx_pipeline() -> RenderingPipeline:
     '''Returns rendering pipeline for WxNode'''

@@ -2,12 +2,12 @@
 
 # pylint: disable=W0613
 
-from pyviews import RenderingPipeline
+from pyviews.rendering import RenderingPipeline
 from pyviews.core.observable import InheritedDict
-from pyviews.rendering.pipeline import apply_attributes, render_children
-from pyviews.rendering.views import render_view
-from pyviews.services import render
-from wxviews.core.containers import Container, View, For, If
+from pyviews.rendering import apply_attributes, render_children
+from pyviews.rendering import render_view
+from pyviews.container import render
+from wxviews.node import Container, View, For, If
 
 def get_container_pipeline() -> RenderingPipeline:
     '''Returns setup for container'''

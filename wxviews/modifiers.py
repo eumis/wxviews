@@ -3,7 +3,7 @@
 from typing import TypeVar, Callable, Tuple
 import wx
 from wx import Event # pylint: disable=E0611
-from wxviews.core.node import WxNode
+from wxviews.core import WxNode
 
 BindValue = TypeVar('BindValue', Callable[[Event], None], Tuple[Callable[[Event], None], dict])
 

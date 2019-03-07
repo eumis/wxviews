@@ -4,7 +4,7 @@
 
 from pyviews.core.node import InstanceNode
 from pyviews.rendering.pipeline import apply_attribute
-from wxviews.core.node import WxNode
+from wxviews.core import WxNode
 from wxviews.rendering import get_attr_args
 
 def setup_instance_node_setter(node: WxNode, **args):

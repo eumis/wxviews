@@ -3,13 +3,16 @@
 from unittest import TestCase, main
 from unittest.mock import Mock, patch
 from wx import Sizer, GridSizer # pylint: disable=E0611
-from pyviews.core.xml import XmlAttr
-from pyviews.core.node import Node
-from pyviews.core.observable import InheritedDict
+from pyviews.core import XmlAttr, Node, InheritedDict
+from pyviews.core.ioc import register_func
+from pyviews.compilation import CompiledExpression
 from pyviews.testing import case
-from wxviews.core.node import WxNode
-from wxviews.core.sizers import SizerNode
+from wxviews.core import WxNode
+from wxviews.node import SizerNode
+from wxviews import rendering
 from wxviews.rendering import create_node, get_attr_args
+
+register_func('expression', CompiledExpression)
 
 class SomeNode(Node):
     def __init__(self, xml_node, **init_args):
@@ -47,7 +50,7 @@ class create_node_tests(TestCase):
 
         return xml_node
 
-    @patch('wxviews.rendering.get_inst_type')
+    @patch(rendering.__name__ + '.get_inst_type')
     @case(Node)
     @case(SomeNode)
     @case(OtherNode)
@@ -59,7 +62,7 @@ class create_node_tests(TestCase):
         msg = 'should create node from xml node name and namespace with right type'
         self.assertTrue(isinstance(actual_node, inst_type), msg)
 
-    @patch('wxviews.rendering.get_inst_type')
+    @patch(rendering.__name__ + '.get_inst_type')
     @case(SomeNode, {})
     @case(SomeNode, {'one': 1})
     @case(OtherNode, {'parent': Mock(), 'node_globals': InheritedDict(), 'key': 'value'})
@@ -74,7 +77,7 @@ class create_node_tests(TestCase):
         msg = 'should pass init_args'
         self.assertEqual(actual_node.init_args, init_args, msg)
 
-    @patch('wxviews.rendering.get_inst_type')
+    @patch(rendering.__name__ + '.get_inst_type')
     @case(WxInstance, WxNode)
     @case(OtherWxInstance, WxNode)
     @case(AnySizer, SizerNode)
@@ -90,7 +93,7 @@ class create_node_tests(TestCase):
         msg = 'should wrap instance to right instance node'
         self.assertTrue(isinstance(actual_node, node_type), msg)
 
-    @patch('wxviews.rendering.get_inst_type')
+    @patch(rendering.__name__ + '.get_inst_type')
     @case(WxInstance, None)
     @case(WxInstance, Mock())
     @case(OtherWxInstance, None)
@@ -103,7 +106,7 @@ class create_node_tests(TestCase):
         msg = 'should pass parent to instance constructor'
         self.assertEqual(actual_node.instance.parent, parent, msg)
 
-    @patch('wxviews.rendering.get_inst_type')
+    @patch(rendering.__name__ + '.get_inst_type')
     @case(WxInstance, [], {})
     @case(WxInstance,
           [XmlAttr('key', 'value', 'init')],
@@ -128,7 +131,7 @@ class create_node_tests(TestCase):
         msg = 'should pass parent to instance constructor'
         self.assertEqual(actual_node.instance.init_args, args, msg)
 
-    @patch('wxviews.rendering.get_inst_type')
+    @patch(rendering.__name__ + '.get_inst_type')
     @case(XmlAttr('key', '1'))
     @case(XmlAttr('key', '1', ''))
     @case(XmlAttr('key', '1', 'some_namespace'))

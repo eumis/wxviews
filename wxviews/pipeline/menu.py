@@ -3,11 +3,9 @@
 # pylint: disable=W0613
 
 from wx import Frame, MenuBar, Menu # pylint: disable=E0611
-from wx import ID_EXIT
-from pyviews import RenderingPipeline, InstanceNode, Property
-from pyviews.core.observable import InheritedDict
-from pyviews.rendering.pipeline import render_children
-from wxviews.pipeline.common import setup_instance_node_setter, apply_attributes
+from pyviews.core import InstanceNode, Property, InheritedDict
+from pyviews.rendering import RenderingPipeline, render_children
+from .common import setup_instance_node_setter, apply_attributes
 
 def get_menu_bar_pipeline():
     '''Return render pipeline for MenuBar'''

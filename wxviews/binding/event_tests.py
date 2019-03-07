@@ -1,15 +1,19 @@
-# pylint: disable=C0111,C0103
+#pylint: disable=missing-docstring, invalid-name
 
 from unittest import TestCase
 from unittest.mock import Mock, call
 from wx import TextCtrl, CheckBox # pylint: disable=E0611
 from wx import EVT_TEXT, EVT_CHECKBOX # pylint: disable=E0611
 from pyviews.testing import case
-from pyviews import InheritedDict, ObservableEntity
-from pyviews.core.xml import XmlAttr
-from pyviews.core.binding import BindingError, TwoWaysBinding
-from wxviews.core.node import WxNode
-from wxviews.core.binding import EventBinding, TextTwoWaysRule, CheckBoxTwoWaysRule
+from pyviews.core.ioc import register_func
+from pyviews.core import XmlAttr, BindingError
+from pyviews.core import InheritedDict, ObservableEntity
+from pyviews.binding import TwoWaysBinding
+from pyviews.compilation import CompiledExpression
+from wxviews.core import WxNode
+from .event import EventBinding, TextTwoWaysRule, CheckBoxTwoWaysRule
+
+register_func('expression', CompiledExpression)
 
 class EventHandlerStub:
     def __init__(self, event):

@@ -2,30 +2,32 @@
 
 from os.path import abspath
 from wx import Frame, App, MenuBar, Menu, MenuItem # pylint: disable=E0611
-from pyviews.core import ioc
-from pyviews.rendering.binding import Binder, add_default_rules
-from pyviews.rendering.views import render_view
-from pyviews.dependencies import register_defaults
-from wxviews.core.containers import Container, View, For, If
-from wxviews.core.sizers import SizerNode, GrowableCol, GrowableRow
-from wxviews.core.binding import TextTwoWaysRule, CheckBoxTwoWaysRule
-from wxviews.pipeline.wx import get_frame_pipeline, get_wx_pipeline, get_app_pipeline
-from wxviews.pipeline.containers import get_container_pipeline, get_view_pipeline
-from wxviews.pipeline.containers import get_for_pipeline, get_if_pipeline
-from wxviews.pipeline.sizers import get_sizer_pipeline
-from wxviews.pipeline.sizers import get_growable_row_pipeline, get_growable_col_pipeline
-from wxviews.pipeline.menu import get_menu_bar_pipeline, get_menu_pipeline, get_menu_item_pipeline
+from pyviews.core import ioc, Binder
+from pyviews.compilation import CompiledExpression
+from pyviews.binding import add_one_way_rules
+from pyviews.rendering import render_node, render_view
+from pyviews.code import Code, get_code_pipeline
+from wxviews.node import Container, View, For, If
+from wxviews.node import SizerNode, GrowableCol, GrowableRow
+from wxviews.binding import add_two_ways_rules
+from wxviews.pipeline import get_frame_pipeline, get_wx_pipeline, get_app_pipeline
+from wxviews.pipeline import get_container_pipeline, get_view_pipeline
+from wxviews.pipeline import get_for_pipeline, get_if_pipeline
+from wxviews.pipeline import get_sizer_pipeline
+from wxviews.pipeline import get_growable_row_pipeline, get_growable_col_pipeline
+from wxviews.pipeline import get_menu_bar_pipeline, get_menu_pipeline, get_menu_item_pipeline
 from wxviews.rendering import create_node
 
 def register_dependencies():
     '''Registers all dependencies needed for application'''
-    register_defaults()
-
     ioc.register_single('views_folder', abspath('views'))
     ioc.register_single('view_ext', 'xml')
     ioc.register_func('create_node', create_node)
-    _register_binder()
+    ioc.register_func('render', render_node)
+    ioc.register_func('expression', CompiledExpression)
+    ioc.register_single('binder', setup_binder())
 
+    ioc.register_single('pipeline', get_code_pipeline(), Code)
     ioc.register_single('pipeline', get_wx_pipeline())
     ioc.register_single('pipeline', get_app_pipeline(), App)
     ioc.register_single('pipeline', get_frame_pipeline(), Frame)
@@ -40,12 +42,12 @@ def register_dependencies():
     ioc.register_single('pipeline', get_menu_pipeline(), Menu)
     ioc.register_single('pipeline', get_menu_item_pipeline(), MenuItem)
 
-def _register_binder():
+def setup_binder() -> Binder:
+    '''Adds all needed rules to binder'''
     binder = Binder()
-    add_default_rules(binder)
-    binder.add_rule('twoways', TextTwoWaysRule())
-    binder.add_rule('twoways', CheckBoxTwoWaysRule())
-    ioc.register_single('binder', binder)
+    add_one_way_rules(binder)
+    add_two_ways_rules(binder)
+    return binder
 
 def launch(root_view=None, **render_args):
     '''Runs application. Widgets are created from passed xml_files'''

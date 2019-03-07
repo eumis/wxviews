@@ -1,4 +1,4 @@
-from pyviews import InheritedDict
+from pyviews.core import InheritedDict
 from wxviews.app import register_dependencies, launch
 from viewmodel import SandboxViews
 

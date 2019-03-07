@@ -1,10 +1,8 @@
-'''SizerNode tests'''
+#pylint: disable=missing-docstring, invalid-name
 
-# pylint: disable=C0111,C0103
-
-from unittest import TestCase, main
+from unittest import TestCase
 from unittest.mock import Mock, call
-from wxviews.core.sizers import SizerNode
+from .sizers import SizerNode
 
 class SizerNode_destroy_test(TestCase):
     def test_removes_sizer_from_parent(self):
@@ -24,6 +22,3 @@ class SizerNode_destroy_test(TestCase):
 
         msg = 'should do nothing if has parent sizer'
         self.assertFalse(parent.SetSizer.called, msg)
-
-if __name__ == '__main__':
-    main()

@@ -1,12 +1,12 @@
 # pylint: disable=C0103,C0111
 
 from typing import Any
-from unittest import TestCase, main
+from unittest import TestCase
 from unittest.mock import Mock, call
 from wx import Frame, MenuBar, Menu # pylint: disable=E0611
-from pyviews import InstanceNode, Property
+from pyviews.core import InstanceNode, Property
 from pyviews.testing import case
-from wxviews.pipeline.menu import set_to_frame, add_menu_properties, set_to_menu_bar, set_to_menu
+from .menu import set_to_frame, add_menu_properties, set_to_menu_bar, set_to_menu
 
 class EmptyClass:
     pass
@@ -93,6 +93,3 @@ class set_to_menu_tests(TestCase):
 
         msg = 'should call Appendon menu and pass item instance'
         self.assertEqual(menu.Append.call_args, call(node.instance), msg)
-
-if __name__ == '__main__':
-    main()

@@ -1,7 +1,7 @@
 '''Sandbox view models'''
 
 from typing import List
-from pyviews import ObservableEntity
+from pyviews.core import ObservableEntity
 
 class SandboxViews(ObservableEntity):
     def __init__(self, views: List[str]):

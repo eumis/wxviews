@@ -1,12 +1,10 @@
-'''Container nodes tests'''
+#pylint: disable=missing-docstring, invalid-name
 
-# pylint: disable=C0111,C0103
-
-from unittest import TestCase, main
+from unittest import TestCase
 from unittest.mock import Mock, call
 from pyviews.testing import case
-from pyviews.core.xml import XmlNode
-from wxviews.core.containers import View, For, If
+from pyviews.core import XmlNode
+from .containers import View, For, If
 
 class View_init_tests(TestCase):
     def test_name_is_none_by_default(self):
@@ -80,6 +78,3 @@ class If_condition_changed_tests(TestCase):
         self.assertEqual(node.condition_changed.call_args,
                          call(node, new_condition, old_condition),
                          msg)
-
-if __name__ == '__main__':
-    main()

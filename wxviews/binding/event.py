@@ -1,16 +1,14 @@
-'''Binding rules'''
+'''Binding based on events'''
 
 from typing import Callable, Any
 from wx import EvtHandler, TextEntry, CheckBox # pylint: disable=E0611
 from wx import Event, CommandEvent, EVT_TEXT, EVT_CHECKBOX # pylint: disable=E0611
-from pyviews import Modifier
-from pyviews.core.xml import XmlAttr
-from pyviews.core.compilation import Expression
-from pyviews.core.binding import Binding, ExpressionBinding, TwoWaysBinding
-from pyviews.core.binding import BindingTarget, PropertyTarget, FunctionTarget
-from pyviews.core.binding import get_expression_target
-from pyviews.rendering.expression import parse_expression, is_code_expression
-from pyviews.rendering.binding import BindingRule
+from pyviews.core import Modifier, XmlAttr
+from pyviews.core import Binding, BindingTarget, BindingRule, Binder
+from pyviews.binding import ExpressionBinding, TwoWaysBinding
+from pyviews.binding import get_expression_target, PropertyTarget
+from pyviews.compilation import parse_expression, is_expression
+from pyviews.container import expression
 from wxviews.core.node import WxNode
 
 # pylint: disable=W0221
@@ -58,20 +56,17 @@ class TextTwoWaysRule(BindingRule):
               modifier: Modifier = None,
               attr: XmlAttr = None,
               **args):
-        expr_body = parse_expression(expr_body)[1] if is_code_expression(expr_body) else expr_body
-        expression = Expression(expr_body)
+        expr_body = parse_expression(expr_body)[1] if is_expression(expr_body) else expr_body
+        expression_ = expression(expr_body)
         value_target = PropertyTarget(node, attr.name, modifier)
-        expression_binding = ExpressionBinding(value_target, expression, node.node_globals)
+        expression_binding = ExpressionBinding(value_target, expression_, node.node_globals)
 
-        expression_target = get_expression_target(expression, node.node_globals)
+        expression_target = get_expression_target(expression_, node.node_globals)
         value_binding = EventBinding(expression_target, node.instance, EVT_TEXT)
 
         two_ways_binding = TwoWaysBinding(expression_binding, value_binding)
         two_ways_binding.bind()
         node.add_binding(two_ways_binding)
-
-    def _set_control_value(self, node: WxNode, value: str):
-        node.instance.ChangeValue(value)
 
 class CheckBoxTwoWaysRule(BindingRule):
     '''wx.CheckBox.Value two ways binding'''
@@ -88,15 +83,20 @@ class CheckBoxTwoWaysRule(BindingRule):
               modifier: Modifier = None,
               attr: XmlAttr = None,
               **args):
-        expr_body = parse_expression(expr_body)[1] if is_code_expression(expr_body) else expr_body
-        expression = Expression(expr_body)
+        expr_body = parse_expression(expr_body)[1] if is_expression(expr_body) else expr_body
+        expression_ = expression(expr_body)
         value_target = PropertyTarget(node, attr.name, modifier)
-        expression_binding = ExpressionBinding(value_target, expression, node.node_globals)
+        expression_binding = ExpressionBinding(value_target, expression_, node.node_globals)
 
-        expression_target = get_expression_target(expression, node.node_globals)
+        expression_target = get_expression_target(expression_, node.node_globals)
         value_binding = EventBinding(expression_target, node.instance,
                                      EVT_CHECKBOX, lambda evt: evt.IsChecked())
 
         two_ways_binding = TwoWaysBinding(expression_binding, value_binding)
         two_ways_binding.bind()
         node.add_binding(two_ways_binding)
+
+def add_two_ways_rules(binder: Binder):
+    '''Adds tkviews binding rules to passed factory'''
+    binder.add_rule('twoways', TextTwoWaysRule())
+    binder.add_rule('twoways', CheckBoxTwoWaysRule())

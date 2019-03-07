@@ -1,15 +1,14 @@
-'''WxNode rendering pipeline tests'''
-
 # pylint: disable=C0111,C0103
 
-from unittest import TestCase, main
+from unittest import TestCase
 from unittest.mock import Mock, call, patch
 from wx import Sizer # pylint: disable=E0611
 from pyviews.testing import case
-from wxviews.core.sizers import GrowableCol, GrowableRow
-from wxviews.pipeline.common import instance_node_setter
-from wxviews.pipeline.sizers import setup_setter, render_sizer_children, set_sizer_to_parent
-from wxviews.pipeline.sizers import add_growable_row_to_sizer, add_growable_col_to_sizer
+from wxviews.node import GrowableCol, GrowableRow
+from .common import instance_node_setter
+from . import sizers
+from .sizers import setup_setter, render_sizer_children, set_sizer_to_parent
+from .sizers import add_growable_row_to_sizer, add_growable_col_to_sizer
 
 class setup_setter_tests(TestCase):
     def test_sets_instance_property(self):
@@ -20,8 +19,8 @@ class setup_setter_tests(TestCase):
         self.assertEqual(node.attr_setter, instance_node_setter, msg)
 
 class render_sizer_children_tests(TestCase):
-    @patch('wxviews.pipeline.sizers.render_children')
-    @patch('wxviews.pipeline.sizers.InheritedDict')
+    @patch(sizers.__name__ + '.render_children')
+    @patch(sizers.__name__ + '.InheritedDict')
     def test_passes_child_args(self, inherited_dict: Mock, render_children: Mock):
         node = Mock(instance=Mock(), node_globals=Mock())
         parent = Mock()
@@ -99,6 +98,3 @@ class add_growable_col_to_sizer_tests(TestCase):
 
         msg = 'should call AddGrowableCol with parameters'
         self.assertEqual(sizer.AddGrowableCol.call_args, expected_call, msg)
-
-if __name__ == '__main__':
-    main()

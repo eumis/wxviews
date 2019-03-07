@@ -1,12 +1,10 @@
-'''WxNode tests'''
+#pylint: disable=missing-docstring, invalid-name
 
-# pylint: disable=C0111,C0103
-
-from unittest import TestCase, main
+from unittest import TestCase
 from unittest.mock import Mock, call
 from wx import EVT_MENU, EVT_BUTTON
 from pyviews.testing import case
-from wxviews.core.node import WxNode
+from .node import WxNode
 
 class WxNode_destroy_tests(TestCase):
     def test_destroys_instance(self):
@@ -31,6 +29,3 @@ class WxNode_bind_tests(TestCase):
 
         msg = 'should call bind for instance'
         self.assertEqual(node.instance.Bind.call_args, call(event, callback, **args), msg)
-
-if __name__ == '__main__':
-    main()

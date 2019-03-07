@@ -2,8 +2,7 @@
 
 from typing import Callable
 from wx import PyEventBinder, Event # pylint: disable=E0611
-from pyviews import InstanceNode, InheritedDict
-from pyviews.core.xml import XmlNode
+from pyviews.core import XmlNode, InstanceNode, InheritedDict
 
 class WxNode(InstanceNode):
     '''Wrapper under wx widget'''

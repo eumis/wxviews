@@ -1,24 +1,23 @@
-'''Containers rendering pipeline tests'''
-
 # pylint: disable=C0111,C0103,C0301,W0613
 
 from math import floor
-from unittest import TestCase, main
+from unittest import TestCase
 from unittest.mock import Mock, call, patch
 from pyviews.testing import case
-from wxviews.core.containers import Container, View, For, If
-from wxviews.pipeline.containers import render_container_children
-from wxviews.pipeline.containers import render_view_children, rerender_on_view_change
-from wxviews.pipeline.containers import render_for_items, rerender_on_items_change
-from wxviews.pipeline.containers import get_if_pipeline, render_if, rerender_on_condition_change
+from wxviews.node import Container, View, For, If
+from . import containers
+from .containers import render_container_children
+from .containers import render_view_children, rerender_on_view_change
+from .containers import render_for_items, rerender_on_items_change
+from .containers import render_if, rerender_on_condition_change
 
 class render_container_children_tests(TestCase):
-    @patch('wxviews.pipeline.containers.render_children')
-    @patch('wxviews.pipeline.containers.InheritedDict')
+    @patch(containers.__name__ + '.render_children')
+    @patch(containers.__name__ + '.InheritedDict')
     @case([])
     @case(['item1'])
     @case(['item1', 'item2'])
-    def test_renders_child(self, inherited_dict:Mock, render_children: Mock, nodes):
+    def test_renders_child(self, inherited_dict: Mock, render_children: Mock, nodes):
         xml_node = Mock(children=nodes)
         node = Container(xml_node)
         parent = Mock()
@@ -38,7 +37,7 @@ class render_container_children_tests(TestCase):
         self.assertEqual(render_children.call_args, call(node, **child_args), msg)
 
 class render_view_children_tests(TestCase):
-    @patch('wxviews.pipeline.containers.render_view')
+    @patch(containers.__name__ + '.render_view')
     def test_renders_view(self, render_view: Mock):
         view_name = 'name'
         child = Mock()
@@ -53,8 +52,8 @@ class render_view_children_tests(TestCase):
         msg = 'should render view by node name and set result as view child'
         self.assertEqual(node.set_content.call_args, call(child), msg)
 
-    @patch('wxviews.pipeline.containers.render_view')
-    @patch('wxviews.pipeline.containers.InheritedDict')
+    @patch(containers.__name__ + '.render_view')
+    @patch(containers.__name__ + '.InheritedDict')
     def test_renders_view_with_args(self, inherit_dict:Mock, render_view: Mock):
         view_name = 'name'
         inherit_dict.side_effect = lambda source: source
@@ -78,7 +77,7 @@ class render_view_children_tests(TestCase):
         msg = 'should render view by node name and set result as view child'
         self.assertEqual(node.set_content.call_args, call(args), msg)
 
-    @patch('wxviews.pipeline.containers.render_view')
+    @patch(containers.__name__ + '.render_view')
     @case('')
     @case(None)
     def test_not_render_empty_view_name(self, render_view: Mock, view_name):
@@ -92,7 +91,7 @@ class render_view_children_tests(TestCase):
         self.assertFalse(node.set_content.called or render_view.called, msg)
 
 class rerender_on_view_change_tests(TestCase):
-    @patch('wxviews.pipeline.containers.render_view_children')
+    @patch(containers.__name__ + '.render_view_children')
     @case('', 'view', {})
     @case('', 'view', {'parent': Mock()})
     @case(None, 'view', {'parent': Mock(), 'sizer': Mock()})
@@ -108,7 +107,7 @@ class rerender_on_view_change_tests(TestCase):
         msg = 'render_view_children should be called on view change'
         self.assertEqual(render_view_children.call_args, call(node, **args), msg)
 
-    @patch('wxviews.pipeline.containers.render_view_children')
+    @patch(containers.__name__ + '.render_view_children')
     @case('view', None)
     @case('view', '')
     @case('', 'view')
@@ -125,7 +124,7 @@ class rerender_on_view_change_tests(TestCase):
         msg = 'destroy_children should be called on view change'
         self.assertTrue(node.destroy_children.called, msg)
 
-    @patch('wxviews.pipeline.containers.render_view')
+    @patch(containers.__name__ + '.render_view')
     @case('')
     @case(None)
     def test_not_render_empty_name(self, render_view: Mock, empty_view_name):
@@ -140,7 +139,7 @@ class rerender_on_view_change_tests(TestCase):
         msg = 'should not render in case name is not set or empty'
         self.assertFalse(render_view.called or node.set_content.called, msg)
 
-    @patch('wxviews.pipeline.containers.render_view_children')
+    @patch(containers.__name__ + '.render_view_children')
     @case(None, '')
     @case('', None)
     @case('', '')
@@ -164,7 +163,7 @@ class rerender_on_view_change_tests(TestCase):
         msg = 'should not call parent Layout'
         self.assertFalse(parent.Layout.called, msg)
 
-    @patch('wxviews.pipeline.containers.render_view_children')
+    @patch(containers.__name__ + '.render_view_children')
     @case('view', 'new view')
     @case('', 'view')
     @case(None, 'view')
@@ -180,7 +179,7 @@ class rerender_on_view_change_tests(TestCase):
         self.assertTrue(parent.Layout.called, msg)
 
 class render_for_items_tests(TestCase):
-    @patch('wxviews.pipeline.containers.render')
+    @patch(containers.__name__ + '.render')
     @case([], [], [])
     @case(['item1'], ['node1'], ['node1'])
     @case(['item1'], ['node1', 'node2'], ['node1', 'node2'])
@@ -197,7 +196,7 @@ class render_for_items_tests(TestCase):
         msg = 'should render all xml children for every item'
         self.assertEqual(node.children, expected_children, msg)
 
-    @patch('wxviews.pipeline.containers.render')
+    @patch(containers.__name__ + '.render')
     @case([], [], [])
     @case(['item1'], ['node1'], [(0, 'item1')])
     @case(['item1'], ['node1', 'node2'], [(0, 'item1'), (0, 'item1')])
@@ -229,7 +228,7 @@ class rerender_on_items_change_tests(TestCase):
     def _get_mock_items(self, items_count):
         return [Mock() for i in range(items_count)]
 
-    @patch('wxviews.pipeline.containers.render')
+    @patch(containers.__name__ + '.render')
     @case(2, 4, 4)
     @case(2, 4, 2)
     @case(1, 4, 2)
@@ -252,7 +251,7 @@ class rerender_on_items_change_tests(TestCase):
         msg = 'should remove destroyed from children'
         self.assertEqual(node.children, to_left, msg)
 
-    @patch('wxviews.pipeline.containers.render')
+    @patch(containers.__name__ + '.render')
     @case(2, 4, 4)
     @case(2, 0, 4)
     @case(2, 4, 2)
@@ -273,7 +272,7 @@ class rerender_on_items_change_tests(TestCase):
             item = node.items[floor(i / xml_child_count)]
             self.assertEqual(child.node_globals['item'], item, msg)
 
-    @patch('wxviews.pipeline.containers.render')
+    @patch(containers.__name__ + '.render')
     @case(2, 4, 6)
     @case(2, 4, 10)
     @case(1, 4, 4)
@@ -286,7 +285,7 @@ class rerender_on_items_change_tests(TestCase):
         msg = 'should create new children'
         self.assertEqual(len(node.children), xml_child_count * new_items_count, msg)
 
-    @patch('wxviews.pipeline.containers.render')
+    @patch(containers.__name__ + '.render')
     @case(2, 4, 6)
     @case(2, 4, 10)
     @case(1, 4, 4)
@@ -306,7 +305,7 @@ class rerender_on_items_change_tests(TestCase):
         self.assertTrue(parent.Layout.called, msg)
 
 class render_if_tests(TestCase):
-    @patch('wxviews.pipeline.containers.render_children')
+    @patch(containers.__name__ + '.render_children')
     @case(True)
     @case(False)
     def test_renders_children(self, render_children, condition):
@@ -320,7 +319,7 @@ class render_if_tests(TestCase):
         self.assertEqual(render_children.called, condition, msg)
 
 class rerender_on_condition_change_tests(TestCase):
-    @patch('wxviews.pipeline.containers.render_children')
+    @patch(containers.__name__ + '.render_children')
     def test_renders_children(self, render_children: Mock):
         node = If(Mock())
         node.condition = False
@@ -331,7 +330,7 @@ class rerender_on_condition_change_tests(TestCase):
         msg = 'should render children if condition is changed to True'
         self.assertTrue(render_children.called, msg)
 
-    @patch('wxviews.pipeline.containers.render_children')
+    @patch(containers.__name__ + '.render_children')
     def test_destroy_children(self, render_children: Mock):
         node = If(Mock())
         node.condition = True
@@ -343,7 +342,7 @@ class rerender_on_condition_change_tests(TestCase):
         msg = 'should destroy children if condition is changed to False'
         self.assertTrue(node.destroy_children, msg)
 
-    @patch('wxviews.pipeline.containers.render_children')
+    @patch(containers.__name__ + '.render_children')
     @case(True)
     @case(False)
     def test_calls_parent_layout(self, render_children: Mock, new_condition):
@@ -356,6 +355,3 @@ class rerender_on_condition_change_tests(TestCase):
 
         msg = 'should call parent Layout method'
         self.assertTrue(parent.Layout.called, msg)
-
-if __name__ == '__main__':
-    main()

@@ -1,12 +1,12 @@
 '''Contains core nodes for wxviews'''
 
 from wx import Sizer # pylint: disable=E0611
-from pyviews import Node, InstanceNode, InheritedDict
-from pyviews.core.xml import XmlNode
+from pyviews.core import XmlNode, Node, InstanceNode, InheritedDict
 
 class SizerNode(InstanceNode):
     '''Wrapper under sizer'''
-    def __init__(self, instance: Sizer, xml_node: XmlNode, node_globals: InheritedDict = None, parent=None, sizer=None):
+    def __init__(self, instance: Sizer, xml_node: XmlNode,
+                 node_globals: InheritedDict = None, parent=None, sizer=None):
         super().__init__(instance, xml_node, node_globals=node_globals)
         self._parent = parent
         self._parent_sizer = sizer

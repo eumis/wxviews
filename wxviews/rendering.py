@@ -3,12 +3,12 @@
 from wx import Sizer, GridSizer, MenuBar, Menu, StaticBoxSizer # pylint: disable=E0611
 from pyviews.core.xml import XmlNode, XmlAttr
 from pyviews.core.observable import InheritedDict
-from pyviews.core.compilation import Expression
 from pyviews.core.node import Node
-from pyviews.rendering.expression import is_code_expression, parse_expression
-from pyviews.rendering.node import get_inst_type, get_init_args
-from wxviews.core.node import WxNode
-from wxviews.core.sizers import SizerNode
+from pyviews.compilation import is_expression, parse_expression
+from pyviews.rendering import get_inst_type, get_init_args
+from pyviews.container import expression
+from wxviews.core import WxNode
+from wxviews.node import SizerNode
 
 def create_node(xml_node: XmlNode,
                 parent=None,
@@ -66,8 +66,8 @@ def get_attr_args(xml_node, namespace: str, node_globals: InheritedDict = None) 
 
 def _get_init_value(attr: XmlAttr, node_globals: InheritedDict):
     stripped_value = attr.value.strip() if attr.value else ''
-    if is_code_expression(stripped_value):
+    if is_expression(stripped_value):
         body = parse_expression(stripped_value)[1]
         parameters = node_globals.to_dictionary() if node_globals else {}
-        return Expression(body).execute(parameters)
+        return expression(body).execute(parameters)
     return attr.value

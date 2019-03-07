@@ -3,13 +3,10 @@ Nodes used as abstract containers, that used to incapsulate some logic.
 Containers don't represent any widget.
 '''
 
-from pyviews.core.xml import XmlNode
-from pyviews.core.observable import InheritedDict
-from pyviews.core.node import Node
+from pyviews.core import XmlNode, InheritedDict, Node
 
 class Container(Node):
     '''Used to combine some xml elements'''
-    pass
 
 class View(Container):
     '''Loads xml from anothre file'''

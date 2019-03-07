@@ -3,11 +3,10 @@
 # pylint: disable=W0613
 
 from wx import FlexGridSizer # pylint: disable=E0611
-from pyviews import RenderingPipeline
-from pyviews.core.observable import InheritedDict
-from pyviews.rendering.pipeline import render_children
-from wxviews.core.sizers import SizerNode, GrowableRow, GrowableCol
-from wxviews.pipeline.common import instance_node_setter, apply_attributes, add_to_sizer
+from pyviews.core import InheritedDict
+from pyviews.rendering import RenderingPipeline, render_children
+from wxviews.node import SizerNode, GrowableRow, GrowableCol
+from .common import instance_node_setter, apply_attributes, add_to_sizer
 
 def get_sizer_pipeline() -> RenderingPipeline:
     '''Returns rendering pipeline for SizerNode'''

@@ -1,13 +1,15 @@
-'''WxNode rendering pipeline tests'''
-
 # pylint: disable=C0111,C0103
 
-from unittest import TestCase, main
+from unittest import TestCase
 from unittest.mock import Mock, call, patch
 from pyviews.testing import case
-from pyviews.core.node import InstanceNode
-from pyviews.core.xml import XmlAttr
-from wxviews.pipeline.common import setup_instance_node_setter, instance_node_setter, apply_attributes, add_to_sizer
+from pyviews.core.ioc import register_func
+from pyviews.core import InstanceNode, XmlAttr
+from pyviews.compilation import CompiledExpression
+from . import common
+from .common import setup_instance_node_setter, instance_node_setter, apply_attributes, add_to_sizer
+
+register_func('expression', CompiledExpression)
 
 class setup_instance_node_setter_tests(TestCase):
     def test_sets_attr_setter(self):
@@ -54,7 +56,7 @@ class instance_node_setter_tests(TestCase):
         self.assertEqual(getattr(inst, key), value, msg)
 
 class apply_attributes_tests(TestCase):
-    @patch('wxviews.pipeline.common.apply_attribute')
+    @patch(common.__name__ + '.apply_attribute')
     @case(XmlAttr('key', 'value', 'init'))
     @case(XmlAttr('key', 'value', 'sizer'))
     def test_skip_special_attributes(self, apply_attribute: Mock, attr):
@@ -65,7 +67,7 @@ class apply_attributes_tests(TestCase):
         msg = 'should skip attributes with "init" and "sizer" namespaces'
         self.assertFalse(apply_attribute.called, msg)
 
-    @patch('wxviews.pipeline.common.apply_attribute')
+    @patch(common.__name__ + '.apply_attribute')
     @case([XmlAttr('key', 'value')])
     @case([XmlAttr('key', 'value', ''), XmlAttr('other_key', 1, 'some namespace')])
     def test_apply_attributes(self, apply_attribute: Mock, attrs):
@@ -116,6 +118,3 @@ class add_to_sizer_tests(TestCase):
             add_to_sizer(node)
         except:
             self.fail('add_to_sizer skip if sizer is missed')
-
-if __name__ == '__main__':
-    main()
