@@ -5,8 +5,8 @@ from wx import Frame, App, MenuBar, Menu, MenuItem # pylint: disable=E0611
 from pyviews.core import ioc, Binder
 from pyviews.compilation import CompiledExpression
 from pyviews.binding import add_one_way_rules
-from pyviews.rendering import render_node, render_view
-from pyviews.code import Code, get_code_pipeline
+from pyviews.rendering import render_node, render_view, RenderingPipeline
+from pyviews.code import Code, run_code
 from wxviews.node import Container, View, For, If
 from wxviews.node import SizerNode, GrowableCol, GrowableRow
 from wxviews.binding import add_two_ways_rules
@@ -27,7 +27,7 @@ def register_dependencies():
     ioc.register_func('expression', CompiledExpression)
     ioc.register_single('binder', setup_binder())
 
-    ioc.register_single('pipeline', get_code_pipeline(), Code)
+    ioc.register_single('pipeline', RenderingPipeline(steps=[run_code]), Code)
     ioc.register_single('pipeline', get_wx_pipeline())
     ioc.register_single('pipeline', get_app_pipeline(), App)
     ioc.register_single('pipeline', get_frame_pipeline(), Frame)
