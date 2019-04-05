@@ -62,7 +62,14 @@ def _get_attr_args_values(xml_node, namespace: str, node_globals: InheritedDict 
 def get_attr_args(xml_node, namespace: str, node_globals: InheritedDict = None) -> dict:
     '''Returs args from attributes with provided namespace'''
     init_attrs = [attr for attr in xml_node.attrs if attr.namespace == namespace]
-    return {attr.name: _get_init_value(attr, node_globals) for attr in init_attrs}
+    args = {}
+    for attr in init_attrs:
+        value = _get_init_value(attr, node_globals)
+        if attr.name == '':
+            args = {**args, **value}
+        else:
+            args[attr.name] = value
+    return args
 
 def _get_init_value(attr: XmlAttr, node_globals: InheritedDict):
     stripped_value = attr.value.strip() if attr.value else ''

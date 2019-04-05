@@ -157,6 +157,10 @@ class get_attr_args_tests(TestCase):
           [XmlAttr('key', 'value', 'sizer'), XmlAttr('another key', '{1}', 'init')],
           {'key': 'value'})
     @case('sizer', [XmlAttr('key', 'value', 'init')], {})
+    @case('init', [XmlAttr('', '{{"key":"value"}}', 'init')], {'key': 'value'})
+    @case('init', [XmlAttr('', '{{"one":"1", "two": 2}}', 'init')], {'one': '1', 'two': 2})
+    @case('init', [XmlAttr('', '{{"key":1}}', 'init'), XmlAttr('key', '{2}', 'init')], {'key': 2})
+    @case('init', [XmlAttr('key', '{2}', 'init'), XmlAttr('', '{{"key":1}}', 'init')], {'key': 1})
     def test_returns_attr_with_values_with_passed_namespace(self, namespace, attrs, args):
         xml_node = Mock(attrs=attrs)
 

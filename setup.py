@@ -22,7 +22,7 @@ def setup_package():
         ],
         python_requires='>=3.6',
         keywords='binding wxpython pyviews python mvvm',
-        packages=find_packages(exclude=['sandbox', 'tests', 'tests.*']))
+        packages=find_packages(exclude=['sandbox']))
 
 if __name__ == '__main__':
     setup_package()
