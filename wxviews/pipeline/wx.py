@@ -1,14 +1,14 @@
-'''Rendering pipeline for WxNode'''
+'''Rendering pipeline for WidgetNode'''
 
 # pylint: disable=W0613
 
 from pyviews.core import InheritedDict
 from pyviews.rendering import RenderingPipeline, render_children
-from wxviews.core import WxNode
+from wxviews.node import WidgetNode
 from .common import setup_instance_node_setter, apply_attributes, add_to_sizer
 
 def get_wx_pipeline() -> RenderingPipeline:
-    '''Returns rendering pipeline for WxNode'''
+    '''Returns rendering pipeline for WidgetNode'''
     return RenderingPipeline(steps=[
         setup_instance_node_setter,
         apply_attributes,
@@ -16,8 +16,8 @@ def get_wx_pipeline() -> RenderingPipeline:
         render_wx_children
     ])
 
-def render_wx_children(node: WxNode, **args):
-    '''Renders WxNode children'''
+def render_wx_children(node: WidgetNode, **args):
+    '''Renders WidgetNode children'''
     render_children(node,
                     parent=node.instance,
                     parent_node=node,
@@ -40,7 +40,7 @@ def get_app_pipeline():
         render_app_children,
     ])
 
-def render_app_children(node: WxNode, **args):
+def render_app_children(node: WidgetNode, **args):
     '''Renders App children'''
     render_children(node,
                     parent_node=node,

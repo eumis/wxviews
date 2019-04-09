@@ -7,8 +7,7 @@ from pyviews.core import XmlAttr, Node, InheritedDict
 from pyviews.core.ioc import register_func
 from pyviews.compilation import CompiledExpression
 from pyviews.testing import case
-from wxviews.core import WxNode
-from wxviews.node import SizerNode
+from wxviews.node import SizerNode, WidgetNode
 from wxviews import rendering
 from wxviews.rendering import create_node, get_attr_args
 
@@ -19,7 +18,7 @@ class SomeNode(Node):
         self._xml_node = xml_node
         self.init_args = init_args
 
-class OtherNode(WxNode):
+class OtherNode(WidgetNode):
     def __init__(self, xml_node, **init_args):
         self._xml_node = xml_node
         self.init_args = init_args
@@ -78,8 +77,8 @@ class create_node_tests(TestCase):
         self.assertEqual(actual_node.init_args, init_args, msg)
 
     @patch(rendering.__name__ + '.get_inst_type')
-    @case(WxInstance, WxNode)
-    @case(OtherWxInstance, WxNode)
+    @case(WxInstance, WidgetNode)
+    @case(OtherWxInstance, WidgetNode)
     @case(AnySizer, SizerNode)
     @case(AnyGridSizer, SizerNode)
     def test_creates_instance(self, get_inst_type: Mock, inst_type, node_type):

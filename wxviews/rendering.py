@@ -7,8 +7,7 @@ from pyviews.core.node import Node
 from pyviews.compilation import is_expression, parse_expression
 from pyviews.rendering import get_inst_type, get_init_args
 from pyviews.container import expression
-from wxviews.core import WxNode
-from wxviews.node import SizerNode
+from wxviews.node import WidgetNode, SizerNode
 
 def create_node(xml_node: XmlNode,
                 parent=None,
@@ -44,11 +43,11 @@ def create_node(xml_node: XmlNode,
         inst = inst_type(**args)
         return SizerNode(inst, xml_node, node_globals=node_globals, parent=parent, sizer=sizer)
     elif issubclass(inst_type, MenuBar) or issubclass(inst_type, Menu):
-        return WxNode(inst_type(), xml_node, node_globals=node_globals)
+        return WidgetNode(inst_type(), xml_node, node_globals=node_globals)
     else:
         args = get_attr_args(xml_node, 'init', node_globals)
         inst = inst_type(parent, **args)
-        return WxNode(inst, xml_node, node_globals=node_globals)
+        return WidgetNode(inst, xml_node, node_globals=node_globals)
 
 def _create_inst(inst_type, **init_args):
     '''Creates class instance with args'''

@@ -19,7 +19,7 @@ def get_sizer_pipeline() -> RenderingPipeline:
     ])
 
 def setup_setter(node: SizerNode, **args):
-    '''Sets attr_setter for WxNode'''
+    '''Sets attr_setter for SizerNode'''
     node.attr_setter = instance_node_setter
 
 def render_sizer_children(node: SizerNode, parent=None, **args):

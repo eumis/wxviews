@@ -1,4 +1,4 @@
-'''Rendering pipeline for WxNode'''
+'''Rendering pipeline for menus'''
 
 # pylint: disable=W0613
 

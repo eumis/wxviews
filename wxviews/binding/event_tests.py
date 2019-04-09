@@ -10,7 +10,7 @@ from pyviews.core import XmlAttr, BindingError
 from pyviews.core import InheritedDict, ObservableEntity
 from pyviews.binding import TwoWaysBinding
 from pyviews.compilation import CompiledExpression
-from wxviews.core import WxNode
+from wxviews.node import WidgetNode
 from .event import EventBinding, TextTwoWaysRule, CheckBoxTwoWaysRule
 
 register_func('expression', CompiledExpression)
@@ -111,10 +111,10 @@ class EventBinding_destroy_tests(TestCase):
 class TextTwoWaysRule_suitable_tests(TestCase):
     @case({}, False)
     @case({'attr': XmlAttr('Value')}, False)
-    @case({'node': WxNode(TextEntryStub(), Mock())}, False)
-    @case({'node': WxNode(TextEntryStub(), Mock()), 'attr': XmlAttr('Hint')}, False)
-    @case({'node': WxNode(Mock(), Mock()), 'attr': XmlAttr('Value')}, False)
-    @case({'node': WxNode(TextEntryStub(), Mock()), 'attr': XmlAttr('Value')}, True)
+    @case({'node': WidgetNode(TextEntryStub(), Mock())}, False)
+    @case({'node': WidgetNode(TextEntryStub(), Mock()), 'attr': XmlAttr('Hint')}, False)
+    @case({'node': WidgetNode(Mock(), Mock()), 'attr': XmlAttr('Value')}, False)
+    @case({'node': WidgetNode(TextEntryStub(), Mock()), 'attr': XmlAttr('Value')}, True)
     def test_checks_instance_type_and_attribute(self, args: dict, expected: bool):
         rule = TextTwoWaysRule()
 
@@ -198,10 +198,10 @@ class TextTwoWaysRule_apply_tests(TestCase):
 class CheckBoxTwoWaysRule_suitable_tests(TestCase):
     @case({}, False)
     @case({'attr': XmlAttr('Value')}, False)
-    @case({'node': WxNode(CheckBoxStub(), Mock())}, False)
-    @case({'node': WxNode(CheckBoxStub(), Mock()), 'attr': XmlAttr('Hint')}, False)
-    @case({'node': WxNode(Mock(), Mock()), 'attr': XmlAttr('Value')}, False)
-    @case({'node': WxNode(CheckBoxStub(), Mock()), 'attr': XmlAttr('Value')}, True)
+    @case({'node': WidgetNode(CheckBoxStub(), Mock())}, False)
+    @case({'node': WidgetNode(CheckBoxStub(), Mock()), 'attr': XmlAttr('Hint')}, False)
+    @case({'node': WidgetNode(Mock(), Mock()), 'attr': XmlAttr('Value')}, False)
+    @case({'node': WidgetNode(CheckBoxStub(), Mock()), 'attr': XmlAttr('Value')}, True)
     def test_checks_instance_type_and_attribute(self, args: dict, expected: bool):
         rule = CheckBoxTwoWaysRule()
 

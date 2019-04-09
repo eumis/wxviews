@@ -9,7 +9,7 @@ from pyviews.binding import ExpressionBinding, TwoWaysBinding
 from pyviews.binding import get_expression_target, PropertyTarget
 from pyviews.compilation import parse_expression, is_expression
 from pyviews.container import expression
-from wxviews.core.node import WxNode
+from wxviews.node import WidgetNode
 
 # pylint: disable=W0221
 
@@ -44,14 +44,14 @@ class EventBinding(Binding):
 class TextTwoWaysRule(BindingRule):
     '''wx.TextEntry.Value two ways binding'''
     def suitable(self,
-                 node: WxNode = None,
+                 node: WidgetNode = None,
                  attr: XmlAttr = None,
                  **args) -> bool:
         return node is not None and isinstance(node.instance, TextEntry)\
                and attr is not None and attr.name == 'Value'
 
     def apply(self,
-              node: WxNode = None,
+              node: WidgetNode = None,
               expr_body: str = None,
               modifier: Modifier = None,
               attr: XmlAttr = None,
@@ -71,14 +71,14 @@ class TextTwoWaysRule(BindingRule):
 class CheckBoxTwoWaysRule(BindingRule):
     '''wx.CheckBox.Value two ways binding'''
     def suitable(self,
-                 node: WxNode = None,
+                 node: WidgetNode = None,
                  attr: XmlAttr = None,
                  **args) -> bool:
         return node is not None and isinstance(node.instance, CheckBox)\
                and attr is not None and attr.name == 'Value'
 
     def apply(self,
-              node: WxNode = None,
+              node: WidgetNode = None,
               expr_body: str = None,
               modifier: Modifier = None,
               attr: XmlAttr = None,
