@@ -1,7 +1,7 @@
-'''wxviews applictaion entry point'''
+"""wxviews application entry point"""
 
 from os.path import abspath
-from wx import Frame, App, MenuBar, Menu, MenuItem # pylint: disable=E0611
+from wx import Frame, App, MenuBar, Menu, MenuItem
 from pyviews.core import ioc, Binder
 from pyviews.compilation import CompiledExpression
 from pyviews.binding import add_one_way_rules
@@ -18,15 +18,16 @@ from wxviews.pipeline import get_growable_row_pipeline, get_growable_col_pipelin
 from wxviews.pipeline import get_menu_bar_pipeline, get_menu_pipeline, get_menu_item_pipeline
 from wxviews.rendering import create_node
 
+
 def register_dependencies():
-    '''Registers all dependencies needed for application'''
+    """Registers all dependencies needed for application"""
     ioc.register_single('views_folder', abspath('views'))
     ioc.register_single('view_ext', 'xml')
     ioc.register_func('create_node', create_node)
     ioc.register_func('render', render_node)
     ioc.register_func('expression', CompiledExpression)
     ioc.register_single('binder', setup_binder())
-    ioc.register_single('namespaces', {'': 'wx'})
+    ioc.register_single('namespaces', {'': 'wx', 'init': 'init'})
 
     ioc.register_single('pipeline', RenderingPipeline(steps=[run_code]), Code)
     ioc.register_single('pipeline', get_wx_pipeline())
@@ -43,15 +44,17 @@ def register_dependencies():
     ioc.register_single('pipeline', get_menu_pipeline(), Menu)
     ioc.register_single('pipeline', get_menu_item_pipeline(), MenuItem)
 
+
 def setup_binder() -> Binder:
-    '''Adds all needed rules to binder'''
+    """Adds all needed rules to binder"""
     binder = Binder()
     add_one_way_rules(binder)
     add_two_ways_rules(binder)
     return binder
 
+
 def launch(root_view=None, **render_args):
-    '''Runs application. Widgets are created from passed xml_files'''
+    """Runs application. Widgets are created from passed xml_files"""
     root_view = 'root' if root_view is None else root_view
     root = render_view(root_view, **render_args)
     root.instance.MainLoop()

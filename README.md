@@ -2,6 +2,12 @@
 
 [pyviews](https://github.com/eumis/pyviews) adapter for wxpython. It allows to create ui widgets using xml with binding.
 
+[![Build Status](https://travis-ci.com/eumis/wxviews.svg?branch=dev)](https://travis-ci.com/eumis/wxviews)
+[![Codacy Badge](https://api.codacy.com/project/badge/Grade/0298085f56ac4dee99817a67f793d6f6)](https://www.codacy.com/app/eumis/wxviews?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=eumis/wxviews&amp;utm_campaign=Badge_Grade)
+[![image](https://img.shields.io/pypi/v/wxviews.svg)](https://python.org/pypi/wxviews)
+[![image](https://img.shields.io/pypi/pyversions/wxviews.svg)](https://python.org/pypi/wxviews)
+[![image](https://img.shields.io/pypi/l/wxviews.svg)](https://python.org/pypi/wxviews)
+
 ## Installation
 
 To install dev version:

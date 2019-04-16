@@ -18,13 +18,14 @@ def setup_package():
             #   3 - Alpha
             #   4 - Beta
             #   5 - Production/Stable
-            'Development Status :: 4 - Beta',
+            'Development Status :: 3 - Alpha',
             'Intended Audience :: Developers',
             'Topic :: Software Development :: Libraries',
             'License :: OSI Approved :: MIT License',
             'Programming Language :: Python :: 3.6'
         ],
         python_requires='>=3.6',
+        install_requires=['pyviews>=2.0.2'],
         keywords='binding wxpython pyviews python mvvm wx',
         packages=find_packages(exclude=['sandbox']))
 
