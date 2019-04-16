@@ -12,4 +12,3 @@ pip-selfcheck.json
 pyvenv.cfg
 .vscode/.ropeproject/
 .idea/dictionaries/
-.idea/workspace.xml
