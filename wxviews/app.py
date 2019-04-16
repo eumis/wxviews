@@ -26,6 +26,7 @@ def register_dependencies():
     ioc.register_func('render', render_node)
     ioc.register_func('expression', CompiledExpression)
     ioc.register_single('binder', setup_binder())
+    ioc.register_single('namespaces', {'': 'wx'})
 
     ioc.register_single('pipeline', RenderingPipeline(steps=[run_code]), Code)
     ioc.register_single('pipeline', get_wx_pipeline())

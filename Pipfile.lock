@@ -1,7 +1,7 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "da03482aa22d6853e65c403bdcd405cb394d443591f3ed4cc95ab4478696aca7"
+            "sha256": "773e4300ae3a36d96bec571809997307764ac4a2c330f0ed9e86d5f7eca1be00"
         },
         "pipfile-spec": 6,
         "requires": {
@@ -82,6 +82,10 @@
             ],
             "index": "pypi",
             "version": "==4.0.4"
+        },
+        "wxviews": {
+            "editable": true,
+            "path": "."
         }
     },
     "develop": {}
