@@ -18,7 +18,7 @@ To install dev version:
 
 To get started using pyviews see sandbox app.
 
-Clone repository to folder([project_root])
+Clone repository to folder(\[project_root\])
 
 Run following command to install pyviews package
 
