@@ -3,6 +3,7 @@ language: python
 python: 3.7
 # command to install dependencies
 install:
+  - sudo apt-get install -y python-wxgtk2.8
   - pip install pipenv
   - pipenv install
 # command to run tests
