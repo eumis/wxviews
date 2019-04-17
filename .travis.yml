@@ -1,19 +1,10 @@
-dist: trusty
+dist: xenial
 language: python
 python: 3.7
-addons:
-  apt:
-    packages:
-      # for wxPython:
-      - python-wxgtk2.8
-      - python-wxtools
-      - wx2.8-doc
-      - wx2.8-examples
-      - wx2.8-headers
-      - wx2.8-i18n
 # command to install dependencies
 install:
   - pip install pipenv
+  - pipenv run pip install -f https://extras.wxpython.org/wxPython4/extras/linux/gtk3/ubuntu-16.04 wxPython
   - pipenv install
 # command to run tests
 script:
