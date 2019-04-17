@@ -1,9 +1,18 @@
 dist: xenial
 language: python
 python: 3.7
+addons:
+  apt:
+    packages:
+      # for wxPython:
+      - python-wxgtk2.8
+      - python-wxtools
+      - wx2.8-doc
+      - wx2.8-examples
+      - wx2.8-headers
+      - wx2.8-i18n
 # command to install dependencies
 install:
-  - sudo apt-get install -y python-wxgtk2.8
   - pip install pipenv
   - pipenv install
 # command to run tests
