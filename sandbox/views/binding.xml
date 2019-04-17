@@ -1,0 +1,31 @@
+<wxv:Container xmlns='wx'
+               xmlns:wxv='wxviews'
+               xmlns:init='init'
+
+               xmlns:sizer='wxviews.sizer'
+               xmlns:import='wxviews.import_global'
+               xmlns:global='wxviews.set_global'
+               xmlns:bind='wxviews.bind'
+
+               import:wx='wx'
+               import:TwoWaysViewModel='viewmodel.TwoWaysViewModel'
+               global:vm='{TwoWaysViewModel()}'>
+
+    <BoxSizer init:orient='{wx.VERTICAL}'>
+        <StaticBoxSizer init:orient='{wx.VERTICAL}'
+                        init:label='TextCtrl two ways binding'
+                        sizer:flag='{wx.EXPAND|wx.ALL}'>
+            <TextCtrl Value='{{vm.text_value}}' />
+            <StaticText Label='{vm.text_value}' />
+        </StaticBoxSizer>
+
+        <StaticBoxSizer init:orient='{wx.VERTICAL}'
+                        init:label='CheckBox two ways binding'
+                        sizer:flag='{wx.EXPAND|wx.ALL}'>
+            <BoxSizer init:orient='{wx.VERTICAL}'>
+                <CheckBox Value='{{vm.bool_value}}' />
+                <StaticText Label='{str(vm.bool_value)}' />
+            </BoxSizer>
+        </StaticBoxSizer>
+    </BoxSizer>
+</wxv:Container>

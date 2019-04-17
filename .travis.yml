@@ -1,0 +1,18 @@
+dist: xenial
+language: python
+python: 3.7
+# command to install dependencies
+install:
+  - pip install pipenv
+  - pipenv run pip install -f https://extras.wxpython.org/wxPython4/extras/linux/gtk3/ubuntu-16.04 wxPython
+  - pipenv install
+# command to run tests
+script:
+  - pipenv run python -m unittest discover -s wxviews -p *_tests.py
+deploy:
+  on:
+    branch: dev
+    tags: true
+  provider: pypi
+  user: $pypi_user
+  password: $pypi_password

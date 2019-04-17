@@ -10,28 +10,24 @@
 				"kind": "build",
 				"isDefault": true
 			},
-			"windows" : {
-				"command": "pip",
-				"args": ["install", "-e", "${workspaceRoot}", "--upgrade"]
-			},
-			"linux" : {
-				"command": "pip3",
-				"args": ["install", "-e", "${workspaceRoot}", "--upgrade"]
-			}
-		},
-		{
-			"label": "Run file tests",
-			"group": {
-				"kind": "test",
-				"isDefault": true
-			},
 			"windows": {
-				"command": "python"
+				"command": "pip",
+				"args": [
+					"install",
+					"-e",
+					"${workspaceRoot}",
+					"--upgrade"
+				]
 			},
 			"linux": {
-				"command": "python3"
-			},
-			"args": ["${file}", "-v"]
+				"command": "pip3",
+				"args": [
+					"install",
+					"-e",
+					"${workspaceRoot}",
+					"--upgrade"
+				]
+			}
 		},
 		{
 			"label": "Run all tests",
@@ -46,10 +42,11 @@
 					"unittest",
 					"discover",
 					"-s",
-					"${workspaceRoot}\\tests",
+					"${workspaceRoot}\\wxviews",
 					"-v",
 					"-p",
-					"*_test.py"]
+					"*_tests.py"
+				]
 			},
 			"linux": {
 				"command": "python3",
@@ -58,10 +55,31 @@
 					"unittest",
 					"discover",
 					"-s",
-					"${workspaceRoot}//tests", "-v",
+					"${workspaceRoot}//wxviews",
+					"-v",
 					"-p",
-					"*_test.py"]
+					"*_tests.py"
+				]
 			}
+		},
+		{
+			"label": "Run file tests",
+			"group": {
+				"kind": "test",
+				"isDefault": true
+			},
+			"windows": {
+				"command": "python"
+			},
+			"linux": {
+				"command": "python3"
+			},
+			"args": [
+				"-m",
+				"unittest",
+				"${file}",
+				"-v"
+			]
 		},
 		{
 			"label": "Run package linting",
@@ -71,11 +89,15 @@
 			},
 			"windows": {
 				"command": "pylint",
-				"args": ["${workspaceRoot}\\pyviews"]
+				"args": [
+					"${workspaceRoot}\\pyviews"
+				]
 			},
 			"linux": {
 				"command": "pylint3",
-				"args": ["${workspaceRoot}//pyviews"]
+				"args": [
+					"${workspaceRoot}//pyviews"
+				]
 			}
 		},
 		{

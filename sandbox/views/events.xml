@@ -1,0 +1,19 @@
+<wxv:Container xmlns='wx'
+               xmlns:wxv='wxviews'
+               xmlns:init='init'
+
+               xmlns:sizer='wxviews.sizer'
+               xmlns:import='wxviews.import_global'
+               xmlns:global='wxviews.set_global'
+               xmlns:bind='wxviews.bind'
+
+               import:wx='wx'>
+
+    <wxv:Code>
+        def show_dialog(message):
+            dialog = wx.MessageDialog(None, message)
+            dialog.ShowModal()
+    </wxv:Code>
+    <Button Label='Button show dialog'
+            bind:EVT_BUTTON='once:{lambda evt: show_dialog("Button click event")}' />
+</wxv:Container>

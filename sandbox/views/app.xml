@@ -1,15 +1,44 @@
 <?xml version="1.0"?>
 <App xmlns='wx'
-     xmlns:import='pyviews.rendering.modifiers.import_global'
-     xmlns:call='wxviews.modifiers.call'
-     xmlns:sizer_args='wxviews.modifiers.set_sizer_args'
-     xmlns:sizer='wxviews.modifiers.set_sizer_kwargs'
      xmlns:wxv='wxviews'
+     xmlns:init='init'
+
+     xmlns:import='wxviews.import_global'
+     xmlns:global='wxviews.set_global'
+     xmlns:bind='wxviews.bind'
 
      import:wx='wx'>
-    <Frame call:SetTitle='title world'>
-        <Panel call:SetBackgroundColour='gray'>
-            <wxv:View name='sizers' />
+    <Frame init:title='hello world'
+           global:frame='once:{node.instance}'>
+        <wxv:Code>
+            def get_view_id(index):
+                return 500 + index
+
+            def change_view(view):
+                views.current = view
+
+            for index, view in enumerate(views.all):
+                id = get_view_id(index)
+                frame.Bind(wx.EVT_MENU, lambda evt, v=view: change_view(v), id=id)
+
+            frame.Bind(wx.EVT_MENU, lambda evt: wx.Exit(), id=wx.ID_EXIT) 
+        </wxv:Code>
+        <MenuBar>
+            <Menu title='File'>
+                <MenuItem init:id='{wx.ID_EXIT}'
+                          Text='once:{"&amp;Quit\tCtrl+Q"}'
+                          Help='Quit the Application' />
+            </Menu>
+            <Menu title='Views'>
+                <wxv:For items='{views.all}'>
+                    <MenuItem init:id='{get_view_id(index)}'
+                              init:text='{item}'>
+                    </MenuItem>
+                </wxv:For>
+            </Menu>
+        </MenuBar>
+        <Panel BackgroundColour='gray'>
+            <wxv:View name='{views.current}' />
         </Panel>
     </Frame>
 </App>

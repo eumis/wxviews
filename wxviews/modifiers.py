@@ -1,25 +1,24 @@
-'''wxviews default modifiers'''
+'''Module with default modifiers'''
 
+from typing import TypeVar, Callable, Tuple, Any
 import wx
-from pyviews.core.ioc import inject
-from wxviews.node import ControlNode
+from wx import Event # pylint: disable=E0611
+from wxviews.core import WxNode
+from wxviews.node import WidgetNode
 
-def call(node, key, value):
-    '''calls control method'''
-    args = value if isinstance(value, list) or isinstance(value, tuple) else [value]
-    method = getattr(node.wx_instance, key) if hasattr(node, 'wx_instance') else getattr(node, key)
-    method(*args)
+BindValue = TypeVar('BindValue', Callable[[Event], None], Tuple[Callable[[Event], None], dict])
 
-def setup_sizer(node: ControlNode, key, value):
-    '''Modifier - sets argument for sizer add method'''
-    if key == 'args':
-        node.sizer_args = value
-    if key == 'kwargs':
-        node.sizer_kwargs = value
+def bind(node: WidgetNode, key: str, value: BindValue):
+    '''Calls node bind method'''
+    event = wx.__dict__[key]
+    if not isinstance(value, tuple):
+        value = (value, {})
+    command, args = value
+    node.bind(event, command, **args)
 
-@inject('custom_events')
-def bind(node: ControlNode, key, command, custom_events=None):
-    '''Binds node to event'''
-    source = custom_events if key in custom_events else wx.__dict__
-    event = source[key]
-    node.bind(event, command)
+def sizer(node: WxNode, key: str, value: Any):
+    '''Sets sizer argument'''
+    if key == '':
+        node.sizer_args = {**node.sizer_args, **value}
+    else:
+        node.sizer_args[key] = value
