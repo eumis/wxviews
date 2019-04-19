@@ -3,9 +3,9 @@
 from typing import Callable
 from wx import PyEventBinder, Event # pylint: disable=E0611
 from pyviews.core import XmlNode, InstanceNode, InheritedDict
-from wxviews.core import WxNode
+from wxviews.core import Sizerable
 
-class WidgetNode(InstanceNode, WxNode):
+class WidgetNode(InstanceNode, Sizerable):
     '''Wrapper under wx widget'''
     def __init__(self, instance, xml_node: XmlNode, node_globals: InheritedDict = None):
         super().__init__(instance, xml_node, node_globals=node_globals)

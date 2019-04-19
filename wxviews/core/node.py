@@ -1,13 +1,16 @@
-'''Contains core nodes for wxviews'''
+"""Contains core nodes for wxviews"""
 
-from abc import ABC, abstractproperty
+from abc import ABC, abstractmethod
 
-class WxNode(ABC):
-    '''Node interface'''
-    @abstractproperty
+
+class Sizerable(ABC):
+    """Has arguments for sizer"""
+
+    @property
+    @abstractmethod
     def sizer_args(self) -> dict:
-        '''Contains sizer args'''
+        pass
 
     @sizer_args.setter
     def sizer_args(self, value):
-        '''Contains sizer args'''
+        pass
