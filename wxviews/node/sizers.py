@@ -2,9 +2,9 @@
 
 from wx import Sizer # pylint: disable=E0611
 from pyviews.core import XmlNode, Node, InstanceNode, InheritedDict
-from wxviews.core import WxNode
+from wxviews.core import Sizerable
 
-class SizerNode(InstanceNode, WxNode):
+class SizerNode(InstanceNode, Sizerable):
     '''Wrapper under sizer'''
     def __init__(self, instance: Sizer, xml_node: XmlNode,
                  node_globals: InheritedDict = None, parent=None, sizer=None):

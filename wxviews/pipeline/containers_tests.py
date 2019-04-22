@@ -11,6 +11,7 @@ from .containers import render_view_children, rerender_on_view_change
 from .containers import render_for_items, rerender_on_items_change
 from .containers import render_if, rerender_on_condition_change
 
+
 class render_container_children_tests(TestCase):
     @patch(containers.__name__ + '.render_children')
     @patch(containers.__name__ + '.InheritedDict')
@@ -36,6 +37,7 @@ class render_container_children_tests(TestCase):
         msg = 'should render all xml children for every item'
         self.assertEqual(render_children.call_args, call(node, **child_args), msg)
 
+
 class render_view_children_tests(TestCase):
     @patch(containers.__name__ + '.render_view')
     def test_renders_view(self, render_view: Mock):
@@ -43,25 +45,21 @@ class render_view_children_tests(TestCase):
         child = Mock()
         render_view.side_effect = lambda name, **args: child if name == view_name else None
 
-        node = Mock(node_globals=None)
-        node.set_content = Mock()
+        node = View(Mock())
         node.name = view_name
 
         render_view_children(node)
 
         msg = 'should render view by node name and set result as view child'
-        self.assertEqual(node.set_content.call_args, call(child), msg)
+        self.assertEqual(node.children[-1], child, msg)
 
     @patch(containers.__name__ + '.render_view')
     @patch(containers.__name__ + '.InheritedDict')
-    def test_renders_view_with_args(self, inherit_dict:Mock, render_view: Mock):
+    def test_renders_view_with_args(self, inherit_dict: Mock, render_view: Mock):
         view_name = 'name'
         inherit_dict.side_effect = lambda source: source
-        render_view.side_effect = lambda name, **args: args
 
-        node = Mock()
-        node.node_globals = Mock()
-        node.set_content = Mock()
+        node = View(Mock())
         node.name = view_name
         parent = Mock()
         sizer = Mock()
@@ -75,7 +73,7 @@ class render_view_children_tests(TestCase):
         render_view_children(node, parent=parent, sizer=sizer)
 
         msg = 'should render view by node name and set result as view child'
-        self.assertEqual(node.set_content.call_args, call(args), msg)
+        self.assertEqual(render_view.call_args, call(view_name, **args), msg)
 
     @patch(containers.__name__ + '.render_view')
     @case('')
@@ -88,7 +86,8 @@ class render_view_children_tests(TestCase):
         render_view_children(node)
 
         msg = 'should not render view if name is empty or None'
-        self.assertFalse(node.set_content.called or render_view.called, msg)
+        self.assertFalse(render_view.called, msg)
+
 
 class rerender_on_view_change_tests(TestCase):
     @patch(containers.__name__ + '.render_view_children')
@@ -178,6 +177,7 @@ class rerender_on_view_change_tests(TestCase):
         msg = 'should call parent Layout method'
         self.assertTrue(parent.Layout.called, msg)
 
+
 class render_for_items_tests(TestCase):
     @patch(containers.__name__ + '.render')
     @case([], [], [])
@@ -208,20 +208,21 @@ class render_for_items_tests(TestCase):
         node = For(xml_node)
         node.items = items
         render.side_effect = lambda xml_node, **args: \
-                             (args['node_globals']['index'], args['node_globals']['item'])
+            (args['node_globals']['index'], args['node_globals']['item'])
 
         render_for_items(node)
 
         msg = 'should add item and index to child globals'
         self.assertEqual(node.children, expected_children, msg)
 
+
 class rerender_on_items_change_tests(TestCase):
     def _setup_node(self, xml_child_count, items_count, render):
         xml_node = Mock(children=self._get_mock_items(xml_child_count))
         node = For(xml_node)
         node.items = self._get_mock_items(items_count)
-        node.add_children([Mock(destroy=Mock(), node_globals={})\
-                          for i in range(xml_child_count * items_count)])
+        node.add_children([Mock(destroy=Mock(), node_globals={}) \
+                           for i in range(xml_child_count * items_count)])
         render.side_effect = lambda xml_node, **args: Mock()
         return node
 
@@ -304,6 +305,7 @@ class rerender_on_items_change_tests(TestCase):
         msg = 'should call parent Layout'
         self.assertTrue(parent.Layout.called, msg)
 
+
 class render_if_tests(TestCase):
     @patch(containers.__name__ + '.render_children')
     @case(True)
@@ -317,6 +319,7 @@ class render_if_tests(TestCase):
 
         msg = 'should render children if condition is True'
         self.assertEqual(render_children.called, condition, msg)
+
 
 class rerender_on_condition_change_tests(TestCase):
     @patch(containers.__name__ + '.render_children')

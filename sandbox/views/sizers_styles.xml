@@ -1,0 +1,8 @@
+<Container xmlns="wxviews">
+    <Style name="white"
+           BackgroundColour="white"/>
+    <Style name="red"
+           BackgroundColour="red"/>
+    <Style name="green"
+           BackgroundColour="green"/>
+</Container>

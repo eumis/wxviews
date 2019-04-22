@@ -1,6 +1,6 @@
-'''Customizing of wx parsing'''
+"""Customizing of wx parsing"""
 
-from wx import Sizer, GridSizer, MenuBar, Menu, StaticBoxSizer # pylint: disable=E0611
+from wx import Sizer, GridSizer, MenuBar, Menu, StaticBoxSizer  # pylint: disable=E0611
 from pyviews.core.xml import XmlNode, XmlAttr
 from pyviews.core.observable import InheritedDict
 from pyviews.core.node import Node
@@ -9,12 +9,13 @@ from pyviews.rendering import get_inst_type, get_init_args
 from pyviews.container import expression
 from wxviews.node import WidgetNode, SizerNode
 
+
 def create_node(xml_node: XmlNode,
                 parent=None,
                 node_globals: InheritedDict = None,
                 sizer=None,
                 **init_args) -> Node:
-    '''Creates node from xml node using namespace as module and tag name as class name'''
+    """Creates node from xml node using namespace as module and tag name as class name"""
     inst_type = get_inst_type(xml_node)
     if issubclass(inst_type, Node):
         args = {**init_args, **{'xml_node': xml_node}}
@@ -49,17 +50,20 @@ def create_node(xml_node: XmlNode,
         inst = inst_type(parent, **args)
         return WidgetNode(inst, xml_node, node_globals=node_globals)
 
+
 def _create_inst(inst_type, **init_args):
-    '''Creates class instance with args'''
+    """Creates class instance with args"""
     args, kwargs = get_init_args(inst_type, init_args, True)
     return inst_type(*args, **kwargs)
+
 
 def _get_attr_args_values(xml_node, namespace: str, node_globals: InheritedDict = None) -> dict:
     init_attrs = [attr for attr in xml_node.attrs if attr.namespace == namespace]
     return [_get_init_value(attr, node_globals) for attr in init_attrs]
 
+
 def get_attr_args(xml_node, namespace: str, node_globals: InheritedDict = None) -> dict:
-    '''Returs args from attributes with provided namespace'''
+    """Returns args from attributes with provided namespace"""
     init_attrs = [attr for attr in xml_node.attrs if attr.namespace == namespace]
     args = {}
     for attr in init_attrs:
@@ -69,6 +73,7 @@ def get_attr_args(xml_node, namespace: str, node_globals: InheritedDict = None) 
         else:
             args[attr.name] = value
     return args
+
 
 def _get_init_value(attr: XmlAttr, node_globals: InheritedDict):
     stripped_value = attr.value.strip() if attr.value else ''
