@@ -1,26 +1,34 @@
 """Contains rendering steps for style nodes"""
 
-from pyviews.core import XmlAttr, InheritedDict
+from pyviews.core import XmlAttr, InheritedDict, Node
 from pyviews.compilation import is_expression, parse_expression
 from pyviews.rendering import get_setter, render_children, RenderingPipeline
 from pyviews.container import expression
 from wxviews.node import Style, StyleItem, StyleError
 
 
-def get_style_setup() -> RenderingPipeline:
-    """Returns setup for style node"""
+def get_style_pipeline() -> RenderingPipeline:
+    """Returns pipeline for style node"""
     node_setup = RenderingPipeline()
     node_setup.steps = [
+        setup_node_styles,
         apply_style_items,
         apply_parent_items,
         store_to_node_styles,
         render_child_styles,
-        # remove_style_on_destroy
     ]
     return node_setup
 
 
-def apply_style_items(node: Style, **args):
+def setup_node_styles(_: Style, parent: Node = None, node_styles: InheritedDict = None, **__):
+    if node_styles is not None:
+        return
+    node_styles = InheritedDict()
+    parent.node_globals['_node_styles'] = node_styles
+    return node_styles
+
+
+def apply_style_items(node: Style, **_):
     """Parsing step. Parses attributes to style items and sets them to style"""
     attrs = node.xml_node.attrs
     try:
@@ -39,30 +47,20 @@ def _get_style_item(node: Style, attr: XmlAttr):
     return StyleItem(setter, attr.name, value)
 
 
-def apply_parent_items(node: Style,
-                       parent_name: str = None,
-                       node_styles: InheritedDict = None,
-                       **args):
+def apply_parent_items(node: Style, parent: Style = None, **_):
     """Sets style items from parent style"""
-    if parent_name:
-        parent_items = node_styles[parent_name]
-        node.items = {**parent_items, **node.items}
+    if isinstance(parent, Style):
+        node.items = {**parent.items, **node.items}
 
 
-def store_to_node_styles(node: Style, node_styles: InheritedDict = None, **args):
+def store_to_node_styles(node: Style, node_styles: InheritedDict = None, **_):
     """Store styles to node styles"""
     node_styles[node.name] = node.items.values()
 
 
-def render_child_styles(node: Style, node_styles: InheritedDict = None, **args):
+def render_child_styles(node: Style, node_styles: InheritedDict = None, **_):
     """Renders child styles"""
     render_children(node,
                     parent_node=node,
-                    parent_name=node.name,
                     node_globals=InheritedDict(node.node_globals),
                     node_styles=node_styles)
-
-
-def remove_style_on_destroy(node: Style, node_styles: InheritedDict = None, **args):
-    """Removes style from styles on destroying"""
-    node_styles.remove_key(node.name)

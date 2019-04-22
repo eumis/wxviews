@@ -1,8 +1,6 @@
-# pylint: disable=C0111,C0103, W0231
-
 from unittest import TestCase, main
 from unittest.mock import Mock, patch
-from wx import Sizer, GridSizer # pylint: disable=E0611
+from wx import Sizer, GridSizer  # pylint: disable=E0611
 from pyviews.core import XmlAttr, Node, InheritedDict
 from pyviews.core.ioc import register_func
 from pyviews.compilation import CompiledExpression
@@ -13,33 +11,40 @@ from wxviews.rendering import create_node, get_attr_args
 
 register_func('expression', CompiledExpression)
 
+
 class SomeNode(Node):
     def __init__(self, xml_node, **init_args):
         self._xml_node = xml_node
         self.init_args = init_args
+
 
 class OtherNode(WidgetNode):
     def __init__(self, xml_node, **init_args):
         self._xml_node = xml_node
         self.init_args = init_args
 
+
 class WxInstance:
     def __init__(self, parent, **init_args):
         self.parent = parent
         self.init_args = init_args
+
 
 class OtherWxInstance:
     def __init__(self, parent, **init_args):
         self.parent = parent
         self.init_args = init_args
 
+
 class AnySizer(Sizer):
     def __init__(self, **init_args):
         self.init_args = init_args
 
+
 class AnyGridSizer(GridSizer):
     def __init__(self, *init_args):
         self.init_args = init_args
+
 
 class create_node_tests(TestCase):
     def _setup_mocks(self, get_inst_type: Mock, inst_type, attrs=None):
@@ -142,6 +147,7 @@ class create_node_tests(TestCase):
         msg = 'should pass parent to instance constructor'
         self.assertDictEqual(actual_node.instance.init_args, {}, msg)
 
+
 class get_attr_args_tests(TestCase):
     @case('init', [], {})
     @case('init', [XmlAttr('key', 'value', 'init')], {'key': 'value'})
@@ -167,6 +173,7 @@ class get_attr_args_tests(TestCase):
 
         msg = 'should pass parent to instance constructor'
         self.assertDictEqual(actual, args, msg)
+
 
 if __name__ == '__main__':
     main()
