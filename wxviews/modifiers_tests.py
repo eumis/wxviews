@@ -6,7 +6,7 @@ from pyviews.core import InheritedDict
 from pyviews.testing import case
 
 from wxviews.node import StyleError
-from .modifiers import bind, sizer, style
+from wxviews.modifiers import bind, sizer, style
 
 
 class bind_tests(TestCase):
