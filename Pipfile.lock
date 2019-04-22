@@ -49,10 +49,10 @@
         },
         "pyviews": {
             "hashes": [
-                "sha256:7f886bc91b906cca80f511e10c5005a7fd760b66bd166ccc1238d1f7e685b971"
+                "sha256:d68bc68c3f2a1587bbab961ca95c4c5ff01f31c639a51b93ef124716e10dc742"
             ],
             "index": "pypi",
-            "version": "==2.0.2"
+            "version": "==2.0.4"
         },
         "six": {
             "hashes": [

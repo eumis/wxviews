@@ -20,12 +20,12 @@ def get_style_pipeline() -> RenderingPipeline:
     return node_setup
 
 
-def setup_node_styles(_: Style, parent: Node = None, node_styles: InheritedDict = None, **__):
+def setup_node_styles(_: Style, parent_node: Node = None, node_styles: InheritedDict = None, **__):
     if node_styles is not None:
         return
-    node_styles = InheritedDict()
-    parent.node_globals['_node_styles'] = node_styles
-    return node_styles
+    if '_node_styles' not in parent_node.node_globals:
+        parent_node.node_globals['_node_styles'] = InheritedDict()
+    return {'node_styles': parent_node.node_globals['_node_styles']}
 
 
 def apply_style_items(node: Style, **_):
@@ -47,10 +47,10 @@ def _get_style_item(node: Style, attr: XmlAttr):
     return StyleItem(setter, attr.name, value)
 
 
-def apply_parent_items(node: Style, parent: Style = None, **_):
+def apply_parent_items(node: Style, parent_node: Style = None, **_):
     """Sets style items from parent style"""
-    if isinstance(parent, Style):
-        node.items = {**parent.items, **node.items}
+    if isinstance(parent_node, Style):
+        node.items = {**parent_node.items, **node.items}
 
 
 def store_to_node_styles(node: Style, node_styles: InheritedDict = None, **_):

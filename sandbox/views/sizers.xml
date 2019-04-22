@@ -2,11 +2,14 @@
                xmlns:wxv='wxviews'
                xmlns:import='wxviews.import_global'
                xmlns:global='wxviews.set_global'
+               xmlns:style='wxviews.style'
                xmlns:init='init'
 
                xmlns:sizer='wxviews.sizer'
                import:wx='wx'>
 
+    <wxv:Style name="white"
+               BackgroundColour="white"/>
     <wxv:Style name="red"
                BackgroundColour="red"/>
     <wxv:Style name="green"
@@ -19,7 +22,7 @@
         <StaticText Label='Panel with border 20'
                     sizer:flag='{wx.EXPAND|wx.ALL}' />
 
-        <Panel BackgroundColour='white'
+        <Panel style:='white'
                sizer:proportion='{1}'
                sizer:flag='{wx.EXPAND|wx.ALL}'
                sizer:border='{20}'>
@@ -33,15 +36,15 @@
         <BoxSizer init:orient='{wx.HORIZONTAL}'
                   sizer:proportion='{1}'
                   sizer:flag='{wx.EXPAND|wx.ALL}'>
-            <Panel BackgroundColour='red'
+            <Panel style:='red'
                    sizer:proportion='{1}'
                    sizer:flag='{wx.EXPAND|wx.RIGHT}'
                    sizer:border='{10}'/>
-            <Panel BackgroundColour='green'
+            <Panel style:='green'
                    sizer:proportion='{1}'
                    sizer:flag='{wx.EXPAND|wx.ALL}'
                    sizer:border='{10}'/>
-            <Panel BackgroundColour='blue'
+            <Panel style:='blue'
                    sizer:proportion='{2}'
                    sizer:flag='{wx.ALIGN_TOP|wx.ALL}'
                    sizer:border='{10}'/>
@@ -60,7 +63,7 @@
             <wxv:For items='{list(range(16))}'>
                 <Panel sizer:proportion='{0}'
                        sizer:flag='{wx.EXPAND}'
-                       BackgroundColour='green'>
+                       style:='green'>
                     <StaticText Label='{str(index)}'/>
                 </Panel>
             </wxv:For>
@@ -83,7 +86,7 @@
             <wxv:For items='{list(range(6))}'>
                 <Panel sizer:proportion='{0}'
                        sizer:flag='{wx.EXPAND}'
-                       BackgroundColour='Green'>
+                       style:='green'>
                     <StaticText Label='{str(index)}'/>
                 </Panel>
             </wxv:For>
