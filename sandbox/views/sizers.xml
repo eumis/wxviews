@@ -8,26 +8,21 @@
                xmlns:sizer='wxviews.sizer'
                import:wx='wx'>
 
-    <wxv:Style name="white"
-               BackgroundColour="white"/>
-    <wxv:Style name="red"
-               BackgroundColour="red"/>
-    <wxv:Style name="green"
-               BackgroundColour="green"/>
+    <wxv:StylesView name="sizers_styles"/>
     <wxv:Style name="blue"
                BackgroundColour="blue"/>
 
     <BoxSizer init:orient='{wx.VERTICAL}'>
 
         <StaticText Label='Panel with border 20'
-                    sizer:flag='{wx.EXPAND|wx.ALL}' />
+                    sizer:flag='{wx.EXPAND|wx.ALL}'/>
 
         <Panel style:='white'
                sizer:proportion='{1}'
                sizer:flag='{wx.EXPAND|wx.ALL}'
                sizer:border='{20}'>
             <StaticText Label='Text inside panel'
-                        sizer:flag='{wx.EXPAND|wx.ALL}' />
+                        sizer:flag='{wx.EXPAND|wx.ALL}'/>
         </Panel>
 
         <StaticText Label='Box sizer'

@@ -6,7 +6,8 @@ from pyviews.core.ioc import Scope, register_func
 from pyviews.compilation import CompiledExpression
 from pyviews.rendering import call_set_attr
 from wxviews.node import Style, StyleError
-from .styles import setup_node_styles, apply_style_items, apply_parent_items
+from wxviews.node.styles import StylesView, StyleItem
+from .styles import setup_node_styles, apply_style_items, apply_parent_items, store_to_globals
 from .styles import store_to_node_styles
 
 with Scope('styles_tests'):
@@ -161,3 +162,26 @@ class store_to_node_styles_tests(TestCase):
 
         msg = 'store_to_node_styles should store style items to node_styles'
         self.assertEqual(node_styles[node.name], node.items.values(), msg)
+
+
+class store_to_globals_tests(TestCase):
+    @case(None, {}, {})
+    @case({}, {}, {})
+    @case(None, {'key': 'style'}, {'key': 'style'})
+    @case({}, {'key': 'style'}, {'key': 'style'})
+    @case({'key': 'style'}, {'style': 'style'}, {'key': 'style', 'style': 'style'})
+    @case({'key': 'parent style'}, {'key': 'view style'}, {'key': 'view style'})
+    def test_copies_node_styles(self, parent_styles, view_styles, expected):
+        parent_node = Mock(node_globals=InheritedDict())
+        if parent_styles:
+            parent_node.node_globals['_node_styles'] = InheritedDict(parent_styles)
+        node = StylesView(Mock())
+        child = Mock(node_globals=InheritedDict())
+        child.node_globals['_node_styles'] = InheritedDict(view_styles)
+        node.add_child(child)
+
+        store_to_globals(node, parent_node=parent_node)
+        actual = parent_node.node_globals['_node_styles'].to_dictionary()
+
+        msg = 'should copy node styles from view root to parent globals'
+        self.assertEqual(expected, actual, msg=msg)

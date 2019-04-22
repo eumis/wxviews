@@ -2,9 +2,11 @@
 
 from pyviews.core import XmlAttr, InheritedDict, Node
 from pyviews.compilation import is_expression, parse_expression
-from pyviews.rendering import get_setter, render_children, RenderingPipeline
+from pyviews.rendering import get_setter, render_children, RenderingPipeline, apply_attributes
 from pyviews.container import expression
 from wxviews.node import Style, StyleItem, StyleError
+from wxviews.node.styles import StylesView
+from wxviews.pipeline.containers import render_view_children
 
 
 def get_style_pipeline() -> RenderingPipeline:
@@ -64,3 +66,22 @@ def render_child_styles(node: Style, node_styles: InheritedDict = None, **_):
                     parent_node=node,
                     node_globals=InheritedDict(node.node_globals),
                     node_styles=node_styles)
+
+
+def get_styles_view_pipeline() -> RenderingPipeline:
+    """Returns setup for container"""
+    return RenderingPipeline(steps=[
+        apply_attributes,
+        render_view_children,
+        store_to_globals
+    ])
+
+
+def store_to_globals(view: StylesView, parent_node: Node = None, **_):
+    child: Node = view.children[0]
+    styles: InheritedDict = child.node_globals['_node_styles']
+    if '_node_styles' in parent_node.node_globals:
+        parent_styles = parent_node.node_globals['_node_styles']
+        merged_styles = {**parent_styles.to_dictionary(), **styles.to_dictionary()}
+        styles = InheritedDict(merged_styles)
+    parent_node.node_globals['_node_styles'] = styles

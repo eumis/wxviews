@@ -1,15 +1,18 @@
-'''
+"""
 Nodes used as abstract containers, that used to incapsulate some logic.
 Containers don't represent any widget.
-'''
+"""
 
 from pyviews.core import XmlNode, InheritedDict, Node
 
+
 class Container(Node):
-    '''Used to combine some xml elements'''
+    """Used to combine some xml elements"""
+
 
 class View(Container):
-    '''Loads xml from anothre file'''
+    """Loads xml from another file"""
+
     def __init__(self, xml_node: XmlNode, node_globals: InheritedDict = None):
         super().__init__(xml_node, node_globals=node_globals)
         self._name = None
@@ -17,7 +20,7 @@ class View(Container):
 
     @property
     def name(self):
-        '''Returns view name'''
+        """Returns view name"""
         return self._name
 
     @name.setter
@@ -26,12 +29,10 @@ class View(Container):
         self._name = value
         self.name_changed(self, value, old_name)
 
-    def set_content(self, content: Node):
-        '''Destroys current '''
-        self._children = [content]
 
 class For(Container):
-    '''Renders children for every item in items collection'''
+    """Renders children for every item in items collection"""
+
     def __init__(self, xml_node: XmlNode, node_globals: InheritedDict = None):
         super().__init__(xml_node, node_globals=node_globals)
         self._items = []
@@ -39,7 +40,7 @@ class For(Container):
 
     @property
     def items(self):
-        '''Returns items'''
+        """Returns items"""
         return self._items
 
     @items.setter
@@ -48,8 +49,10 @@ class For(Container):
         self._items = value
         self.items_changed(self, value, old_items)
 
+
 class If(Container):
-    '''Renders children if condition is True'''
+    """Renders children if condition is True"""
+
     def __init__(self, xml_node: XmlNode, node_globals: InheritedDict = None):
         super().__init__(xml_node, node_globals=node_globals)
         self._condition = False
@@ -57,7 +60,7 @@ class If(Container):
 
     @property
     def condition(self):
-        '''Returns condition'''
+        """Returns condition"""
         return self._condition
 
     @condition.setter

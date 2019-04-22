@@ -49,3 +49,11 @@ class Style(Node):
         super().__init__(xml_node, node_globals)
         self.name = None
         self.items = {}
+
+
+class StylesView(Node):
+    """Loads styles from separate file"""
+
+    def __init__(self, xml_node: XmlNode, node_globals: InheritedDict = None):
+        super().__init__(xml_node, node_globals)
+        self.name = None

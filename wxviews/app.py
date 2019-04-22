@@ -10,6 +10,7 @@ from pyviews.code import Code, run_code
 from wxviews.node import Container, View, For, If
 from wxviews.node import SizerNode, GrowableCol, GrowableRow, Style
 from wxviews.binding import add_two_ways_rules
+from wxviews.node.styles import StylesView
 from wxviews.pipeline import get_frame_pipeline, get_wx_pipeline, get_app_pipeline
 from wxviews.pipeline import get_container_pipeline, get_view_pipeline
 from wxviews.pipeline import get_for_pipeline, get_if_pipeline
@@ -17,6 +18,7 @@ from wxviews.pipeline import get_sizer_pipeline
 from wxviews.pipeline import get_growable_row_pipeline, get_growable_col_pipeline
 from wxviews.pipeline import get_menu_bar_pipeline, get_menu_pipeline, get_menu_item_pipeline
 from wxviews.pipeline import get_style_pipeline
+from wxviews.pipeline.styles import get_styles_view_pipeline
 from wxviews.rendering import create_node
 
 
@@ -45,6 +47,7 @@ def register_dependencies():
     ioc.register_single('pipeline', get_menu_pipeline(), Menu)
     ioc.register_single('pipeline', get_menu_item_pipeline(), MenuItem)
     ioc.register_single('pipeline', get_style_pipeline(), Style)
+    ioc.register_single('pipeline', get_styles_view_pipeline(), StylesView)
 
 
 def setup_binder() -> Binder:
