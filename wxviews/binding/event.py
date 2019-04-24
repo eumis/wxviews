@@ -3,13 +3,12 @@
 from typing import Callable, Any
 from wx import EvtHandler, TextEntry, CheckBox
 from wx import Event, CommandEvent, EVT_TEXT, EVT_CHECKBOX
-from pyviews.core import Modifier, XmlAttr
+from pyviews.core import Modifier, XmlAttr, InstanceNode
 from pyviews.core import Binding, BindingTarget, BindingRule, Binder
 from pyviews.binding import ExpressionBinding, TwoWaysBinding
 from pyviews.binding import get_expression_target, PropertyTarget
 from pyviews.compilation import parse_expression, is_expression
 from pyviews.container import expression
-from wxviews.node import WidgetNode
 
 
 class EventBinding(Binding):
@@ -46,14 +45,14 @@ class TextTwoWaysRule(BindingRule):
     """wx.TextEntry.Value two ways binding"""
 
     def suitable(self,
-                 node: WidgetNode = None,
+                 node: InstanceNode = None,
                  attr: XmlAttr = None,
                  **args) -> bool:
         return node is not None and isinstance(node.instance, TextEntry) \
                and attr is not None and attr.name == 'Value'
 
     def apply(self,
-              node: WidgetNode = None,
+              node: InstanceNode = None,
               expr_body: str = None,
               modifier: Modifier = None,
               attr: XmlAttr = None,
@@ -75,14 +74,14 @@ class CheckBoxTwoWaysRule(BindingRule):
     """wx.CheckBox.Value two ways binding"""
 
     def suitable(self,
-                 node: WidgetNode = None,
+                 node: InstanceNode = None,
                  attr: XmlAttr = None,
                  **args) -> bool:
         return node is not None and isinstance(node.instance, CheckBox) \
                and attr is not None and attr.name == 'Value'
 
     def apply(self,
-              node: WidgetNode = None,
+              node: InstanceNode = None,
               expr_body: str = None,
               modifier: Modifier = None,
               attr: XmlAttr = None,

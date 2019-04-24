@@ -7,19 +7,15 @@ from pyviews.compilation import CompiledExpression
 from pyviews.binding import add_one_way_rules
 from pyviews.rendering import render_node, render_view, RenderingPipeline
 from pyviews.code import Code, run_code
-from wxviews.node import Container, View, For, If
-from wxviews.node import SizerNode, GrowableCol, GrowableRow, Style
 from wxviews.binding import add_two_ways_rules
-from wxviews.node.styles import StylesView
-from wxviews.pipeline import get_frame_pipeline, get_wx_pipeline, get_app_pipeline
-from wxviews.pipeline import get_container_pipeline, get_view_pipeline
-from wxviews.pipeline import get_for_pipeline, get_if_pipeline
-from wxviews.pipeline import get_sizer_pipeline
-from wxviews.pipeline import get_growable_row_pipeline, get_growable_col_pipeline
-from wxviews.pipeline import get_menu_bar_pipeline, get_menu_pipeline, get_menu_item_pipeline
-from wxviews.pipeline import get_style_pipeline
-from wxviews.pipeline.styles import get_styles_view_pipeline
+from wxviews.containers import get_if_pipeline, get_for_pipeline, get_view_pipeline, get_container_pipeline
+from wxviews.containers import Container, View, For, If
+from wxviews.menus import get_menu_item_pipeline, get_menu_pipeline, get_menu_bar_pipeline
+from wxviews.sizers import get_growable_col_pipeline, get_growable_row_pipeline, get_sizer_pipeline
+from wxviews.sizers import GrowableCol, GrowableRow, SizerNode
+from wxviews.styles import get_styles_view_pipeline, StylesView, get_style_pipeline, Style
 from wxviews.rendering import create_node
+from wxviews.widgets import get_frame_pipeline, get_app_pipeline, get_wx_pipeline
 
 
 def register_dependencies():

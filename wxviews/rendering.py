@@ -1,13 +1,15 @@
 """Customizing of wx parsing"""
 
-from wx import Sizer, GridSizer, MenuBar, Menu, StaticBoxSizer  # pylint: disable=E0611
+from wx import Sizer, GridSizer, MenuBar, Menu, StaticBoxSizer
 from pyviews.core.xml import XmlNode, XmlAttr
 from pyviews.core.observable import InheritedDict
 from pyviews.core.node import Node
 from pyviews.compilation import is_expression, parse_expression
 from pyviews.rendering import get_inst_type, get_init_args
 from pyviews.container import expression
-from wxviews.node import WidgetNode, SizerNode
+
+from wxviews.sizers import SizerNode
+from wxviews.widgets import WidgetNode
 
 
 def create_node(xml_node: XmlNode,

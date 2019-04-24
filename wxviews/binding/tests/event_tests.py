@@ -1,19 +1,18 @@
-#pylint: disable=missing-docstring, invalid-name
-
 from unittest import TestCase
 from unittest.mock import Mock, call
-from wx import TextCtrl, CheckBox # pylint: disable=E0611
-from wx import EVT_TEXT, EVT_CHECKBOX # pylint: disable=E0611
+from wx import TextCtrl, CheckBox  # pylint: disable=E0611
+from wx import EVT_TEXT, EVT_CHECKBOX  # pylint: disable=E0611
 from pyviews.testing import case
 from pyviews.core.ioc import register_func
 from pyviews.core import XmlAttr, BindingError
 from pyviews.core import InheritedDict, ObservableEntity
 from pyviews.binding import TwoWaysBinding
 from pyviews.compilation import CompiledExpression
-from wxviews.node import WidgetNode
-from .event import EventBinding, TextTwoWaysRule, CheckBoxTwoWaysRule
+from wxviews.binding.event import EventBinding, TextTwoWaysRule, CheckBoxTwoWaysRule
+from wxviews.widgets import WidgetNode
 
 register_func('expression', CompiledExpression)
+
 
 class EventHandlerStub:
     def __init__(self, event):
@@ -27,6 +26,7 @@ class EventHandlerStub:
     def Unbind(self, event, handler=None):
         if event == self._event and self._handler == handler:
             self._handler = None
+
 
 class TextEntryStub(EventHandlerStub, TextCtrl):
     def __init__(self):
@@ -47,6 +47,7 @@ class TextEntryStub(EventHandlerStub, TextCtrl):
             event = Mock()
             event.GetString.side_effect = lambda: value
             self._handler(event)
+
 
 class CheckBoxStub(EventHandlerStub, CheckBox):
     def __init__(self):
@@ -69,8 +70,10 @@ class CheckBoxStub(EventHandlerStub, CheckBox):
             event.IsChecked.side_effect = lambda: self.Value
             self._handler(event)
 
+
 def prop_modifier(node, prop, value):
     setattr(node.instance, prop, value)
+
 
 class EventBinding_bind_tests(TestCase):
     def test_binds_target_update_to_event(self):
@@ -95,6 +98,7 @@ class EventBinding_bind_tests(TestCase):
         msg = 'should subscribe to event and update target using passed get_value'
         self.assertEqual(call(value), target.on_change.call_args, msg)
 
+
 class EventBinding_destroy_tests(TestCase):
     def test_unbinds_event(self):
         target, value = (Mock(), 'some value')
@@ -107,6 +111,7 @@ class EventBinding_destroy_tests(TestCase):
 
         msg = 'should unsubscribe from event'
         self.assertFalse(target.on_change.called, msg)
+
 
 class TextTwoWaysRule_suitable_tests(TestCase):
     @case({}, False)
@@ -123,10 +128,12 @@ class TextTwoWaysRule_suitable_tests(TestCase):
         msg = 'should be suitable for TextEntry and "Value" property'
         self.assertEqual(expected, actual, msg)
 
+
 class TextViewModel(ObservableEntity):
     def __init__(self, value=None):
         super().__init__()
         self.text_value = value
+
 
 class TextTwoWaysRule_apply_tests(TestCase):
     @case('"some value"', {})
@@ -195,6 +202,7 @@ class TextTwoWaysRule_apply_tests(TestCase):
         actual_binding = node.add_binding.call_args[0][0]
         self.assertIsInstance(actual_binding, TwoWaysBinding, msg)
 
+
 class CheckBoxTwoWaysRule_suitable_tests(TestCase):
     @case({}, False)
     @case({'attr': XmlAttr('Value')}, False)
@@ -210,10 +218,12 @@ class CheckBoxTwoWaysRule_suitable_tests(TestCase):
         msg = 'should be suitable for CheckBox and "Value" property'
         self.assertEqual(expected, actual, msg)
 
+
 class CheckViewModel(ObservableEntity):
     def __init__(self, value=None):
         super().__init__()
         self.value = value
+
 
 class CheckBoxTwoWaysRule_apply_tests(TestCase):
     @case('True', {})
