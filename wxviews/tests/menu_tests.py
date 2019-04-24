@@ -6,7 +6,7 @@ from unittest.mock import Mock, call
 from wx import Frame, MenuBar, Menu # pylint: disable=E0611
 from pyviews.core import InstanceNode, Property
 from pyviews.testing import case
-from .menu import set_to_frame, add_menu_properties, set_to_menu_bar, set_to_menu
+from wxviews.menus import set_to_frame, add_menu_properties, set_to_menu_bar, set_to_menu
 
 class EmptyClass:
     pass

@@ -5,9 +5,10 @@ from pyviews.core import XmlAttr, Node, InheritedDict
 from pyviews.core.ioc import register_func
 from pyviews.compilation import CompiledExpression
 from pyviews.testing import case
-from wxviews.node import SizerNode, WidgetNode
 from wxviews import rendering
 from wxviews.rendering import create_node, get_attr_args
+from wxviews.sizers import SizerNode
+from wxviews.widgets import WidgetNode
 
 register_func('expression', CompiledExpression)
 

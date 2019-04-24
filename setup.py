@@ -27,7 +27,7 @@ def setup_package():
         python_requires='>=3.6',
         install_requires=['pyviews>=2.0.4', 'wxpython'],
         keywords='binding wxpython pyviews python mvvm wx',
-        packages=find_packages(exclude=['sandbox']))
+        packages=find_packages(exclude=['sandbox', '*.tests']))
 
 
 _HERE = dirname(__file__)

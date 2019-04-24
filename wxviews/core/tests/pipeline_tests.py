@@ -1,15 +1,14 @@
-# pylint: disable=C0111,C0103
-
 from unittest import TestCase
 from unittest.mock import Mock, call, patch
 from pyviews.testing import case
 from pyviews.core.ioc import register_func
 from pyviews.core import InstanceNode, XmlAttr
 from pyviews.compilation import CompiledExpression
-from . import common
-from .common import setup_instance_node_setter, instance_node_setter, apply_attributes, add_to_sizer
+from wxviews.core import pipeline
+from wxviews.core.pipeline import setup_instance_node_setter, instance_node_setter, apply_attributes, add_to_sizer
 
 register_func('expression', CompiledExpression)
+
 
 class setup_instance_node_setter_tests(TestCase):
     def test_sets_attr_setter(self):
@@ -20,14 +19,16 @@ class setup_instance_node_setter_tests(TestCase):
         msg = 'setup_instance_node_setter should set attr_setter'
         self.assertEqual(node.attr_setter, instance_node_setter, msg)
 
+
 class instance_node_setter_tests(TestCase):
-    def _data(self, inst=None):
-        return (InstanceNode(inst if inst else Mock(), None), 'key', 'value')
+    @staticmethod
+    def _data(inst=None):
+        return InstanceNode(inst if inst else Mock(), None), 'key', 'value'
 
     def test_sets_properties(self):
         node, key, value = self._data()
         setter = Mock()
-        node.properties = {key:Mock(set=setter)}
+        node.properties = {key: Mock(set=setter)}
 
         instance_node_setter(node, key, value)
 
@@ -46,6 +47,7 @@ class instance_node_setter_tests(TestCase):
     def test_sets_instance_property(self):
         class Instance:
             pass
+
         inst = Instance()
         node, key, value = self._data(inst)
         setattr(inst, key, None)
@@ -55,8 +57,9 @@ class instance_node_setter_tests(TestCase):
         msg = 'setup_setter should setup set to instance property'
         self.assertEqual(getattr(inst, key), value, msg)
 
+
 class apply_attributes_tests(TestCase):
-    @patch(common.__name__ + '.apply_attribute')
+    @patch(pipeline.__name__ + '.apply_attribute')
     @case(XmlAttr('key', 'value', 'init'))
     def test_skip_special_attributes(self, apply_attribute: Mock, attr):
         node = Mock(xml_node=Mock(attrs=[attr]))
@@ -66,7 +69,7 @@ class apply_attributes_tests(TestCase):
         msg = 'should skip attributes with "init" and "sizer" namespaces'
         self.assertFalse(apply_attribute.called, msg)
 
-    @patch(common.__name__ + '.apply_attribute')
+    @patch(pipeline.__name__ + '.apply_attribute')
     @case([XmlAttr('key', 'value')])
     @case([XmlAttr('key', 'value', ''), XmlAttr('other_key', 1, 'some namespace')])
     def test_apply_attributes(self, apply_attribute: Mock, attrs):
@@ -78,11 +81,13 @@ class apply_attributes_tests(TestCase):
         msg = 'should apply passed attributes'
         self.assertEqual(apply_attribute.call_args_list, [call(node, attr) for attr in attrs], msg)
 
+
 class add_to_sizer_tests(TestCase):
-    def _get_mocks(self, sizer_args=None, node_globals=None):
+    @staticmethod
+    def _get_mocks(sizer_args=None, node_globals=None):
         sizer_args = sizer_args if sizer_args else {}
         node = Mock(sizer_args=sizer_args, node_globals=node_globals, instace=Mock())
-        return (node, Mock())
+        return node, Mock()
 
     @case({})
     @case({'key': 'value'})

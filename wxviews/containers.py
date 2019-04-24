@@ -1,11 +1,14 @@
 """Contains methods for node setups creation"""
-
+from pyviews.core import Node, XmlNode
 from pyviews.rendering import RenderingPipeline
 from pyviews.core.observable import InheritedDict
 from pyviews.rendering import apply_attributes, render_children
 from pyviews.rendering import render_view
 from pyviews.container import render
-from wxviews.node import Container, View, For, If
+
+
+class Container(Node):
+    """Used to combine some xml elements"""
 
 
 def get_container_pipeline() -> RenderingPipeline:
@@ -28,6 +31,26 @@ def _get_child_args(node: Container, parent=None, sizer=None, **_):
         'node_globals': InheritedDict(node.node_globals),
         'sizer': sizer
     }
+
+
+class View(Container):
+    """Loads xml from another file"""
+
+    def __init__(self, xml_node: XmlNode, node_globals: InheritedDict = None):
+        super().__init__(xml_node, node_globals=node_globals)
+        self._name = None
+        self.name_changed = lambda view, name, previous_name: None
+
+    @property
+    def name(self):
+        """Returns view name"""
+        return self._name
+
+    @name.setter
+    def name(self, value):
+        old_name = self._name
+        self._name = value
+        self.name_changed(self, value, old_name)
 
 
 def get_view_pipeline() -> RenderingPipeline:
@@ -64,6 +87,26 @@ def _rerender_view(node: View, args: dict):
     render_view_children(node, **args)
     if 'parent' in args:
         args['parent'].Layout()
+
+
+class For(Container):
+    """Renders children for every item in items collection"""
+
+    def __init__(self, xml_node: XmlNode, node_globals: InheritedDict = None):
+        super().__init__(xml_node, node_globals=node_globals)
+        self._items = []
+        self.items_changed = lambda node, items, old_items: None
+
+    @property
+    def items(self):
+        """Returns items"""
+        return self._items
+
+    @items.setter
+    def items(self, value):
+        old_items = self._items
+        self._items = value
+        self.items_changed(self, value, old_items)
 
 
 def get_for_pipeline() -> RenderingPipeline:
@@ -152,6 +195,26 @@ def get_if_pipeline() -> RenderingPipeline:
         render_if,
         rerender_on_condition_change
     ])
+
+
+class If(Container):
+    """Renders children if condition is True"""
+
+    def __init__(self, xml_node: XmlNode, node_globals: InheritedDict = None):
+        super().__init__(xml_node, node_globals=node_globals)
+        self._condition = False
+        self.condition_changed = lambda node, cond, old_cond: None
+
+    @property
+    def condition(self):
+        """Returns condition"""
+        return self._condition
+
+    @condition.setter
+    def condition(self, value):
+        old_condition = self._condition
+        self._condition = value
+        self.condition_changed(self, value, old_condition)
 
 
 def render_if(node: If, **args):

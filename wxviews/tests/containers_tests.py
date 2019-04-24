@@ -1,15 +1,12 @@
-# pylint: disable=C0111,C0103,C0301,W0613
-
 from math import floor
 from unittest import TestCase
 from unittest.mock import Mock, call, patch
 from pyviews.testing import case
-from wxviews.node import Container, View, For, If
-from . import containers
-from .containers import render_container_children
-from .containers import render_view_children, rerender_on_view_change
-from .containers import render_for_items, rerender_on_items_change
-from .containers import render_if, rerender_on_condition_change
+from wxviews import containers
+from wxviews.containers import Container, render_container_children
+from wxviews.containers import View, render_view_children, rerender_on_view_change
+from wxviews.containers import For, render_for_items, rerender_on_items_change
+from wxviews.containers import If, render_if, rerender_on_condition_change
 
 
 class render_container_children_tests(TestCase):
@@ -36,6 +33,28 @@ class render_container_children_tests(TestCase):
 
         msg = 'should render all xml children for every item'
         self.assertEqual(render_children.call_args, call(node, **child_args), msg)
+
+
+class View_init_tests(TestCase):
+    def test_name_is_none_by_default(self):
+        view = View(Mock())
+
+        msg = 'name should be None by default'
+        self.assertIsNone(view.name, msg)
+
+
+class View_name_changed_tests(TestCase):
+    @case(None, 'name')
+    @case('name', 'another name')
+    def test_called_on_name_changed(self, old_name, new_name):
+        view = View(Mock())
+        view.name = old_name
+        view.name_changed = Mock()
+
+        view.name = new_name
+
+        msg = 'should call name_changed on name change'
+        self.assertEqual(view.name_changed.call_args, call(view, new_name, old_name), msg)
 
 
 class render_view_children_tests(TestCase):
@@ -178,6 +197,29 @@ class rerender_on_view_change_tests(TestCase):
         self.assertTrue(parent.Layout.called, msg)
 
 
+class For_init_tests(TestCase):
+    def test_items_is_empty_by_default(self):
+        node = For(Mock())
+
+        msg = 'items should be empty by default'
+        self.assertEqual(node.items, [], msg)
+
+
+class For_items_changed_tests(TestCase):
+    @case([], [Mock()])
+    @case([Mock()], [])
+    @case([Mock()], [Mock(), Mock()])
+    def test_called_on_items_changed(self, old_items, new_items):
+        node = For(Mock())
+        node.items = old_items
+        node.items_changed = Mock()
+
+        node.items = new_items
+
+        msg = 'should call items_changed on items change'
+        self.assertEqual(node.items_changed.call_args, call(node, new_items, old_items), msg)
+
+
 class render_for_items_tests(TestCase):
     @patch(containers.__name__ + '.render')
     @case([], [], [])
@@ -304,6 +346,30 @@ class rerender_on_items_change_tests(TestCase):
 
         msg = 'should call parent Layout'
         self.assertTrue(parent.Layout.called, msg)
+
+
+class If_init_tests(TestCase):
+    def test_condition_is_false_by_default(self):
+        node = If(Mock())
+
+        msg = 'condition should be False by default'
+        self.assertFalse(node.condition, msg)
+
+
+class If_condition_changed_tests(TestCase):
+    @case(False, True)
+    @case(True, False)
+    def test_called_on_condition_changed(self, old_condition, new_condition):
+        node = If(Mock())
+        node.condition = old_condition
+        node.condition_changed = Mock()
+
+        node.condition = new_condition
+
+        msg = 'should call condition_changed on condition change'
+        self.assertEqual(node.condition_changed.call_args,
+                         call(node, new_condition, old_condition),
+                         msg)
 
 
 class render_if_tests(TestCase):
