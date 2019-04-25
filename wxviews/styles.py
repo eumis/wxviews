@@ -9,6 +9,9 @@ from pyviews.container import expression
 from wxviews.containers import render_view_children
 
 
+STYLES_KEY = '_node_styles'
+
+
 class StyleError(CoreError):
     """Error for style"""
 
@@ -72,9 +75,9 @@ def get_style_pipeline() -> RenderingPipeline:
 def setup_node_styles(_: Style, parent_node: Node = None, node_styles: InheritedDict = None, **__):
     if node_styles is not None:
         return
-    if '_node_styles' not in parent_node.node_globals:
-        parent_node.node_globals['_node_styles'] = InheritedDict()
-    return {'node_styles': parent_node.node_globals['_node_styles']}
+    if STYLES_KEY not in parent_node.node_globals:
+        parent_node.node_globals[STYLES_KEY] = InheritedDict()
+    return {'node_styles': parent_node.node_globals[STYLES_KEY]}
 
 
 def apply_style_items(node: Style, **_):
@@ -134,12 +137,12 @@ def get_styles_view_pipeline() -> RenderingPipeline:
 
 def store_to_globals(view: StylesView, parent_node: Node = None, **_):
     child: Node = view.children[0]
-    styles: InheritedDict = child.node_globals['_node_styles']
-    if '_node_styles' in parent_node.node_globals:
-        parent_styles = parent_node.node_globals['_node_styles']
+    styles: InheritedDict = child.node_globals[STYLES_KEY]
+    if STYLES_KEY in parent_node.node_globals:
+        parent_styles = parent_node.node_globals[STYLES_KEY]
         merged_styles = {**parent_styles.to_dictionary(), **styles.to_dictionary()}
         styles = InheritedDict(merged_styles)
-    parent_node.node_globals['_node_styles'] = styles
+    parent_node.node_globals[STYLES_KEY] = styles
 
 
 def style(node: Node, _: str, keys: List[str]):
@@ -147,7 +150,7 @@ def style(node: Node, _: str, keys: List[str]):
     if isinstance(keys, str):
         keys = [key.strip() for key in keys.split(',') if key]
     try:
-        node_styles = node.node_globals['_node_styles']
+        node_styles = node.node_globals[STYLES_KEY]
         for key in keys:
             for item in node_styles[key]:
                 item.apply(node)
