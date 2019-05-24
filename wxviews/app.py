@@ -2,7 +2,7 @@
 
 from os.path import abspath
 from wx import Frame, App, MenuBar, Menu, MenuItem
-from pyviews.core import ioc, Binder
+from pyviews.core import ioc, Binder, Expression
 from pyviews.compilation import CompiledExpression
 from pyviews.binding import add_one_way_rules
 from pyviews.rendering import render_node, render_view, RenderingPipeline
@@ -24,7 +24,7 @@ def register_dependencies():
     ioc.register_single('view_ext', 'xml')
     ioc.register_func('create_node', create_node)
     ioc.register_func('render', render_node)
-    ioc.register_func('expression', CompiledExpression)
+    ioc.register_func(Expression, CompiledExpression)
     ioc.register_single('binder', setup_binder())
     ioc.register_single('namespaces', {'': 'wx', 'init': 'init'})
 

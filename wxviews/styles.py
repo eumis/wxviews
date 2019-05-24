@@ -2,10 +2,10 @@
 
 from typing import Any, List
 
-from pyviews.core import XmlAttr, InheritedDict, Node, CoreError, Modifier, XmlNode
+from injectool import resolve
+from pyviews.core import XmlAttr, InheritedDict, Node, CoreError, Modifier, XmlNode, Expression
 from pyviews.compilation import is_expression, parse_expression
 from pyviews.rendering import get_setter, render_children, RenderingPipeline, apply_attributes
-from pyviews.container import expression
 from wxviews.containers import render_view_children
 
 
@@ -94,7 +94,7 @@ def _get_style_item(node: Style, attr: XmlAttr):
     setter = get_setter(attr)
     value = attr.value if attr.value else ''
     if is_expression(value):
-        expression_ = expression(parse_expression(value)[1])
+        expression_ = resolve(Expression)(parse_expression(value)[1])
         value = expression_.execute(node.node_globals.to_dictionary())
     return StyleItem(setter, attr.name, value)
 

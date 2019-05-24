@@ -1,39 +1,40 @@
 from unittest import TestCase
 from unittest.mock import Mock, call, patch
-from pyviews.testing import case
-from pyviews.core.ioc import register_func
-from pyviews.core import InstanceNode, XmlAttr
+
+from injectool import register_func
+from pyviews.core import InstanceNode, XmlAttr, Expression
 from pyviews.compilation import CompiledExpression
 from wxviews.core import pipeline
 from wxviews.core.pipeline import setup_instance_node_setter, instance_node_setter, apply_attributes, add_to_sizer
 
-register_func('expression', CompiledExpression)
+register_func(Expression, CompiledExpression)
 
 
-class setup_instance_node_setter_tests(TestCase):
-    def test_sets_attr_setter(self):
-        node = Mock()
+def test_setup_instance_node_setter():
+    """setup_instance_node_setter should set attr_setter"""
+    node = Mock()
 
-        setup_instance_node_setter(node)
+    setup_instance_node_setter(node)
 
-        msg = 'setup_instance_node_setter should set attr_setter'
-        self.assertEqual(node.attr_setter, instance_node_setter, msg)
+    assert node.attr_setter == instance_node_setter
 
 
-class instance_node_setter_tests(TestCase):
+class InstanceNodeSetterTests:
+    """instance_node_setter() tests"""
+
     @staticmethod
     def _data(inst=None):
         return InstanceNode(inst if inst else Mock(), None), 'key', 'value'
 
     def test_sets_properties(self):
+        """should set propertyies """
         node, key, value = self._data()
         setter = Mock()
         node.properties = {key: Mock(set=setter)}
 
         instance_node_setter(node, key, value)
 
-        msg = 'setup_setter should setup set to properties'
-        self.assertEqual(setter.call_args, call(value), msg)
+        assert setter.call_args == call(value)
 
     def test_sets_node_property(self):
         node, key, value = self._data()

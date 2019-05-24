@@ -1,14 +1,15 @@
 """Binding based on events"""
 
 from typing import Callable, Any
+
+from injectool import resolve
 from wx import EvtHandler, TextEntry, CheckBox
 from wx import Event, CommandEvent, EVT_TEXT, EVT_CHECKBOX
-from pyviews.core import Modifier, XmlAttr, InstanceNode
-from pyviews.core import Binding, BindingTarget, BindingRule, Binder
-from pyviews.binding import ExpressionBinding, TwoWaysBinding
+from pyviews.core import Modifier, XmlAttr, InstanceNode, Expression
+from pyviews.core import Binding, BindingTarget, BindingRule
+from pyviews.binding import ExpressionBinding, TwoWaysBinding, Binder
 from pyviews.binding import get_expression_target, PropertyTarget
 from pyviews.compilation import parse_expression, is_expression
-from pyviews.container import expression
 
 
 class EventBinding(Binding):
@@ -58,7 +59,7 @@ class TextTwoWaysRule(BindingRule):
               attr: XmlAttr = None,
               **args):
         expr_body = parse_expression(expr_body)[1] if is_expression(expr_body) else expr_body
-        expression_ = expression(expr_body)
+        expression_ = resolve(Expression)(expr_body)
         value_target = PropertyTarget(node, attr.name, modifier)
         expression_binding = ExpressionBinding(value_target, expression_, node.node_globals)
 
@@ -87,7 +88,7 @@ class CheckBoxTwoWaysRule(BindingRule):
               attr: XmlAttr = None,
               **args):
         expr_body = parse_expression(expr_body)[1] if is_expression(expr_body) else expr_body
-        expression_ = expression(expr_body)
+        expression_ = resolve(Expression)(expr_body)
         value_target = PropertyTarget(node, attr.name, modifier)
         expression_binding = ExpressionBinding(value_target, expression_, node.node_globals)
 
