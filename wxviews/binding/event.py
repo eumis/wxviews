@@ -7,7 +7,7 @@ from wx import EvtHandler, TextEntry, CheckBox
 from wx import Event, CommandEvent, EVT_TEXT, EVT_CHECKBOX
 from pyviews.core import Modifier, XmlAttr, InstanceNode, Expression
 from pyviews.core import Binding, BindingTarget, BindingRule
-from pyviews.binding import ExpressionBinding, TwoWaysBinding, Binder
+from pyviews.binding import ExpressionBinding, TwoWaysBinding
 from pyviews.binding import get_expression_target, PropertyTarget
 from pyviews.compilation import parse_expression, is_expression
 
@@ -99,9 +99,3 @@ class CheckBoxTwoWaysRule(BindingRule):
         two_ways_binding = TwoWaysBinding(expression_binding, value_binding)
         two_ways_binding.bind()
         node.add_binding(two_ways_binding)
-
-
-def add_two_ways_rules(binder: Binder):
-    """Adds wxviews binding rules to passed factory"""
-    binder.add_rule('twoways', TextTwoWaysRule())
-    binder.add_rule('twoways', CheckBoxTwoWaysRule())

@@ -60,7 +60,7 @@ def _create_inst(inst_type, **init_args):
     return inst_type(*args, **kwargs)
 
 
-def _get_attr_args_values(xml_node, namespace: str, node_globals: InheritedDict = None) -> dict:
+def _get_attr_args_values(xml_node, namespace: str, node_globals: InheritedDict = None) -> list:
     init_attrs = [attr for attr in xml_node.attrs if attr.namespace == namespace]
     return [_get_init_value(attr, node_globals) for attr in init_attrs]
 

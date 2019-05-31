@@ -8,7 +8,6 @@ from pyviews.compilation import is_expression, parse_expression
 from pyviews.rendering import get_setter, render_children, RenderingPipeline, apply_attributes
 from wxviews.containers import render_view_children
 
-
 STYLES_KEY = '_node_styles'
 
 
