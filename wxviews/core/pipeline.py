@@ -4,6 +4,8 @@ from pyviews.core.node import Node, InstanceNode
 from pyviews.rendering.pipeline import apply_attribute
 from wx import Sizer
 
+from .node import Sizerable
+
 
 def setup_instance_node_setter(node: InstanceNode, **_):
     """Sets attr_setter for WidgetNode"""
@@ -27,7 +29,7 @@ def apply_attributes(node: Node, **_):
         apply_attribute(node, attr)
 
 
-def add_to_sizer(node: InstanceNode, sizer: Sizer = None, **_):
+def add_to_sizer(node: (InstanceNode, Sizerable), sizer: Sizer = None, **_):
     """Adds to wx instance to sizer"""
     if sizer is None:
         return

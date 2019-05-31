@@ -1,12 +1,13 @@
 """Customizing of wx parsing"""
+from injectool import resolve
 
+from pyviews.core import Expression
 from wx import Sizer, GridSizer, MenuBar, Menu, StaticBoxSizer
 from pyviews.core.xml import XmlNode, XmlAttr
 from pyviews.core.observable import InheritedDict
 from pyviews.core.node import Node
 from pyviews.compilation import is_expression, parse_expression
 from pyviews.rendering import get_inst_type, get_init_args
-from pyviews.container import expression
 
 from wxviews.sizers import SizerNode
 from wxviews.widgets import WidgetNode
@@ -59,7 +60,7 @@ def _create_inst(inst_type, **init_args):
     return inst_type(*args, **kwargs)
 
 
-def _get_attr_args_values(xml_node, namespace: str, node_globals: InheritedDict = None) -> dict:
+def _get_attr_args_values(xml_node, namespace: str, node_globals: InheritedDict = None) -> list:
     init_attrs = [attr for attr in xml_node.attrs if attr.namespace == namespace]
     return [_get_init_value(attr, node_globals) for attr in init_attrs]
 
@@ -82,5 +83,5 @@ def _get_init_value(attr: XmlAttr, node_globals: InheritedDict):
     if is_expression(stripped_value):
         body = parse_expression(stripped_value)[1]
         parameters = node_globals.to_dictionary() if node_globals else {}
-        return expression(body).execute(parameters)
+        return resolve(Expression)(body).execute(parameters)
     return attr.value

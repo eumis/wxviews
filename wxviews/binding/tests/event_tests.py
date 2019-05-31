@@ -1,17 +1,17 @@
-from unittest import TestCase
 from unittest.mock import Mock, call
-from wx import TextCtrl, CheckBox  # pylint: disable=E0611
-from wx import EVT_TEXT, EVT_CHECKBOX  # pylint: disable=E0611
-from pyviews.testing import case
-from pyviews.core.ioc import register_func
-from pyviews.core import XmlAttr, BindingError
+
+from injectool import register_func
+from pytest import mark, raises
+from wx import TextCtrl, CheckBox
+from wx import EVT_TEXT, EVT_CHECKBOX
+from pyviews.core import XmlAttr, BindingError, Expression
 from pyviews.core import InheritedDict, ObservableEntity
 from pyviews.binding import TwoWaysBinding
 from pyviews.compilation import CompiledExpression
 from wxviews.binding.event import EventBinding, TextTwoWaysRule, CheckBoxTwoWaysRule
 from wxviews.widgets import WidgetNode
 
-register_func('expression', CompiledExpression)
+register_func(Expression, CompiledExpression)
 
 
 class EventHandlerStub:
@@ -75,58 +75,45 @@ def prop_modifier(node, prop, value):
     setattr(node.instance, prop, value)
 
 
-class EventBinding_bind_tests(TestCase):
-    def test_binds_target_update_to_event(self):
+class EventBindingTests:
+    """EventBinding class tests"""
+
+    @staticmethod
+    def test_binds_target_update_to_event():
+        """bind() should subscribe to event and update target"""
         target, value = (Mock(), 'some value')
         evt_handler, event = (TextEntryStub(), EVT_TEXT)
         binding = EventBinding(target, evt_handler, event)
 
         binding.bind()
+
         evt_handler.ChangeValue(value)
+        assert call(value) == target.on_change.call_args
 
-        msg = 'should subscribe to event and update target'
-        self.assertEqual(call(value), target.on_change.call_args, msg)
-
-    def test_binds_target_update_to_event_with_custom_get_value(self):
+    @staticmethod
+    def test_binds_target_update_to_event_with_custom_get_value():
+        """bind() should subscribe to event and update target using passed get_value"""
         target, value = (Mock(), True)
         evt_handler, event = (CheckBoxStub(), EVT_CHECKBOX)
         binding = EventBinding(target, evt_handler, event, lambda evt: evt.IsChecked())
 
         binding.bind()
+
         evt_handler.SetValue(value)
+        assert call(value) == target.on_change.call_args
 
-        msg = 'should subscribe to event and update target using passed get_value'
-        self.assertEqual(call(value), target.on_change.call_args, msg)
-
-
-class EventBinding_destroy_tests(TestCase):
-    def test_unbinds_event(self):
+    @staticmethod
+    def test_destroy():
+        """should unsubscribe from event"""
         target, value = (Mock(), 'some value')
         evt_handler, event = (TextEntryStub(), EVT_TEXT)
         binding = EventBinding(target, evt_handler, event)
-
         binding.bind()
+
         binding.destroy()
+
         evt_handler.ChangeValue(value)
-
-        msg = 'should unsubscribe from event'
-        self.assertFalse(target.on_change.called, msg)
-
-
-class TextTwoWaysRule_suitable_tests(TestCase):
-    @case({}, False)
-    @case({'attr': XmlAttr('Value')}, False)
-    @case({'node': WidgetNode(TextEntryStub(), Mock())}, False)
-    @case({'node': WidgetNode(TextEntryStub(), Mock()), 'attr': XmlAttr('Hint')}, False)
-    @case({'node': WidgetNode(Mock(), Mock()), 'attr': XmlAttr('Value')}, False)
-    @case({'node': WidgetNode(TextEntryStub(), Mock()), 'attr': XmlAttr('Value')}, True)
-    def test_checks_instance_type_and_attribute(self, args: dict, expected: bool):
-        rule = TextTwoWaysRule()
-
-        actual = rule.suitable(**args)
-
-        msg = 'should be suitable for TextEntry and "Value" property'
-        self.assertEqual(expected, actual, msg)
+        assert not target.on_change.called
 
 
 class TextViewModel(ObservableEntity):
@@ -135,39 +122,68 @@ class TextViewModel(ObservableEntity):
         self.text_value = value
 
 
-class TextTwoWaysRule_apply_tests(TestCase):
-    @case('"some value"', {})
-    @case('{"some value"}', {})
-    @case('val + " value"', {'val': "some"})
-    @case('{val + " value"}', {'val': "some"})
-    @case('vm.text_value + "text"', {'vm': TextViewModel("some ")})
-    @case('{vm.text_value + "text"}', {'vm': TextViewModel("some ")})
-    def test_raises_for_invalid_expression(self, expr_body: str, node_globals: dict):
+class TextTwoWaysRuleTests:
+    """TextTwoWaysRule class tests"""
+
+    @staticmethod
+    @mark.parametrize('args, expected', [
+        ({}, False),
+        ({'attr': XmlAttr('Value')}, False),
+        ({'node': WidgetNode(TextEntryStub(), Mock())}, False),
+        ({'node': WidgetNode(TextEntryStub(), Mock()), 'attr': XmlAttr('Hint')}, False),
+        ({'node': WidgetNode(Mock(), Mock()), 'attr': XmlAttr('Value')}, False),
+        ({'node': WidgetNode(TextEntryStub(), Mock()), 'attr': XmlAttr('Value')}, True)
+    ])
+    def test_suitable(args: dict, expected: bool):
+        """should be suitable for TextEntry and "Value" property"""
+        rule = TextTwoWaysRule()
+
+        actual = rule.suitable(**args)
+
+        assert expected == actual
+
+    @staticmethod
+    @mark.parametrize('expr_body, node_globals', [
+        ('"some value"', {}),
+        ('{"some value"}', {}),
+        ('val + " value"', {'val': "some"}),
+        ('{val + " value"}', {'val': "some"}),
+        ('vm.text_value + "text"', {'vm': TextViewModel("some ")}),
+        ('{vm.text_value + "text"}', {'vm': TextViewModel("some ")})
+    ])
+    def test_apply_raises(expr_body: str, node_globals: dict):
+        """apply() should raise error if expression is not observable property or dict value"""
         rule = TextTwoWaysRule()
         node = Mock(node_globals=InheritedDict(node_globals))
 
-        msg = 'should raise error if expression is not observable property or dict value'
-        with self.assertRaises(BindingError, msg=msg):
+        with raises(BindingError):
             rule.apply(node=node, expr_body=expr_body,
                        modifier=Mock(), attr=XmlAttr('Value'))
 
-    @case('val', {'val': "value"}, "value")
-    @case('{val}', {'val': "value"}, "value")
-    @case('vm.text_value', {'vm': TextViewModel("some value")}, 'some value')
-    @case('{vm.text_value}', {'vm': TextViewModel("some value")}, 'some value')
-    def test_calls_passed_modifier(self, expr_body: str, node_globals: dict, expected_value):
+    @staticmethod
+    @mark.parametrize('expr_body, node_globals, expected_value', [
+        ('val', {'val': "value"}, "value"),
+        ('{val}', {'val': "value"}, "value"),
+        ('vm.text_value', {'vm': TextViewModel("some value")}, 'some value'),
+        ('{vm.text_value}', {'vm': TextViewModel("some value")}, 'some value')
+    ])
+    def test_calls_modifier(expr_body: str, node_globals: dict, expected_value):
+        """apply() should compile expression and call modifier"""
         rule, modifier, xml_attr = (TextTwoWaysRule(), Mock(), XmlAttr('Value'))
         node = Mock(node_globals=InheritedDict(node_globals))
 
         rule.apply(node=node, expr_body=expr_body, modifier=modifier, attr=xml_attr)
 
-        msg = 'should compile expression and call modifier'
-        self.assertEqual(call(node, xml_attr.name, expected_value), modifier.call_args, msg)
+        assert call(node, xml_attr.name, expected_value) == modifier.call_args
 
-    @case(None, 'value')
-    @case('', 'value')
-    @case('value', 'new value')
-    def test_binds_property_to_expression(self, value, new_value):
+    @staticmethod
+    @mark.parametrize('value, new_value', [
+        (None, 'value'),
+        ('', 'value'),
+        ('value', 'new value')
+    ])
+    def test_binds_property_to_expression(value, new_value):
+        """apply() should bind property to expression"""
         rule = TextTwoWaysRule()
         view_model = TextViewModel(value)
         node = Mock(instance=TextEntryStub(), node_globals=InheritedDict({'vm': view_model}))
@@ -175,10 +191,11 @@ class TextTwoWaysRule_apply_tests(TestCase):
         rule.apply(node=node, expr_body='vm.text_value', modifier=prop_modifier, attr=XmlAttr('Value'))
         view_model.text_value = new_value
 
-        msg = 'should bind property to expression'
-        self.assertEqual(new_value, node.instance.Value, msg)
+        assert new_value == node.instance.Value
 
-    def test_binds_expression_to_property(self):
+    @staticmethod
+    def test_binds_expression_to_property():
+        """apply() should update expression target on EVT_TEXT event"""
         rule = TextTwoWaysRule()
         value, new_value = ('value', 'new value')
         widget, view_model = TextEntryStub(), TextViewModel(value)
@@ -187,36 +204,19 @@ class TextTwoWaysRule_apply_tests(TestCase):
         rule.apply(node=node, expr_body='vm.text_value', attr=XmlAttr('Value'), modifier=prop_modifier)
         widget.ChangeValue(new_value)
 
-        msg = 'should update expression target on EVT_TEXT event'
-        self.assertEqual(new_value, view_model.text_value, msg)
+        assert new_value == view_model.text_value
 
-    def test_adds_binding_to_node(self):
+    @staticmethod
+    def test_adds_binding_to_node():
+        """apply() should add binding to node"""
         rule = TextTwoWaysRule()
         node = Mock(node_globals=InheritedDict({'val': 'value'}))
 
         rule.apply(node=node, expr_body='val', modifier=Mock(), attr=XmlAttr('Value', 'mod'))
-
-        msg = 'should add binding to node'
-        self.assertTrue(node.add_binding.called, msg)
-
         actual_binding = node.add_binding.call_args[0][0]
-        self.assertIsInstance(actual_binding, TwoWaysBinding, msg)
 
-
-class CheckBoxTwoWaysRule_suitable_tests(TestCase):
-    @case({}, False)
-    @case({'attr': XmlAttr('Value')}, False)
-    @case({'node': WidgetNode(CheckBoxStub(), Mock())}, False)
-    @case({'node': WidgetNode(CheckBoxStub(), Mock()), 'attr': XmlAttr('Hint')}, False)
-    @case({'node': WidgetNode(Mock(), Mock()), 'attr': XmlAttr('Value')}, False)
-    @case({'node': WidgetNode(CheckBoxStub(), Mock()), 'attr': XmlAttr('Value')}, True)
-    def test_checks_instance_type_and_attribute(self, args: dict, expected: bool):
-        rule = CheckBoxTwoWaysRule()
-
-        actual = rule.suitable(**args)
-
-        msg = 'should be suitable for CheckBox and "Value" property'
-        self.assertEqual(expected, actual, msg)
+        assert node.add_binding.called
+        assert isinstance(actual_binding, TwoWaysBinding)
 
 
 class CheckViewModel(ObservableEntity):
@@ -225,39 +225,68 @@ class CheckViewModel(ObservableEntity):
         self.value = value
 
 
-class CheckBoxTwoWaysRule_apply_tests(TestCase):
-    @case('True', {})
-    @case('{True}', {})
-    @case('val or False', {'val': True})
-    @case('{val or False}', {'val': True})
-    @case('vm.value or True', {'vm': CheckViewModel(False)})
-    @case('{vm.value or True}', {'vm': CheckViewModel(False)})
-    def test_raises_for_invalid_expression(self, expr_body: str, node_globals: dict):
+class CheckBoxTwoWaysRuleTests:
+    """CheckBoxTwoWaysRule class tests"""
+
+    @staticmethod
+    @mark.parametrize('args, expected', [
+        ({}, False),
+        ({'attr': XmlAttr('Value')}, False),
+        ({'node': WidgetNode(CheckBoxStub(), Mock())}, False),
+        ({'node': WidgetNode(CheckBoxStub(), Mock()), 'attr': XmlAttr('Hint')}, False),
+        ({'node': WidgetNode(Mock(), Mock()), 'attr': XmlAttr('Value')}, False),
+        ({'node': WidgetNode(CheckBoxStub(), Mock()), 'attr': XmlAttr('Value')}, True)
+    ])
+    def test_suitable(args: dict, expected: bool):
+        """should be suitable for CheckBox and "Value" property"""
+        rule = CheckBoxTwoWaysRule()
+
+        actual = rule.suitable(**args)
+
+        assert expected == actual
+
+    @staticmethod
+    @mark.parametrize('expr_body, node_globals', [
+        ('True', {}),
+        ('{True}', {}),
+        ('val or False', {'val': True}),
+        ('{val or False}', {'val': True}),
+        ('vm.value or True', {'vm': CheckViewModel(False)}),
+        ('{vm.value or True}', {'vm': CheckViewModel(False)})
+    ])
+    def test_apply_raises(expr_body: str, node_globals: dict):
+        """should raise error if expression is not observable property or dict value"""
         rule = CheckBoxTwoWaysRule()
         node = Mock(node_globals=InheritedDict(node_globals))
 
-        msg = 'should raise error if expression is not observable property or dict value'
-        with self.assertRaises(BindingError, msg=msg):
+        with raises(BindingError):
             rule.apply(node=node, expr_body=expr_body,
                        modifier=Mock(), attr=XmlAttr('Value'))
 
-    @case('val', {'val': True}, True)
-    @case('{val}', {'val': True}, True)
-    @case('{vm.value}', {'vm': CheckViewModel(False)}, False)
-    def test_calls_passed_modifier(self, expr_body: str, node_globals: dict, expected_value):
+    @staticmethod
+    @mark.parametrize('expr_body, node_globals, expected_value', [
+        ('val', {'val': True}, True),
+        ('{val}', {'val': True}, True),
+        ('{vm.value}', {'vm': CheckViewModel(False)}, False)
+    ])
+    def test_calls_passed_modifier(expr_body: str, node_globals: dict, expected_value):
+        """apply() should compile expression and call modifier"""
         rule, modifier, xml_attr = (CheckBoxTwoWaysRule(), Mock(), XmlAttr('Value'))
         node = Mock(node_globals=InheritedDict(node_globals))
 
         rule.apply(node=node, expr_body=expr_body, modifier=modifier, attr=xml_attr)
 
-        msg = 'should compile expression and call modifier'
-        self.assertEqual(call(node, xml_attr.name, expected_value), modifier.call_args, msg)
+        assert call(node, xml_attr.name, expected_value) == modifier.call_args
 
-    @case(None, True)
-    @case(None, False)
-    @case(False, True)
-    @case(True, False)
-    def test_binds_property_to_expression(self, value, new_value):
+    @staticmethod
+    @mark.parametrize('value, new_value', [
+        (None, True),
+        (None, False),
+        (False, True),
+        (True, False)
+    ])
+    def test_binds_property_to_expression(value, new_value):
+        """apply() should bind property to expression"""
         rule = CheckBoxTwoWaysRule()
         view_model = CheckViewModel(value)
         node = Mock(instance=CheckBoxStub(), node_globals=InheritedDict({'vm': view_model}))
@@ -265,12 +294,15 @@ class CheckBoxTwoWaysRule_apply_tests(TestCase):
         rule.apply(node=node, expr_body='vm.value', modifier=prop_modifier, attr=XmlAttr('Value'))
         view_model.value = new_value
 
-        msg = 'should bind property to expression'
-        self.assertEqual(new_value, node.instance.Value, msg)
+        assert new_value == node.instance.Value
 
-    @case(False, True)
-    @case(True, False)
-    def test_binds_expression_to_property(self, value, new_value):
+    @staticmethod
+    @mark.parametrize('value, new_value', [
+        (False, True),
+        (True, False)
+    ])
+    def test_binds_expression_to_property(value, new_value):
+        """apply() should update expression target on EVT_CHECK event"""
         rule = CheckBoxTwoWaysRule()
         view_model = CheckViewModel(value)
         node = Mock(instance=CheckBoxStub(), node_globals=InheritedDict({'vm': view_model}))
@@ -278,17 +310,16 @@ class CheckBoxTwoWaysRule_apply_tests(TestCase):
         rule.apply(node=node, expr_body='vm.value', attr=XmlAttr('Value'), modifier=prop_modifier)
         node.instance.SetValue(new_value)
 
-        msg = 'should update expression target on EVT_CHECK event'
-        self.assertEqual(new_value, view_model.value, msg)
+        assert new_value == view_model.value
 
-    def test_adds_binding_to_node(self):
+    @staticmethod
+    def test_adds_binding_to_node():
+        """apply() should add binding to node"""
         rule = TextTwoWaysRule()
         node = Mock(node_globals=InheritedDict({'val': 'value'}))
 
         rule.apply(node=node, expr_body='val', modifier=Mock(), attr=XmlAttr('Value', 'mod'))
-
-        msg = 'should add binding to node'
-        self.assertTrue(node.add_binding.called, msg)
-
         actual_binding = node.add_binding.call_args[0][0]
-        self.assertIsInstance(actual_binding, TwoWaysBinding, msg)
+
+        assert node.add_binding.called
+        assert isinstance(actual_binding, TwoWaysBinding)

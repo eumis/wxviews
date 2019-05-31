@@ -6,9 +6,8 @@ verify_ssl = true
 [dev-packages]
 
 [packages]
-wxpython = "*"
-pyviews = "*"
 wxviews = {editable = true,path = "."}
+pytest = "*"
 
 [requires]
 python_version = "3.6"

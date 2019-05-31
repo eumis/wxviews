@@ -1,10 +1,9 @@
 """Contains methods for node setups creation"""
-from pyviews.core import Node, XmlNode
+from pyviews.core import Node, XmlNode, render
 from pyviews.rendering import RenderingPipeline
 from pyviews.core.observable import InheritedDict
 from pyviews.rendering import apply_attributes, render_children
 from pyviews.rendering import render_view
-from pyviews.container import render
 
 
 class Container(Node):
