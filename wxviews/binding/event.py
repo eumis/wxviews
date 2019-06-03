@@ -45,15 +45,15 @@ class EventBinding(Binding):
 class TextTwoWaysRule(BindingRule):
     """wx.TextEntry.Value two ways binding"""
 
-    def suitable(self,
-                 node: InstanceNode = None,
+    @staticmethod
+    def suitable(node: InstanceNode = None,
                  attr: XmlAttr = None,
                  **args) -> bool:
         return node is not None and isinstance(node.instance, TextEntry) \
                and attr is not None and attr.name == 'Value'
 
-    def apply(self,
-              node: InstanceNode = None,
+    @staticmethod
+    def apply(node: InstanceNode = None,
               expr_body: str = None,
               modifier: Modifier = None,
               attr: XmlAttr = None,
@@ -74,15 +74,15 @@ class TextTwoWaysRule(BindingRule):
 class CheckBoxTwoWaysRule(BindingRule):
     """wx.CheckBox.Value two ways binding"""
 
-    def suitable(self,
-                 node: InstanceNode = None,
+    @staticmethod
+    def suitable(node: InstanceNode = None,
                  attr: XmlAttr = None,
                  **args) -> bool:
         return node is not None and isinstance(node.instance, CheckBox) \
                and attr is not None and attr.name == 'Value'
 
-    def apply(self,
-              node: InstanceNode = None,
+    @staticmethod
+    def apply(node: InstanceNode = None,
               expr_body: str = None,
               modifier: Modifier = None,
               attr: XmlAttr = None,

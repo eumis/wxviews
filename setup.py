@@ -1,4 +1,5 @@
 import codecs
+import re
 from os.path import join as join_path, dirname
 from setuptools import setup, find_packages
 
@@ -25,7 +26,7 @@ def setup_package():
             'Programming Language :: Python :: 3.6'
         ],
         python_requires='>=3.6',
-        install_requires=['pyviews>=2.0.4', 'wxpython'],
+        install_requires=['pyviews>=2.1.0', 'wxpython'],
         keywords='binding wxpython pyviews python mvvm wx',
         packages=find_packages(exclude=['sandbox', '*.tests']))
 
@@ -33,17 +34,17 @@ def setup_package():
 _HERE = dirname(__file__)
 
 
-def _get_version():
-    about = {}
-    with open(join_path(_HERE, "wxviews", "__version__.py")) as f:
-        exec(f.read(), about)
-    return about['__version__']
+def _get_version() -> str:
+    with open(join_path(_HERE, "wxviews", "__init__.py")) as package:
+        pattern = re.compile(r"__version__ = '(.*)'")
+        match = pattern.search(package.read())
+        return match.group(1)
 
 
 def _get_long_description():
     readme_path = join_path(_HERE, "README.md")
-    with codecs.open(readme_path, encoding="utf-8") as f:
-        return "\n" + f.read()
+    with codecs.open(readme_path, encoding="utf-8") as readme:
+        return "\n" + readme.read()
 
 
 if __name__ == '__main__':

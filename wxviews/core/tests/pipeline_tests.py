@@ -1,7 +1,7 @@
 from unittest.mock import Mock, call, patch
 
 from injectool import register_func
-from pytest import fixture, mark, fail, raises
+from pytest import fixture, mark, fail
 from pyviews.core import InstanceNode, XmlAttr, Expression
 from pyviews.compilation import CompiledExpression
 from wxviews.core import pipeline
