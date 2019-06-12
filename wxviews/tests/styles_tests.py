@@ -84,6 +84,16 @@ class ApplyStyleItemsTests:
                     ('two', 2, call_set_attr),
                     ('key', '', another_setter)
                 ]
+        ),
+        (
+                [
+                    ('one', 'value', __name__ + '.some_setter'),
+                    ('one', '', __name__ + '.another_setter')
+                ],
+                [
+                    ('one', 'value', some_setter),
+                    ('one', '', another_setter)
+                ]
         )
     ])
     def test_creates_style_items_from_attrs(attrs, expected):
@@ -92,10 +102,8 @@ class ApplyStyleItemsTests:
         xml_node = Mock(attrs=attrs)
         node = Style(xml_node)
 
-        with Scope('styles_tests'):
-            apply_style_items(node)
-        actual = {name: (item.name, item.value, item.setter) for name, item in node.items.items()}
-        expected = {item[0]: item for item in expected}
+        apply_style_items(node)
+        actual = [(item.name, item.value, item.setter) for name, item in node.items.items()]
 
         assert actual == expected
 
@@ -120,8 +128,7 @@ class ApplyStyleItemsTests:
         xml_node = Mock(attrs=[XmlAttr('name', name)])
         node = Style(xml_node)
 
-        with Scope('styles_tests'):
-            apply_style_items(node)
+        apply_style_items(node)
 
         assert node.name == name
 
@@ -129,35 +136,52 @@ class ApplyStyleItemsTests:
 class ApplyParentItemsTests:
     """apply_parent_items tests"""
 
-    @staticmethod
     @mark.parametrize('items, parent_items, expected', [
+        ([('one', '{1}', None)], [], [('one', 1, call_set_attr)]),
+        ([('one', ' value ', None)], [], [('one', ' value ', call_set_attr)]),
+        ([('one', 'value', __name__ + '.some_setter')], [], [('one', 'value', some_setter)]),
         (
-                [('one', 'value'), ('key', '')],
-                [('one', 'parent value'), ('two', 2)],
-                [('one', 'value'), ('key', ''), ('two', 2)]
-        ),
-        (
+                [
+                    ('one', 'value', __name__ + '.some_setter'),
+                    ('two', '{1 + 1}', None),
+                    ('key', '', __name__ + '.another_setter')
+                ],
                 [],
-                [('one', 'value'), ('two', 2)],
-                [('one', 'value'), ('two', 2)]
+                [
+                    ('one', 'value', some_setter),
+                    ('two', 2, call_set_attr),
+                    ('key', '', another_setter)
+                ]
         ),
         (
-                [('one', 'value'), ('two', 2)],
+                [
+                    ('one', 'value', __name__ + '.some_setter'),
+                    ('one', '', __name__ + '.another_setter')
+                ],
                 [],
-                [('one', 'value'), ('two', 2)]
-        ),
+                [
+                    ('one', 'value', some_setter),
+                    ('one', '', another_setter)
+                ]
+        )
     ])
-    def test_uses_parent_style_items(items, parent_items, expected):
+    def test_uses_parent_style_items(self, items, parent_items, expected):
         """apply_parent_items should add parent style items"""
-        node = Style(Mock())
-        node.items = {item[0]: item for item in items}
-        parent_node = Style(Mock())
-        parent_node.items = {item[0]: item for item in parent_items}
-        expected = {item[0]: item for item in expected}
+        node = self._get_style_node(items)
+        parent_node = self._get_style_node(parent_items)
 
         apply_parent_items(node, parent_node=parent_node)
+        actual = [(item.name, item.value, item.setter) for name, item in node.items.items()]
 
-        assert node.items == expected
+        assert actual == expected
+
+    @staticmethod
+    def _get_style_node(attrs):
+        attrs = [XmlAttr('name', 'hoho')] + [XmlAttr(attr[0], attr[1], attr[2]) for attr in attrs]
+        xml_node = Mock(attrs=attrs)
+        node = Style(xml_node)
+        apply_style_items(node)
+        return node
 
     @staticmethod
     @mark.parametrize('parent_node', [None, Node(Mock())])
