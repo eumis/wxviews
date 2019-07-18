@@ -1,13 +1,13 @@
 from unittest.mock import Mock, call, patch
 
-from injectool import register_func
+from injectool import add_resolve_function
 from pytest import fixture, mark, fail
 from pyviews.core import InstanceNode, XmlAttr, Expression
 from pyviews.compilation import CompiledExpression
 from wxviews.core import pipeline
 from wxviews.core.pipeline import setup_instance_node_setter, instance_node_setter, apply_attributes, add_to_sizer
 
-register_func(Expression, CompiledExpression)
+add_resolve_function(Expression, lambda c, p: CompiledExpression(p))
 
 
 def test_setup_instance_node_setter():

@@ -1,17 +1,17 @@
 from unittest.mock import Mock, call
 
-from injectool import register_func
+from injectool import add_resolve_function
 from pytest import mark, raises
+from pyviews.compilation import CompiledExpression
 from wx import TextCtrl, CheckBox
 from wx import EVT_TEXT, EVT_CHECKBOX
 from pyviews.core import XmlAttr, BindingError, Expression
 from pyviews.core import InheritedDict, ObservableEntity
 from pyviews.binding import TwoWaysBinding
-from pyviews.compilation import CompiledExpression
 from wxviews.binding.event import EventBinding, TextTwoWaysRule, CheckBoxTwoWaysRule
 from wxviews.widgets import WidgetNode
 
-register_func(Expression, CompiledExpression)
+add_resolve_function(Expression, lambda c, p: CompiledExpression(p))
 
 
 class EventHandlerStub:

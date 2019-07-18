@@ -59,7 +59,7 @@ class TextTwoWaysRule(BindingRule):
               attr: XmlAttr = None,
               **args):
         expr_body = parse_expression(expr_body)[1] if is_expression(expr_body) else expr_body
-        expression_ = resolve(Expression)(expr_body)
+        expression_ = resolve(Expression, expr_body)
         value_target = PropertyTarget(node, attr.name, modifier)
         expression_binding = ExpressionBinding(value_target, expression_, node.node_globals)
 
@@ -88,7 +88,7 @@ class CheckBoxTwoWaysRule(BindingRule):
               attr: XmlAttr = None,
               **args):
         expr_body = parse_expression(expr_body)[1] if is_expression(expr_body) else expr_body
-        expression_ = resolve(Expression)(expr_body)
+        expression_ = resolve(Expression, expr_body)
         value_target = PropertyTarget(node, attr.name, modifier)
         expression_binding = ExpressionBinding(value_target, expression_, node.node_globals)
 

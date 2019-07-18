@@ -83,5 +83,5 @@ def _get_init_value(attr: XmlAttr, node_globals: InheritedDict):
     if is_expression(stripped_value):
         body = parse_expression(stripped_value)[1]
         parameters = node_globals.to_dictionary() if node_globals else {}
-        return resolve(Expression)(body).execute(parameters)
+        return resolve(Expression, body).execute(parameters)
     return attr.value

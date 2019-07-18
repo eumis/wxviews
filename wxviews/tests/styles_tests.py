@@ -1,7 +1,7 @@
 from itertools import chain
 from unittest.mock import Mock
 
-from injectool import Scope, register_func
+from injectool import make_default, add_resolve_function
 from pytest import mark, raises
 from pyviews.core import XmlAttr, InheritedDict, Node, Expression
 from pyviews.compilation import CompiledExpression
@@ -10,8 +10,8 @@ from wxviews.styles import Style, StyleError, StylesView, style, STYLES_KEY
 from wxviews.styles import setup_node_styles, apply_style_items, apply_parent_items, store_to_globals
 from wxviews.styles import store_to_node_styles
 
-with Scope('styles_tests'):
-    register_func(Expression, CompiledExpression)
+with make_default('styles_tests'):
+    add_resolve_function(Expression, lambda c, p: CompiledExpression(c))
 
 
 def some_setter():

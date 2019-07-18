@@ -2,7 +2,7 @@
 
 from os.path import abspath
 
-from injectool import register_single, register_func
+from injectool import add_singleton, add_resolve_function, SingletonResolver, add_resolver
 from pyviews.binding import Binder, OnceRule, OnewayRule
 from pyviews.code import run_code, Code
 from pyviews.compilation import CompiledExpression
@@ -22,30 +22,15 @@ from wxviews.widgets import get_frame_pipeline, get_app_pipeline, get_wx_pipelin
 
 def register_dependencies():
     """Registers all dependencies needed for application"""
-    register_single('views_folder', abspath('views'))
-    register_single('view_ext', 'xml')
-    register_func(create_node, create_wx_node)
-    register_func(render, render_node)
-    register_func(Expression, CompiledExpression)
-    register_single(Binder, setup_binder())
-    register_single('namespaces', {'': 'wx', 'init': 'init'})
+    add_singleton('views_folder', abspath('views'))
+    add_singleton('view_ext', 'xml')
+    add_singleton(create_node, create_wx_node)
+    add_singleton(render, render_node)
+    add_resolve_function(Expression, lambda p, c: CompiledExpression(c))
+    add_singleton(Binder, setup_binder())
+    add_singleton('namespaces', {'': 'wx', 'init': 'init'})
 
-    register_single(RenderingPipeline, RenderingPipeline(steps=[run_code]), Code)
-    register_single(RenderingPipeline, get_wx_pipeline())
-    register_single(RenderingPipeline, get_app_pipeline(), App)
-    register_single(RenderingPipeline, get_frame_pipeline(), Frame)
-    register_single(RenderingPipeline, get_container_pipeline(), Container)
-    register_single(RenderingPipeline, get_view_pipeline(), View)
-    register_single(RenderingPipeline, get_for_pipeline(), For)
-    register_single(RenderingPipeline, get_if_pipeline(), If)
-    register_single(RenderingPipeline, get_sizer_pipeline(), SizerNode)
-    register_single(RenderingPipeline, get_growable_row_pipeline(), GrowableRow)
-    register_single(RenderingPipeline, get_growable_col_pipeline(), GrowableCol)
-    register_single(RenderingPipeline, get_menu_bar_pipeline(), MenuBar)
-    register_single(RenderingPipeline, get_menu_pipeline(), Menu)
-    register_single(RenderingPipeline, get_menu_item_pipeline(), MenuItem)
-    register_single(RenderingPipeline, get_style_pipeline(), Style)
-    register_single(RenderingPipeline, get_styles_view_pipeline(), StylesView)
+    add_resolver(RenderingPipeline, get_pipeline_resolver())
 
 
 def setup_binder() -> Binder:
@@ -56,6 +41,26 @@ def setup_binder() -> Binder:
     binder.add_rule('twoways', TextTwoWaysRule())
     binder.add_rule('twoways', CheckBoxTwoWaysRule())
     return binder
+
+
+def get_pipeline_resolver() -> SingletonResolver:
+    resolver = SingletonResolver(get_wx_pipeline())
+    resolver.add_value(RenderingPipeline(steps=[run_code]), Code)
+    resolver.add_value(get_app_pipeline(), App)
+    resolver.add_value(get_frame_pipeline(), Frame)
+    resolver.add_value(get_container_pipeline(), Container)
+    resolver.add_value(get_view_pipeline(), View)
+    resolver.add_value(get_for_pipeline(), For)
+    resolver.add_value(get_if_pipeline(), If)
+    resolver.add_value(get_sizer_pipeline(), SizerNode)
+    resolver.add_value(get_growable_row_pipeline(), GrowableRow)
+    resolver.add_value(get_growable_col_pipeline(), GrowableCol)
+    resolver.add_value(get_menu_bar_pipeline(), MenuBar)
+    resolver.add_value(get_menu_pipeline(), Menu)
+    resolver.add_value(get_menu_item_pipeline(), MenuItem)
+    resolver.add_value(get_style_pipeline(), Style)
+    resolver.add_value(get_styles_view_pipeline(), StylesView)
+    return resolver
 
 
 def launch(root_view=None, **render_args):
