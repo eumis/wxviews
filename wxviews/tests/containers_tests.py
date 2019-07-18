@@ -405,8 +405,9 @@ class IfTests:
 
         assert node.condition_changed.call_args == call(node, new_condition, old_condition)
 
+    @staticmethod
     @mark.parametrize('condition', [True, False])
-    def test_renders_children(self, condition):
+    def test_renders_children(condition):
         """should render children if condition is True"""
         with patch(containers.__name__ + '.render_children') as render_children_mock:
             render_children_mock.reset_mock()
