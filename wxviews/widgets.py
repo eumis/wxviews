@@ -12,6 +12,8 @@ from wxviews.core.pipeline import setup_instance_node_setter, apply_attributes, 
 class WidgetNode(InstanceNode, Sizerable):
     """Wrapper under wx widget"""
 
+    Root: 'WidgetNode' = None
+
     def __init__(self, instance, xml_node: XmlNode, node_globals: InheritedDict = None):
         super().__init__(instance, xml_node, node_globals=node_globals)
         self._sizer_args: dict = {}
@@ -64,10 +66,15 @@ def get_frame_pipeline():
 def get_app_pipeline():
     """Returns rendering pipeline for App"""
     return RenderingPipeline(steps=[
+        store_root,
         setup_instance_node_setter,
         apply_attributes,
         render_app_children,
     ])
+
+
+def store_root(node: WidgetNode, **_):
+    WidgetNode.Root = node
 
 
 def render_app_children(node: WidgetNode, **_):
@@ -75,3 +82,10 @@ def render_app_children(node: WidgetNode, **_):
     render_children(node,
                     parent_node=node,
                     node_globals=InheritedDict(node.node_globals))
+
+
+def get_root() -> WidgetNode:
+    """returns root"""
+    if WidgetNode.Root is None:
+        raise ValueError("Root is not set")
+    return WidgetNode.Root

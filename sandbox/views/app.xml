@@ -38,5 +38,12 @@
         <Panel BackgroundColour='gray'>
             <wxv:View name='{views.current}' />
         </Panel>
+        <wxv:Code>
+            from wxviews.inspection import ViewInspectionTool
+            from wx import CallAfter
+
+            tool = ViewInspectionTool()
+            CallAfter(tool.show)
+        </wxv:Code>
     </Frame>
 </App>
