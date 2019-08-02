@@ -71,14 +71,13 @@ def render_view_children(node: View, **args):
 
 def rerender_on_view_change(node: View, **args):
     """Subscribes to name change and renders new view"""
-    node.name_changed = lambda n, val, old, a=args: _rerender_view(n, a) \
+    node.name_changed = lambda n, val, old: _rerender_view(n, args) \
         if _is_different(val, old) else None
 
 
 def _is_different(one: str, two: str):
     empty_values = [None, '']
-    return one != two and \
-           not (one in empty_values and two in empty_values)
+    return one != two and not (one in empty_values and two in empty_values)
 
 
 def _rerender_view(node: View, args: dict):
@@ -141,14 +140,14 @@ def _get_for_child_args(node: For, index, item, **args):
 
 def rerender_on_items_change(node: For, **args):
     """Subscribes to items change and updates children"""
-    node.items_changed = lambda n, v, o, a=args: _on_items_changed(n, **a) \
+    node.items_changed = lambda n, v, o: _on_items_changed(n, **args) \
         if v != o else None
 
 
-def _on_items_changed(node: For, parent=None, **_):
+def _on_items_changed(node: For, parent=None, **args):
     _destroy_overflow(node)
     _update_existing(node)
-    _create_not_existing(node)
+    _create_not_existing(node, parent=parent, **args)
     if parent:
         parent.Layout()
 
@@ -179,21 +178,12 @@ def _update_existing(node: For):
         pass
 
 
-def _create_not_existing(node: For):
+def _create_not_existing(node: For, **args):
     item_children_count = len(node.xml_node.children)
     start = int(len(node.children) / item_children_count)
     end = len(node.items)
     items = [node.items[i] for i in range(start, end)]
-    _render_for_children(node, items, start)
-
-
-def get_if_pipeline() -> RenderingPipeline:
-    """Returns setup for For node"""
-    return RenderingPipeline(steps=[
-        apply_attributes,
-        render_if,
-        rerender_on_condition_change
-    ])
+    _render_for_children(node, items, start, **args)
 
 
 class If(Container):
@@ -216,6 +206,15 @@ class If(Container):
         self.condition_changed(self, value, old_condition)
 
 
+def get_if_pipeline() -> RenderingPipeline:
+    """Returns setup for For node"""
+    return RenderingPipeline(steps=[
+        apply_attributes,
+        render_if,
+        rerender_on_condition_change
+    ])
+
+
 def render_if(node: If, **args):
     """Renders children nodes if condition is true"""
     if node.condition:
@@ -231,6 +230,6 @@ def _on_condition_change(node: If, val: bool, old: bool, parent=None, **args):
     if val == old:
         return
     node.destroy_children()
-    render_if(node, **args)
+    render_if(node, parent=parent, **args)
     if parent:
         parent.Layout()

@@ -148,7 +148,7 @@ class RerenderOnViewChangeTests:
         (None, 'view'),
         ('view', 'another view')
     ])
-    def test_renders_destroys_children(view, new_view):
+    def test_destroys_children(view, new_view):
         """destroy_children should be called on view change"""
         with patch(containers.__name__ + '.render_view_children'):
             node = View(Mock())
@@ -349,7 +349,7 @@ class ForTests:
         (1, 4, 4)
     ])
     def test_creates_new_children(self, xml_child_count, items_count, new_items_count):
-        """should create new children"""
+        """should create new children on items change"""
         with patch(containers.__name__ + '.render') as render_mock:
             node = self._setup_node(xml_child_count, items_count, render_mock)
 
@@ -357,6 +357,22 @@ class ForTests:
             node.items = self._get_mock_items(new_items_count)
 
             assert len(node.children) == xml_child_count * new_items_count
+
+    @mark.parametrize('expected_args', [
+        {},
+        {'parent': Mock()},
+        {'parent': Mock(), 'sizer': Mock()},
+    ])
+    def test_passes_args_to_new_children(self, expected_args: dict):
+        """should create new children on items change"""
+        with patch(containers.__name__ + '.render') as render_mock:
+            node = self._setup_node(1, 0, render_mock)
+            render_mock.side_effect = lambda n, **args: args
+
+            rerender_on_items_change(node, **expected_args)
+            node.items = self._get_mock_items(1)
+
+            assert node.children[0].items() >= expected_args.items()
 
     @mark.parametrize('xml_child_count, items_count, new_items_count', [
         (2, 4, 6),
@@ -419,16 +435,22 @@ class IfTests:
             assert render_children_mock.called == condition
 
     @staticmethod
-    @patch(containers.__name__ + '.render_children')
-    def test_renders_children_if_changed_to_true(render_children: Mock):
+    @mark.parametrize('expected_args', [
+        {},
+        {'parent': Mock()},
+        {'parent': Mock(), 'sizer': Mock()},
+    ])
+    def test_renders_children_if_changed_to_true(expected_args):
         """should render children if condition is changed to True"""
-        node = If(Mock())
-        node.condition = False
 
-        rerender_on_condition_change(node)
-        node.condition = True
+        with patch(containers.__name__ + '.render_children') as render_children:
+            node = If(Mock())
+            node.condition = False
 
-        assert render_children.called
+            rerender_on_condition_change(node, **expected_args)
+            node.condition = True
+
+            assert render_children.call_args[-1].items() >= expected_args.items()
 
     @staticmethod
     @patch(containers.__name__ + '.render_children')

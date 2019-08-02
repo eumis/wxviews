@@ -1,5 +1,9 @@
 # Changelog
 
+## Dev
+
+  - fixed passing parent to For and If children
+
 ## 0.3.0
 
   - updated pyviews to 2.2.0
