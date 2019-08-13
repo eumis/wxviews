@@ -133,6 +133,21 @@ def tree_fixture(request):
                 yield super_build
 
 
+class Item:
+    def __init__(self, parent, name=None):
+        self.parent: str = parent
+        self.name: str = name
+
+    def __eq__(self, other):
+        return self.parent == other.parent and self.name == other.name
+
+
+def _node(name, children=None):
+    node = WidgetNode(name, Mock())
+    node._children = children if children else []
+    return node
+
+
 @mark.usefixtures('tree_fixture')
 class ViewInpsectionTreeTests:
     """ViewInspectionTree tests"""
@@ -151,8 +166,80 @@ class ViewInpsectionTreeTests:
         assert self.tree.DeleteAllItems.called == should_clear
 
     def test_sets_root_node(self):
+        """should set app node as tree root"""
         """should create root from application node"""
         self.tree.BuildTree(WidgetNode(Mock(), Mock()))
 
         assert self.tree.AddRoot.called
         assert self.tree.SetItemData.call_args_list[0] == call(self.root_item, self.root)
+
+    @mark.parametrize('children, items', [
+        ([], []),
+        ([_node('1')], [Item('root', '1')]),
+        ([_node('1'), _node('2')], [Item('root', '1'), Item('root', '2')]),
+        ([
+             _node('1', [_node('1.1'), _node('1.2')]),
+             _node('2', [_node('2.1')])
+         ],
+         [
+             Item('root', '1'),
+             Item('1', '1.1'), Item('1', '1.2'),
+             Item('root', '2'),
+             Item('2', '2.1')
+         ]),
+        ([
+             _node('1', [_node('1.1')]),
+             _node('2', [
+                 _node('2.1', [_node('2.1.1')]),
+                 _node('2.2', [_node('2.2.1'), _node('2.2.2')]),
+             ])
+         ],
+         [
+             Item('root', '1'), Item('1', '1.1'),
+             Item('root', '2'),
+             Item('2', '2.1'), Item('2.1', '2.1.1'),
+             Item('2', '2.2'), Item('2.2', '2.2.1'), Item('2.2', '2.2.2')
+         ])
+    ])
+    def test_adds_children(self, children, items):
+        """Should add node children to tree"""
+        actual_items = []
+        self.root._children = children
+        self.root._instance = 'root'
+        self.tree.AddRoot.side_effect = lambda name: Item('')
+        self.tree.AppendItem.side_effect = lambda parent, text: Item(parent.name)
+        self.tree.SetItemData.side_effect = lambda item, node: self._set_item_data(item, node, actual_items)
+
+        self.tree.BuildTree(self.root)
+
+        assert actual_items == [Item('', 'root')] + items
+
+    @staticmethod
+    def _set_item_data(item, node, items):
+        item.name = node.instance
+        items.append(item)
+
+    def test_selects_obj(self):
+        """should select start node"""
+        node = WidgetNode(Mock(), Mock())
+        self.tree.BuildTree(node)
+
+        assert self.tree.SelectObj.call_args == call(node)
+
+    def test_sets_built_flag(self):
+        """should set built flag to true"""
+        self.tree.BuildTree(WidgetNode(Mock(), Mock()))
+
+        assert self.tree.built
+
+    @mark.parametrize('startWidget, includeSizers, expandFrame', [
+        (Mock(), False, True),
+        (Item(''), True, False),
+        (Mock(), True, True),
+        (Item('root'), False, False)
+    ])
+    def test_builds_widget_tree_for_widget(self, startWidget, includeSizers, expandFrame):
+        """should build default widget tree if passed object other then Node"""
+        self.tree.BuildTree(startWidget, includeSizers, expandFrame)
+
+        assert self.super_build.call_args == call(startWidget, includeSizers=includeSizers, expandFrame=expandFrame)

@@ -2,12 +2,15 @@ import inspect
 from typing import Any, Union, List
 from unittest.mock import patch
 
+from pyviews.binding import ExpressionBinding, PropertyTarget, FunctionTarget, PropertyExpressionTarget, \
+    GlobalValueExpressionTarget, ObservableBinding, TwoWaysBinding
 from pyviews.core import Node, InstanceNode
 import wx
 from wx import Point, DefaultPosition, Size
 from wx.lib.agw.customtreectrl import GenericTreeItem
 from wx.lib.inspection import InspectionTree, InspectionFrame, InspectionInfoPanel
 
+from wxviews.binding import EventBinding
 from wxviews.widgets import WidgetNode, get_root
 
 
@@ -119,24 +122,45 @@ class ViewInspectionTree(InspectionTree):
 
 
 class ViewInspectionInfoPanel(InspectionInfoPanel):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self._evt_names = {}
+        evt_names = [x for x in dir(wx) if x.startswith("EVT_")]
+        for name in evt_names:
+            evt = getattr(wx, name)
+            if isinstance(evt, wx.PyEventBinder):
+                self._evt_names[evt.typeId] = name
+
     def UpdateInfo(self, obj):
         """add node formatter"""
-        st = []
         if not obj:
-            st.append("Item is None or has been destroyed.")
+            self._set_text(["Item is None or has been destroyed."])
+            return
 
         if isinstance(obj, Node):
+            st = []
             st += self.format_node(obj)
             if hasattr(obj, 'instance'):
                 st += self._format_wx_item(obj.instance)
+            self._set_text(st)
         else:
-            st += self._format_wx_item(obj)
+            super().UpdateInfo(obj)
 
+    def _set_text(self, st):
         self.SetReadOnly(False)
         self.SetText('\n'.join(st))
         self.SetReadOnly(True)
 
     def _format_wx_item(self, obj: Any) -> List[str]:
+        if isinstance(obj, wx.MenuBar):
+            return self.format_menu_bar(obj)
+
+        if isinstance(obj, wx.Menu):
+            return self.format_menu(obj)
+
+        if isinstance(obj, wx.MenuItem):
+            return self.format_menu_item(obj)
+
         if isinstance(obj, wx.Window):
             return self.FmtWidget(obj)
 
@@ -149,6 +173,7 @@ class ViewInspectionInfoPanel(InspectionInfoPanel):
         return []
 
     def format_node(self, obj: Node) -> List[str]:
+        # noinspection PyListCreation
         st = [
             "Node:",
             self.Fmt('class', obj.__class__),
@@ -156,12 +181,76 @@ class ViewInspectionInfoPanel(InspectionInfoPanel):
             self.Fmt('module', inspect.getmodule(obj))
         ]
 
-        keys = [key for key in dir(obj) if not key.startswith('_')]
-        for key in keys:
-            st.append(self.Fmt(key, getattr(obj, key)))
-
         st.append("node_globals:")
         for key, value in obj.node_globals.to_dictionary().items():
             st.append(self.Fmt(key, value))
 
+        if obj._bindings:
+            st.append("binding:")
+            for binding in obj._bindings:
+                self._get_binding(binding, st)
+
+        return st
+
+    def _get_binding(self, binding, st):
+        binding_name = binding.__class__.__name__
+        if isinstance(binding, ExpressionBinding):
+            target = self._get_target(binding._target)
+            source = binding._expression.code
+            st.append(f'    {binding_name}: {target} <= {source}')
+        elif isinstance(binding, ObservableBinding):
+            target = self._get_target(binding._target)
+            source = f'{binding._observable.__class__.__name__}.{binding._prop}'
+            st.append(f'    {binding_name}: {target} <= {source}')
+        elif isinstance(binding, EventBinding):
+            target = self._get_target(binding._target)
+            source = self._evt_names[binding._event.typeId]
+            st.append(f'    {binding_name}: {target} <= {source}')
+        elif isinstance(binding, TwoWaysBinding):
+            self._get_binding(binding._one, st)
+            self._get_binding(binding._two, st)
+        else:
+            st.append(f'    {binding_name}')
+
+    @staticmethod
+    def _get_target(target) -> str:
+        if isinstance(target, PropertyTarget):
+            return f'{target.inst.__class__.__name__}.{target.prop}'
+        if isinstance(target, FunctionTarget):
+            return str(target.func)
+        if isinstance(target, PropertyExpressionTarget):
+            return target._expression_code
+        if isinstance(target, GlobalValueExpressionTarget):
+            return f'node_globals["{target._key}"]'
+        return target.__class__.__name__
+
+    def format_menu_bar(self, obj: wx.MenuBar):
+        st = ["MenuBar:"]
+        if hasattr(obj, 'GetName'):
+            st.append(self.Fmt('name', obj.GetName()))
+        st.append(self.Fmt('class', obj.__class__))
+        st.append(self.Fmt('bases', obj.__class__.__bases__))
+        st.append(self.Fmt('module', inspect.getmodule(obj)))
+        st.append(self.Fmt('id', obj.GetId()))
+        return st
+
+    def format_menu(self, obj: wx.Menu):
+        st = [
+            "Menu:",
+            self.Fmt('class', obj.__class__),
+            self.Fmt('bases', obj.__class__.__bases__),
+            self.Fmt('module', inspect.getmodule(obj)),
+            self.Fmt('style', obj.GetStyle()),
+            self.Fmt('title', obj.GetTitle())]
+        return st
+
+    def format_menu_item(self, obj: wx.MenuItem):
+        st = [
+            "MenuItem:",
+            self.Fmt('class', obj.__class__),
+            self.Fmt('bases', obj.__class__.__bases__),
+            self.Fmt('module', inspect.getmodule(obj)),
+            self.Fmt('id', obj.GetId()),
+            self.Fmt('label', obj.GetLabel()),
+            self.Fmt('kind', obj.GetKind())]
         return st
