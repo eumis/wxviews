@@ -3,6 +3,7 @@
 ## Dev
 
   - fixed passing parent to For and If children
+  - added inspection module
 
 ## 0.3.0
 
