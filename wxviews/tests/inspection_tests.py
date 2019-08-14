@@ -3,7 +3,7 @@ from unittest.mock import patch, Mock, call
 from pytest import fixture, mark
 
 from wxviews import inspection
-from wxviews.inspection import ViewInspectionFrame, ViewInspectionTool, ViewInspectionTree
+from wxviews.inspection import ViewInspectionFrame, ViewInspectionTool, ViewInspectionTree, ViewInspectionInfoPanel
 from wxviews.widgets import WidgetNode
 
 
@@ -56,8 +56,6 @@ class ViewInspectionToolTests:
     @mark.parametrize('select_obj', [None, Mock()])
     def test_shows_frame(self, select_obj):
         """should create frame with parameters"""
-        expected = select_obj if select_obj else self.root
-
         self.tool.show(select_obj)
 
         assert self.frame.Show.called
@@ -149,7 +147,7 @@ def _node(name, children=None):
 
 
 @mark.usefixtures('tree_fixture')
-class ViewInpsectionTreeTests:
+class ViewInspectionTreeTests:
     """ViewInspectionTree tests"""
 
     @mark.parametrize('items_count, should_clear', [
@@ -170,8 +168,10 @@ class ViewInpsectionTreeTests:
         """should create root from application node"""
         self.tree.BuildTree(WidgetNode(Mock(), Mock()))
 
-        assert self.tree.AddRoot.called
+        # noinspection PyProtectedMember
+        assert self.tree.AddRoot.call_args == call(self.tree._get_node_name(self.root))
         assert self.tree.SetItemData.call_args_list[0] == call(self.root_item, self.root)
+        assert self.tree.roots == [self.root_item]
 
     @mark.parametrize('children, items', [
         ([], []),
@@ -232,14 +232,59 @@ class ViewInpsectionTreeTests:
 
         assert self.tree.built
 
-    @mark.parametrize('startWidget, includeSizers, expandFrame', [
+    @mark.parametrize('start_widget, include_sizers, expand_frame', [
         (Mock(), False, True),
         (Item(''), True, False),
         (Mock(), True, True),
         (Item('root'), False, False)
     ])
-    def test_builds_widget_tree_for_widget(self, startWidget, includeSizers, expandFrame):
+    def test_builds_widget_tree_for_widget(self, start_widget, include_sizers, expand_frame):
         """should build default widget tree if passed object other then Node"""
-        self.tree.BuildTree(startWidget, includeSizers, expandFrame)
+        self.tree.BuildTree(start_widget, include_sizers, expand_frame)
 
-        assert self.super_build.call_args == call(startWidget, includeSizers=includeSizers, expandFrame=expandFrame)
+        assert self.super_build.call_args == call(start_widget, includeSizers=include_sizers, expandFrame=expand_frame)
+
+
+@fixture
+def info_fixture(request):
+    with patch(f'{inspection.__name__}.InspectionInfoPanel.__init__'):
+        with patch(f'{inspection.__name__}.InspectionInfoPanel.UpdateInfo') as super_update_info:
+            request.cls.result = None
+            info = ViewInspectionInfoPanel()
+            info.SetText = Mock()
+            info.SetText.side_effect = lambda text, test=request.cls: setattr(test, 'result', text)
+            info.SetReadOnly = Mock()
+
+            request.cls.info = info
+            request.cls.super_update_info = super_update_info
+            yield super_update_info
+
+
+@mark.usefixtures('info_fixture')
+class ViewInspectionInfoPanelTests:
+    """ViewInspectionInfoPanel tests"""
+
+    def test_checks_object_none(self):
+        """Should set message that object is None"""
+        self.info.UpdateInfo(None)
+
+        assert self.result == 'Item is None or has been destroyed.'
+
+    @mark.parametrize('obj', [Mock(), Item('')])
+    def test_uses_super_info(self, obj):
+        """should use super().UpdateInfo() for object other than Node"""
+        self.info.UpdateInfo(obj)
+
+        assert self.super_update_info.call_args == call(obj)
+
+    @mark.parametrize('error', [RuntimeError()])
+    def test_handles_error(self, error: Exception):
+        """should handle errors and say that can't show info"""
+        self.super_update_info.side_effect = lambda obj: self._raise(error)
+        self.info.UpdateInfo(Mock())
+
+        assert self.result.startswith(f'Failed to show info.')
+
+    @staticmethod
+    def _raise(error):
+        raise error

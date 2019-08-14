@@ -1,4 +1,6 @@
+from os import linesep
 import inspect
+from traceback import format_exc
 from typing import Any, Union, List
 from unittest.mock import patch
 
@@ -71,14 +73,15 @@ class ViewInspectionFrame(InspectionFrame):
 
 
 class ViewInspectionTree(InspectionTree):
-    def BuildTree(self, startWidget, includeSizers=False, expandFrame=False):
+    # noinspection PyPep8Naming
+    def BuildTree(self, start_widget, includeSizers=False, expandFrame=False):
         """setup root"""
-        if isinstance(startWidget, Node):
-            self.BuildNodeTree(startWidget)
+        if isinstance(start_widget, Node):
+            self.build_node_tree(start_widget)
         else:
-            super().BuildTree(startWidget, includeSizers=includeSizers, expandFrame=expandFrame)
+            super().BuildTree(start_widget, includeSizers=includeSizers, expandFrame=expandFrame)
 
-    def BuildNodeTree(self, startNode: Node):
+    def build_node_tree(self, start_node: Node):
         """setup root"""
         if self.GetCount():
             self.DeleteAllItems()
@@ -86,15 +89,16 @@ class ViewInspectionTree(InspectionTree):
             self.built = False
 
         root = get_root()
-        root_item = self.AddRoot(self._get_node_name(startNode))
+        root_item = self.AddRoot(self._get_node_name(root))
         self.SetItemData(root_item, root)
+        self.roots = [root_item]
 
         for child in root.children:
             self.add_node(root_item, child)
 
         # Expand the subtree containing the startWidget, and select it.
         self.built = True
-        self.SelectObj(startNode)
+        self.SelectObj(start_node)
 
     def _get_node_name(self, node: Union[Node, InstanceNode]):
         node_name = node.__class__.__name__
@@ -113,9 +117,9 @@ class ViewInspectionTree(InspectionTree):
 
         return item
 
-    def _add_binding(self, parentItem, binding):
+    def _add_binding(self, parent_item, binding):
         text = binding.__class__.__name__
-        item = self.AppendItem(parentItem, text)
+        item = self.AppendItem(parent_item, text)
         self.SetItemData(item, binding)
         self.SetItemTextColour(item, "orange")
         return item
@@ -137,18 +141,21 @@ class ViewInspectionInfoPanel(InspectionInfoPanel):
             self._set_text(["Item is None or has been destroyed."])
             return
 
-        if isinstance(obj, Node):
-            st = []
-            st += self.format_node(obj)
-            if hasattr(obj, 'instance'):
-                st += self._format_wx_item(obj.instance)
-            self._set_text(st)
-        else:
-            super().UpdateInfo(obj)
+        try:
+            if isinstance(obj, Node):
+                st = []
+                st += self.format_node(obj)
+                if hasattr(obj, 'instance'):
+                    st += self._format_wx_item(obj.instance)
+                self._set_text(st)
+            else:
+                super().UpdateInfo(obj)
+        except RuntimeError:
+            self._set_text(['Failed to show info.', format_exc()])
 
     def _set_text(self, st):
         self.SetReadOnly(False)
-        self.SetText('\n'.join(st))
+        self.SetText(linesep.join(st))
         self.SetReadOnly(True)
 
     def _format_wx_item(self, obj: Any) -> List[str]:
@@ -172,6 +179,7 @@ class ViewInspectionInfoPanel(InspectionInfoPanel):
 
         return []
 
+    # noinspection PyProtectedMember
     def format_node(self, obj: Node) -> List[str]:
         # noinspection PyListCreation
         st = [
@@ -192,6 +200,7 @@ class ViewInspectionInfoPanel(InspectionInfoPanel):
 
         return st
 
+    # noinspection PyProtectedMember
     def _get_binding(self, binding, st):
         binding_name = binding.__class__.__name__
         if isinstance(binding, ExpressionBinding):
@@ -212,6 +221,7 @@ class ViewInspectionInfoPanel(InspectionInfoPanel):
         else:
             st.append(f'    {binding_name}')
 
+    # noinspection PyProtectedMember
     @staticmethod
     def _get_target(target) -> str:
         if isinstance(target, PropertyTarget):
