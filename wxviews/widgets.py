@@ -74,6 +74,7 @@ def get_app_pipeline():
 
 
 def store_root(node: WidgetNode, **_):
+    """Store root node to global property"""
     WidgetNode.Root = node
 
 

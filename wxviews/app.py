@@ -10,7 +10,8 @@ from pyviews.core import Expression, render, create_node
 from pyviews.rendering import render_node, RenderingPipeline, render_view
 from wx import Frame, App, MenuBar, Menu, MenuItem
 from wxviews.binding import TextTwoWaysRule, CheckBoxTwoWaysRule
-from wxviews.containers import get_if_pipeline, get_for_pipeline, get_view_pipeline, get_container_pipeline
+from wxviews.containers import get_if_pipeline, get_for_pipeline
+from wxviews.containers import get_view_pipeline, get_container_pipeline
 from wxviews.containers import Container, View, For, If
 from wxviews.menus import get_menu_item_pipeline, get_menu_pipeline, get_menu_bar_pipeline
 from wxviews.rendering import create_node as create_wx_node
@@ -44,6 +45,7 @@ def setup_binder() -> Binder:
 
 
 def get_pipeline_resolver() -> SingletonResolver:
+    """Returns resolver for RenderingPipeline"""
     resolver = SingletonResolver(get_wx_pipeline())
     resolver.add_value(RenderingPipeline(steps=[run_code]), Code)
     resolver.add_value(get_app_pipeline(), App)

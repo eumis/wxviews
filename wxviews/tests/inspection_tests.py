@@ -3,7 +3,8 @@ from unittest.mock import patch, Mock, call
 from pytest import fixture, mark
 
 from wxviews import inspection
-from wxviews.inspection import ViewInspectionFrame, ViewInspectionTool, ViewInspectionTree, ViewInspectionInfoPanel
+from wxviews.inspection import ViewInspectionFrame, ViewInspectionTool
+from wxviews.inspection import ViewInspectionTree, ViewInspectionInfoPanel
 from wxviews.widgets import WidgetNode
 
 
@@ -165,7 +166,6 @@ class ViewInspectionTreeTests:
 
     def test_sets_root_node(self):
         """should set app node as tree root"""
-        """should create root from application node"""
         self.tree.BuildTree(WidgetNode(Mock(), Mock()))
 
         # noinspection PyProtectedMember
