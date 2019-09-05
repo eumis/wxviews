@@ -1,8 +1,8 @@
 """Customizing of wx parsing"""
 from injectool import resolve
 
-from pyviews.core import Expression
 from wx import Sizer, GridSizer, MenuBar, Menu, StaticBoxSizer
+from pyviews.core import Expression
 from pyviews.core.xml import XmlNode, XmlAttr
 from pyviews.core.observable import InheritedDict
 from pyviews.core.node import Node
@@ -27,11 +27,11 @@ def create_node(xml_node: XmlNode,
         if node_globals is not None:
             args['node_globals'] = node_globals
         return _create_inst(inst_type, **args)
-    elif issubclass(inst_type, GridSizer):
+    if issubclass(inst_type, GridSizer):
         args = _get_attr_args_values(xml_node, 'init', node_globals)
         inst = inst_type(*args)
         return SizerNode(inst, xml_node, node_globals=node_globals)
-    elif issubclass(inst_type, StaticBoxSizer):
+    if issubclass(inst_type, StaticBoxSizer):
         init_args = get_attr_args(xml_node, 'init', node_globals)
         args = []
         try:
@@ -41,17 +41,18 @@ def create_node(xml_node: XmlNode,
             args.append(init_args.pop('orient'))
             args.append(parent)
         inst = inst_type(*args, **init_args)
-        return SizerNode(inst, xml_node, node_globals=node_globals, parent=inst.GetStaticBox(), sizer=sizer)
-    elif issubclass(inst_type, Sizer):
+        return SizerNode(inst, xml_node,
+                         node_globals=node_globals, parent=inst.GetStaticBox(), sizer=sizer)
+    if issubclass(inst_type, Sizer):
         args = get_attr_args(xml_node, 'init', node_globals)
         inst = inst_type(**args)
         return SizerNode(inst, xml_node, node_globals=node_globals, parent=parent, sizer=sizer)
-    elif issubclass(inst_type, MenuBar) or issubclass(inst_type, Menu):
+    if issubclass(inst_type, MenuBar) or issubclass(inst_type, Menu):
         return WidgetNode(inst_type(), xml_node, node_globals=node_globals)
-    else:
-        args = get_attr_args(xml_node, 'init', node_globals)
-        inst = inst_type(parent, **args)
-        return WidgetNode(inst, xml_node, node_globals=node_globals)
+
+    args = get_attr_args(xml_node, 'init', node_globals)
+    inst = inst_type(parent, **args)
+    return WidgetNode(inst, xml_node, node_globals=node_globals)
 
 
 def _create_inst(inst_type, **init_args):

@@ -72,8 +72,9 @@ def get_style_pipeline() -> RenderingPipeline:
 
 
 def setup_node_styles(_: Style, parent_node: Node = None, node_styles: InheritedDict = None, **__):
+    """Initializes node styles"""
     if node_styles is not None:
-        return
+        return {}
     if STYLES_KEY not in parent_node.node_globals:
         parent_node.node_globals[STYLES_KEY] = InheritedDict()
     return {'node_styles': parent_node.node_globals[STYLES_KEY]}
@@ -86,7 +87,10 @@ def apply_style_items(node: Style, **_):
         node.name = next(attr.value for attr in attrs if attr.name == 'name')
     except StopIteration:
         raise StyleError('Style name is missing', node.xml_node.view_info)
-    node.items = {f'{attr.namespace}{attr.name}': _get_style_item(node, attr) for attr in attrs if attr.name != 'name'}
+    node.items = {
+        f'{attr.namespace}{attr.name}':
+            _get_style_item(node, attr) for attr in attrs if attr.name != 'name'
+    }
 
 
 def _get_style_item(node: Style, attr: XmlAttr):
@@ -135,6 +139,7 @@ def get_styles_view_pipeline() -> RenderingPipeline:
 
 
 def store_to_globals(view: StylesView, parent_node: Node = None, **_):
+    """Stores styles to parent node globals"""
     child: Node = view.children[0]
     styles: InheritedDict = child.node_globals[STYLES_KEY]
     if STYLES_KEY in parent_node.node_globals:

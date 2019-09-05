@@ -8,6 +8,8 @@ verify_ssl = true
 [packages]
 wxviews = {editable = true,path = "."}
 pytest = "*"
+pylint = "*"
+astroid = "*"
 
 [requires]
 python_version = "3"

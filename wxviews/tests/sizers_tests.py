@@ -39,7 +39,7 @@ def test_setup_setter():
 
     setup_setter(node)
 
-    assert node.attr_setter == instance_node_setter
+    assert node.attr_setter == instance_node_setter  # pylint: disable=comparison-with-callable
 
 
 @patch(sizers.__name__ + '.render_children')
@@ -97,7 +97,7 @@ class SetSizerToParentTests:
 
         try:
             set_sizer_to_parent(node, parent=None)
-        except:
+        except Exception:
             fail()
 
 

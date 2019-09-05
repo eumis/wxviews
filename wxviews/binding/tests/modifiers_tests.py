@@ -1,7 +1,7 @@
 from unittest.mock import Mock, call
 
-import wx
 from pytest import mark
+import wx
 from wx.lib.newevent import NewEvent
 
 from wxviews.binding.modifiers import bind

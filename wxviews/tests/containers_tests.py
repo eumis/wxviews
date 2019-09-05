@@ -18,12 +18,12 @@ from wxviews.containers import If, render_if, rerender_on_condition_change
 def test_render_container_children(nodes):
     """should render all xml children for every item"""
     with patch(containers.__name__ + '.render_children') as render_children_mock:
-        with patch(containers.__name__ + '.InheritedDict') as InheritedDictMock:
+        with patch(containers.__name__ + '.InheritedDict') as inherited_dict_mock:
             xml_node = Mock(children=nodes)
             node = Container(xml_node)
             parent = Mock()
             child_globals = Mock()
-            InheritedDictMock.side_effect = lambda globs: child_globals
+            inherited_dict_mock.side_effect = lambda globs: child_globals
             sizer = Mock()
             child_args = {
                 'parent_node': node,
