@@ -9,7 +9,7 @@ class Sizerable(ABC):
     @property
     @abstractmethod
     def sizer_args(self) -> dict:
-        pass
+        """Sizer args"""
 
     @sizer_args.setter
     def sizer_args(self, value):

@@ -2,9 +2,9 @@ from unittest.mock import Mock, call
 
 from injectool import add_resolve_function
 from pytest import mark, raises
-from pyviews.compilation import CompiledExpression
 from wx import TextCtrl, CheckBox
 from wx import EVT_TEXT, EVT_CHECKBOX
+from pyviews.compilation import CompiledExpression
 from pyviews.core import XmlAttr, BindingError, Expression
 from pyviews.core import InheritedDict, ObservableEntity
 from pyviews.binding import TwoWaysBinding

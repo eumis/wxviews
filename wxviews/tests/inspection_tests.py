@@ -173,6 +173,7 @@ class ViewInspectionTreeTests:
         assert self.tree.SetItemData.call_args_list[0] == call(self.root_item, self.root)
         assert self.tree.roots == [self.root_item]
 
+    # pylint: disable=bad-continuation
     @mark.parametrize('children, items', [
         ([], []),
         ([_node('1')], [Item('root', '1')]),

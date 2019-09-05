@@ -68,6 +68,7 @@ class SetupNodeStylesTest:
 class ApplyStyleItemsTests:
     """apply_style_items tests"""
 
+    # pylint: disable=bad-continuation
     @staticmethod
     @mark.parametrize('attrs, expected', [
         ([('one', '{1}', None)], [('one', 1, call_set_attr)]),
@@ -136,34 +137,31 @@ class ApplyStyleItemsTests:
 class ApplyParentItemsTests:
     """apply_parent_items tests"""
 
+    # pylint: disable=bad-continuation
     @mark.parametrize('items, parent_items, expected', [
         ([('one', '{1}', None)], [], [('one', 1, call_set_attr)]),
         ([('one', ' value ', None)], [], [('one', ' value ', call_set_attr)]),
         ([('one', 'value', __name__ + '.some_setter')], [], [('one', 'value', some_setter)]),
-        (
-                [
-                    ('one', 'value', __name__ + '.some_setter'),
-                    ('two', '{1 + 1}', None),
-                    ('key', '', __name__ + '.another_setter')
-                ],
-                [],
-                [
-                    ('one', 'value', some_setter),
-                    ('two', 2, call_set_attr),
-                    ('key', '', another_setter)
-                ]
-        ),
-        (
-                [
-                    ('one', 'value', __name__ + '.some_setter'),
-                    ('one', '', __name__ + '.another_setter')
-                ],
-                [],
-                [
-                    ('one', 'value', some_setter),
-                    ('one', '', another_setter)
-                ]
-        )
+        ([
+             ('one', 'value', __name__ + '.some_setter'),
+             ('two', '{1 + 1}', None),
+             ('key', '', __name__ + '.another_setter')
+         ],
+         [],
+         [
+             ('one', 'value', some_setter),
+             ('two', 2, call_set_attr),
+             ('key', '', another_setter)
+         ]),
+        ([
+             ('one', 'value', __name__ + '.some_setter'),
+             ('one', '', __name__ + '.another_setter')
+         ],
+         [],
+         [
+             ('one', 'value', some_setter),
+             ('one', '', another_setter)
+         ])
     ])
     def test_uses_parent_style_items(self, items, parent_items, expected):
         """apply_parent_items should add parent style items"""

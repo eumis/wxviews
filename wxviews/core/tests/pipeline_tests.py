@@ -16,7 +16,7 @@ def test_setup_instance_node_setter():
 
     setup_instance_node_setter(node)
 
-    assert node.attr_setter == instance_node_setter
+    assert node.attr_setter == instance_node_setter  # pylint: disable=comparison-with-callable
 
 
 class InstanceNodeSetterTests:
@@ -125,5 +125,5 @@ class AddToSizerTests:
 
         try:
             add_to_sizer(node)
-        except:
+        except Exception:
             fail()
