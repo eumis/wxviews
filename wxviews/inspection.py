@@ -173,6 +173,7 @@ class ViewInspectionInfoPanel(InspectionInfoPanel):
         self.SetText(linesep.join(lines))
         self.SetReadOnly(True)
 
+    # pylint:disable=too-many-return-statements
     def _format_wx_item(self, obj: Any) -> List[str]:
         if isinstance(obj, MenuBar):
             return self.format_menu_bar(obj)

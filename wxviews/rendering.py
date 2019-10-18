@@ -39,11 +39,16 @@ def create_node(xml_node: XmlNode, context: WxRenderingContext) -> Node:
             args.append(context.parent)
         inst = inst_type(*args, **init_args)
         return SizerNode(inst, xml_node,
-                         node_globals=context.node_globals, parent=inst.GetStaticBox(), sizer=context.sizer)
+                         node_globals=context.node_globals,
+                         parent=inst.GetStaticBox(),
+                         sizer=context.sizer)
     if issubclass(inst_type, Sizer):
         args = get_attr_args(xml_node, 'init', context.node_globals)
         inst = inst_type(**args)
-        return SizerNode(inst, xml_node, node_globals=context.node_globals, parent=context.parent, sizer=context.sizer)
+        return SizerNode(inst, xml_node,
+                         node_globals=context.node_globals,
+                         parent=context.parent,
+                         sizer=context.sizer)
     if issubclass(inst_type, MenuBar) or issubclass(inst_type, Menu):
         return WidgetNode(inst_type(), xml_node, node_globals=context.node_globals)
 

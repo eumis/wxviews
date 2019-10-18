@@ -1,3 +1,5 @@
+"""Common"""
+
 from typing import Any
 
 from pyviews.core import InheritedDict
@@ -28,6 +30,7 @@ class WxRenderingContext(RenderingContext):
 
     @property
     def node_styles(self) -> InheritedDict:
+        """Node styles"""
         return self.get('node_styles', None)
 
     @node_styles.setter

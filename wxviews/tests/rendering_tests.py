@@ -143,10 +143,10 @@ class CreateNodeTests:
     ])
     def test_passes_init_attrs_to_instance(self, inst_type, attrs, args):
         """should pass parent to instance constructor"""
-        self.xml_node = Mock(attrs=attrs)
+        xml_node = Mock(attrs=attrs)
         self._setup_type(inst_type)
 
-        actual_node = create_node(self.xml_node, WxRenderingContext())
+        actual_node = create_node(xml_node, WxRenderingContext())
 
         assert actual_node.instance.init_args == args
 

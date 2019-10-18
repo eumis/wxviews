@@ -18,14 +18,13 @@ def get_menu_bar_pipeline() -> RenderingPipeline:
     ])
 
 
-def render_menu_children(node: InstanceNode, context: WxRenderingContext):
+def render_menu_children(node: InstanceNode, _: WxRenderingContext):
     """Renders sizer children"""
-    child_context = WxRenderingContext({
+    render_children(node, WxRenderingContext({
         'parent_node': node,
         'parent': node.instance,
         'node_globals': InheritedDict(node.node_globals)
-    })
-    render_children(node, child_context)
+    }))
 
 
 def set_to_frame(node: InstanceNode, context: WxRenderingContext):

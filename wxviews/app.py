@@ -7,7 +7,7 @@ from pyviews.binding import Binder, OnceRule, OnewayRule
 from pyviews.code import run_code, Code
 from pyviews.compilation import CompiledExpression
 from pyviews.core import Expression
-from pyviews.rendering import RenderingPipeline, render_view, create_node, render
+from pyviews.rendering import RenderingPipeline, render_view, create_node
 from wx import Frame, App, MenuBar, Menu, MenuItem
 from wxviews.binding import TextTwoWaysRule, CheckBoxTwoWaysRule
 from wxviews.containers import get_if_pipeline, get_for_pipeline
