@@ -5,9 +5,9 @@ from typing import Callable, Any
 from injectool import resolve
 from wx import EvtHandler, TextEntry, CheckBox
 from wx import Event, CommandEvent, EVT_TEXT, EVT_CHECKBOX
-from pyviews.core import Modifier, XmlAttr, InstanceNode, Expression
-from pyviews.core import Binding, BindingTarget, BindingRule
-from pyviews.binding import ExpressionBinding, TwoWaysBinding
+from pyviews.core import Expression
+from pyviews.core import Binding, BindingTarget
+from pyviews.binding import ExpressionBinding, TwoWaysBinding, BindingRule, BindingContext
 from pyviews.binding import get_expression_target, PropertyTarget
 from pyviews.compilation import parse_expression, is_expression
 
@@ -45,57 +45,45 @@ class EventBinding(Binding):
 class TextTwoWaysRule(BindingRule):
     """wx.TextEntry.Value two ways binding"""
 
-    @staticmethod
-    def suitable(node: InstanceNode = None,
-                 attr: XmlAttr = None,
-                 **args) -> bool:
-        return node is not None and isinstance(node.instance, TextEntry) \
-               and attr is not None and attr.name == 'Value'
+    def suitable(self, context: BindingContext) -> bool:
+        return context.node is not None and isinstance(context.node.instance, TextEntry) \
+               and context.xml_attr is not None and context.xml_attr.name == 'Value'
 
-    @staticmethod
-    def apply(node: InstanceNode = None,
-              expr_body: str = None,
-              modifier: Modifier = None,
-              attr: XmlAttr = None,
-              **args):
-        expr_body = parse_expression(expr_body)[1] if is_expression(expr_body) else expr_body
+    def apply(self, context: BindingContext) -> Binding:
+        expr_body = parse_expression(context.expression_body)[1] \
+            if is_expression(context.expression_body) \
+            else context.expression_body
         expression_ = resolve(Expression, expr_body)
-        value_target = PropertyTarget(node, attr.name, modifier)
-        expression_binding = ExpressionBinding(value_target, expression_, node.node_globals)
+        value_target = PropertyTarget(context.node, context.xml_attr.name, context.modifier)
+        expression_binding = ExpressionBinding(value_target, expression_, context.node.node_globals)
 
-        expression_target = get_expression_target(expression_, node.node_globals)
-        value_binding = EventBinding(expression_target, node.instance, EVT_TEXT)
+        expression_target = get_expression_target(expression_, context.node.node_globals)
+        value_binding = EventBinding(expression_target, context.node.instance, EVT_TEXT)
 
         two_ways_binding = TwoWaysBinding(expression_binding, value_binding)
         two_ways_binding.bind()
-        node.add_binding(two_ways_binding)
+        return two_ways_binding
 
 
 class CheckBoxTwoWaysRule(BindingRule):
     """wx.CheckBox.Value two ways binding"""
 
-    @staticmethod
-    def suitable(node: InstanceNode = None,
-                 attr: XmlAttr = None,
-                 **args) -> bool:
-        return node is not None and isinstance(node.instance, CheckBox) \
-               and attr is not None and attr.name == 'Value'
+    def suitable(self, context: BindingContext) -> bool:
+        return context.node is not None and isinstance(context.node.instance, CheckBox) \
+               and context.xml_attr is not None and context.xml_attr.name == 'Value'
 
-    @staticmethod
-    def apply(node: InstanceNode = None,
-              expr_body: str = None,
-              modifier: Modifier = None,
-              attr: XmlAttr = None,
-              **args):
-        expr_body = parse_expression(expr_body)[1] if is_expression(expr_body) else expr_body
+    def apply(self, context: BindingContext):
+        expr_body = parse_expression(context.expression_body)[1] \
+            if is_expression(context.expression_body) \
+            else context.expression_body
         expression_ = resolve(Expression, expr_body)
-        value_target = PropertyTarget(node, attr.name, modifier)
-        expression_binding = ExpressionBinding(value_target, expression_, node.node_globals)
+        value_target = PropertyTarget(context.node, context.xml_attr.name, context.modifier)
+        expression_binding = ExpressionBinding(value_target, expression_, context.node.node_globals)
 
-        expression_target = get_expression_target(expression_, node.node_globals)
-        value_binding = EventBinding(expression_target, node.instance,
+        expression_target = get_expression_target(expression_, context.node.node_globals)
+        value_binding = EventBinding(expression_target, context.node.instance,
                                      EVT_CHECKBOX, lambda evt: evt.IsChecked())
 
         two_ways_binding = TwoWaysBinding(expression_binding, value_binding)
         two_ways_binding.bind()
-        node.add_binding(two_ways_binding)
+        return two_ways_binding

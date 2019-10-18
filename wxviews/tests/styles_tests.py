@@ -1,17 +1,19 @@
 from itertools import chain
 from unittest.mock import Mock
 
-from injectool import make_default, add_resolve_function
+from injectool import make_default, add_function_resolver
 from pytest import mark, raises
 from pyviews.core import XmlAttr, InheritedDict, Node, Expression
 from pyviews.compilation import CompiledExpression
 from pyviews.rendering import call_set_attr
+
+from wxviews.core import WxRenderingContext
 from wxviews.styles import Style, StyleError, StylesView, style, STYLES_KEY
 from wxviews.styles import setup_node_styles, apply_style_items, apply_parent_items, store_to_globals
 from wxviews.styles import store_to_node_styles
 
 with make_default('styles_tests'):
-    add_resolve_function(Expression, lambda c, p: CompiledExpression(c))
+    add_function_resolver(Expression, lambda c, p: CompiledExpression(c))
 
 
 def some_setter():
@@ -30,7 +32,7 @@ class SetupNodeStylesTest:
         """should add node_styles to parent globals"""
         parent_node: Node = Mock(node_globals=InheritedDict())
 
-        setup_node_styles(Mock(), parent_node=parent_node, node_styles=None)
+        setup_node_styles(Mock(), WxRenderingContext({'parent_node': parent_node}))
         actual = parent_node.node_globals.get(STYLES_KEY)
 
         assert isinstance(actual, InheritedDict)
@@ -41,61 +43,30 @@ class SetupNodeStylesTest:
         node_styles = InheritedDict()
         parent_node: Node = Mock(node_globals=InheritedDict({STYLES_KEY: node_styles}))
 
-        setup_node_styles(Mock(), parent_node=parent_node, node_styles=None)
+        setup_node_styles(Mock(), WxRenderingContext({'parent_node': parent_node}))
         actual = parent_node.node_globals[STYLES_KEY]
 
         assert node_styles == actual
-
-    @staticmethod
-    def test_returns_node_styles():
-        """should return created node_styles"""
-        parent_node: Node = Mock(node_globals=InheritedDict())
-
-        result = setup_node_styles(Mock(), parent_node=parent_node, node_styles=None)
-        actual = result['node_styles']
-        expected = parent_node.node_globals.get(STYLES_KEY)
-
-        assert expected == actual
-
-    @staticmethod
-    def test_returns_none_if_exist():
-        """should return created node_styles"""
-        actual = setup_node_styles(Mock(), node_styles=InheritedDict())
-
-        assert actual is None
 
 
 class ApplyStyleItemsTests:
     """apply_style_items tests"""
 
-    # pylint: disable=bad-continuation
     @staticmethod
     @mark.parametrize('attrs, expected', [
         ([('one', '{1}', None)], [('one', 1, call_set_attr)]),
         ([('one', ' value ', None)], [('one', ' value ', call_set_attr)]),
         ([('one', 'value', __name__ + '.some_setter')], [('one', 'value', some_setter)]),
-        (
-                [
-                    ('one', 'value', __name__ + '.some_setter'),
-                    ('two', '{1 + 1}', None),
-                    ('key', '', __name__ + '.another_setter')
-                ],
-                [
-                    ('one', 'value', some_setter),
-                    ('two', 2, call_set_attr),
-                    ('key', '', another_setter)
-                ]
-        ),
-        (
-                [
-                    ('one', 'value', __name__ + '.some_setter'),
-                    ('one', '', __name__ + '.another_setter')
-                ],
-                [
-                    ('one', 'value', some_setter),
-                    ('one', '', another_setter)
-                ]
-        )
+        ([('one', 'value', __name__ + '.some_setter'),
+          ('two', '{1 + 1}', None),
+          ('key', '', __name__ + '.another_setter')],
+         [('one', 'value', some_setter),
+          ('two', 2, call_set_attr),
+          ('key', '', another_setter)]),
+        ([('one', 'value', __name__ + '.some_setter'),
+          ('one', '', __name__ + '.another_setter')],
+         [('one', 'value', some_setter),
+          ('one', '', another_setter)])
     ])
     def test_creates_style_items_from_attrs(attrs, expected):
         """apply_style_items should create style item for every attribute"""
@@ -103,7 +74,7 @@ class ApplyStyleItemsTests:
         xml_node = Mock(attrs=attrs)
         node = Style(xml_node)
 
-        apply_style_items(node)
+        apply_style_items(node, WxRenderingContext())
         actual = [(item.name, item.value, item.setter) for name, item in node.items.items()]
 
         assert actual == expected
@@ -115,7 +86,7 @@ class ApplyStyleItemsTests:
         node = Style(xml_node)
 
         with raises(StyleError):
-            apply_style_items(node)
+            apply_style_items(node, WxRenderingContext())
 
     @staticmethod
     @mark.parametrize('name', [
@@ -129,7 +100,7 @@ class ApplyStyleItemsTests:
         xml_node = Mock(attrs=[XmlAttr('name', name)])
         node = Style(xml_node)
 
-        apply_style_items(node)
+        apply_style_items(node, WxRenderingContext())
 
         assert node.name == name
 
@@ -137,38 +108,29 @@ class ApplyStyleItemsTests:
 class ApplyParentItemsTests:
     """apply_parent_items tests"""
 
-    # pylint: disable=bad-continuation
     @mark.parametrize('items, parent_items, expected', [
         ([('one', '{1}', None)], [], [('one', 1, call_set_attr)]),
         ([('one', ' value ', None)], [], [('one', ' value ', call_set_attr)]),
         ([('one', 'value', __name__ + '.some_setter')], [], [('one', 'value', some_setter)]),
-        ([
-             ('one', 'value', __name__ + '.some_setter'),
-             ('two', '{1 + 1}', None),
-             ('key', '', __name__ + '.another_setter')
-         ],
+        ([('one', 'value', __name__ + '.some_setter'),
+          ('two', '{1 + 1}', None),
+          ('key', '', __name__ + '.another_setter')],
          [],
-         [
-             ('one', 'value', some_setter),
-             ('two', 2, call_set_attr),
-             ('key', '', another_setter)
-         ]),
-        ([
-             ('one', 'value', __name__ + '.some_setter'),
-             ('one', '', __name__ + '.another_setter')
-         ],
+         [('one', 'value', some_setter),
+          ('two', 2, call_set_attr),
+          ('key', '', another_setter)]),
+        ([('one', 'value', __name__ + '.some_setter'),
+          ('one', '', __name__ + '.another_setter')],
          [],
-         [
-             ('one', 'value', some_setter),
-             ('one', '', another_setter)
-         ])
+         [('one', 'value', some_setter),
+          ('one', '', another_setter)])
     ])
     def test_uses_parent_style_items(self, items, parent_items, expected):
         """apply_parent_items should add parent style items"""
         node = self._get_style_node(items)
         parent_node = self._get_style_node(parent_items)
 
-        apply_parent_items(node, parent_node=parent_node)
+        apply_parent_items(node, WxRenderingContext({'parent_node': parent_node}))
         actual = [(item.name, item.value, item.setter) for name, item in node.items.items()]
 
         assert actual == expected
@@ -178,7 +140,7 @@ class ApplyParentItemsTests:
         attrs = [XmlAttr('name', 'hoho')] + [XmlAttr(attr[0], attr[1], attr[2]) for attr in attrs]
         xml_node = Mock(attrs=attrs)
         node = Style(xml_node)
-        apply_style_items(node)
+        apply_style_items(node, WxRenderingContext())
         return node
 
     @staticmethod
@@ -189,7 +151,7 @@ class ApplyParentItemsTests:
         node = Style(Mock())
         node.items = items.copy()
 
-        apply_parent_items(node, parent_node=parent_node)
+        apply_parent_items(node, WxRenderingContext({'parent_node': parent_node}))
 
         assert items == node.items
 
@@ -199,8 +161,9 @@ def test_store_to_node_styles():
     node_styles = InheritedDict()
     node = Style(Mock())
     node.items = Mock()
+    parent_node = Mock(node_globals=InheritedDict({STYLES_KEY: node_styles}))
 
-    store_to_node_styles(node, node_styles=node_styles)
+    store_to_node_styles(node, WxRenderingContext({'parent_node': parent_node}))
 
     assert node_styles[node.name] == node.items.values()
 
@@ -223,7 +186,7 @@ def test_store_to_globals(parent_styles, view_styles, expected):
     child.node_globals[STYLES_KEY] = InheritedDict(view_styles)
     node.add_child(child)
 
-    store_to_globals(node, parent_node=parent_node)
+    store_to_globals(node, WxRenderingContext({'parent_node': parent_node}))
     actual = parent_node.node_globals[STYLES_KEY].to_dictionary()
 
     assert expected == actual

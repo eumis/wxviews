@@ -1,11 +1,13 @@
 from pyviews.core import InheritedDict
 from wxviews.app import register_dependencies, launch
 from sandbox.viewmodel import SandboxViews
+from wxviews.core import WxRenderingContext
 
 
 def run_sandbox():
     register_dependencies()
-    launch('app', node_globals=InheritedDict({'views': SandboxViews(['events', 'sizers', 'binding'])}))
+    node_globals = InheritedDict({'views': SandboxViews(['events', 'sizers', 'binding'])})
+    launch(WxRenderingContext({'node_globals': node_globals}), 'app')
 
 
 if __name__ == '__main__':

@@ -2,6 +2,8 @@ from unittest.mock import Mock, call, patch
 
 from pytest import fail, mark
 from wx import Sizer
+
+from wxviews.core import WxRenderingContext
 from wxviews.core.pipeline import instance_node_setter
 from wxviews import sizers
 from wxviews.sizers import SizerNode, GrowableCol, GrowableRow, sizer
@@ -37,7 +39,7 @@ def test_setup_setter():
     """setup_setter should set instance_node_setter"""
     node = Mock()
 
-    setup_setter(node)
+    setup_setter(node, WxRenderingContext())
 
     assert node.attr_setter == instance_node_setter  # pylint: disable=comparison-with-callable
 
@@ -57,9 +59,9 @@ def test_render_sizer_children(inherited_dict: Mock, render_children: Mock):
         'sizer': node.instance
     }
 
-    render_sizer_children(node, parent=parent)
+    render_sizer_children(node, WxRenderingContext({'parent': parent}))
 
-    assert render_children.call_args == call(node, **expected_args)
+    assert render_children.call_args == call(node, WxRenderingContext(expected_args))
 
 
 class AnySizer(Sizer):
@@ -76,7 +78,7 @@ class SetSizerToParentTests:
         node = Mock()
         parent = Mock()
 
-        set_sizer_to_parent(node, parent=parent)
+        set_sizer_to_parent(node, WxRenderingContext({'parent': parent}))
 
         assert parent.SetSizer.call_args == call(node.instance, True)
 
@@ -86,7 +88,7 @@ class SetSizerToParentTests:
         node = Mock()
         parent = AnySizer()
 
-        set_sizer_to_parent(node, parent=parent, sizer=Mock())
+        set_sizer_to_parent(node, WxRenderingContext({'parent': parent, 'sizer': Mock()}))
 
         assert not parent.SetSizer.called
 
@@ -96,8 +98,8 @@ class SetSizerToParentTests:
         node = Mock()
 
         try:
-            set_sizer_to_parent(node, parent=None)
-        except Exception:
+            set_sizer_to_parent(node, WxRenderingContext({'parent': None}))
+        except BaseException:
             fail()
 
 
@@ -113,7 +115,7 @@ def test_add_growable_row_to_sizer(properties: dict, expected_call: call):
     for key, value in properties.items():
         node.set_attr(key, value)
 
-    add_growable_row_to_sizer(node, sizer=sizer_)
+    add_growable_row_to_sizer(node, WxRenderingContext({'sizer': sizer_}))
 
     assert sizer_.AddGrowableRow.call_args == expected_call
 
@@ -130,7 +132,7 @@ def test_add_glowable_col(properties: dict, expected_call: call):
     for key, value in properties.items():
         node.set_attr(key, value)
 
-    add_growable_col_to_sizer(node, sizer=sizer_)
+    add_growable_col_to_sizer(node, WxRenderingContext({'sizer': sizer_}))
 
     assert sizer_.AddGrowableCol.call_args == expected_call
 

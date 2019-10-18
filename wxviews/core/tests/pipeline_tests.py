@@ -1,20 +1,20 @@
 from unittest.mock import Mock, call, patch
 
-from injectool import add_resolve_function
+from injectool import add_function_resolver
 from pytest import fixture, mark, fail
 from pyviews.core import InstanceNode, XmlAttr, Expression
 from pyviews.compilation import CompiledExpression
-from wxviews.core import pipeline
+from wxviews.core import pipeline, WxRenderingContext
 from wxviews.core.pipeline import setup_instance_node_setter, instance_node_setter, apply_attributes, add_to_sizer
 
-add_resolve_function(Expression, lambda c, p: CompiledExpression(p))
+add_function_resolver(Expression, lambda c, p: CompiledExpression(p))
 
 
 def test_setup_instance_node_setter():
     """setup_instance_node_setter should set attr_setter"""
     node = Mock()
 
-    setup_instance_node_setter(node)
+    setup_instance_node_setter(node, WxRenderingContext())
 
     assert node.attr_setter == instance_node_setter  # pylint: disable=comparison-with-callable
 
@@ -79,7 +79,7 @@ class ApplyAttributesTests:
         self.apply_attribute.reset_mock()
         node = Mock(xml_node=Mock(attrs=[attr]))
 
-        apply_attributes(node)
+        apply_attributes(node, WxRenderingContext())
 
         assert not self.apply_attribute.called
 
@@ -92,7 +92,7 @@ class ApplyAttributesTests:
         self.apply_attribute.reset_mock()
         node = Mock(xml_node=Mock(attrs=attrs))
 
-        apply_attributes(node)
+        apply_attributes(node, WxRenderingContext)
 
         assert self.apply_attribute.call_args_list == [call(node, attr) for attr in attrs]
 
@@ -115,7 +115,7 @@ class AddToSizerTests:
         """should call sizer.Add with node.sizer_args"""
         node, sizer = self._get_mocks(sizer_args)
 
-        add_to_sizer(node, sizer=sizer)
+        add_to_sizer(node, WxRenderingContext({'sizer': sizer}))
 
         assert sizer.Add.call_args == call(node.instance, **sizer_args)
 
@@ -124,6 +124,6 @@ class AddToSizerTests:
         node = self._get_mocks()[0]
 
         try:
-            add_to_sizer(node)
-        except Exception:
+            add_to_sizer(node, WxRenderingContext())
+        except BaseException:
             fail()
