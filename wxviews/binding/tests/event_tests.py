@@ -7,7 +7,7 @@ from wx import EVT_TEXT, EVT_CHECKBOX
 from pyviews.compilation import CompiledExpression
 from pyviews.core import XmlAttr, BindingError, Expression
 from pyviews.core import InheritedDict, ObservableEntity
-from pyviews.binding import TwoWaysBinding
+from pyviews.binding import TwoWaysBinding, BindingContext
 from wxviews.binding.event import EventBinding, TextTwoWaysRule, CheckBoxTwoWaysRule
 from wxviews.widgets import WidgetNode
 
@@ -128,17 +128,17 @@ class TextTwoWaysRuleTests:
     @staticmethod
     @mark.parametrize('args, expected', [
         ({}, False),
-        ({'attr': XmlAttr('Value')}, False),
+        ({'xml_attr': XmlAttr('Value')}, False),
         ({'node': WidgetNode(TextEntryStub(), Mock())}, False),
-        ({'node': WidgetNode(TextEntryStub(), Mock()), 'attr': XmlAttr('Hint')}, False),
-        ({'node': WidgetNode(Mock(), Mock()), 'attr': XmlAttr('Value')}, False),
-        ({'node': WidgetNode(TextEntryStub(), Mock()), 'attr': XmlAttr('Value')}, True)
+        ({'node': WidgetNode(TextEntryStub(), Mock()), 'xml_attr': XmlAttr('Hint')}, False),
+        ({'node': WidgetNode(Mock(), Mock()), 'xml_attr': XmlAttr('Value')}, False),
+        ({'node': WidgetNode(TextEntryStub(), Mock()), 'xml_attr': XmlAttr('Value')}, True)
     ])
     def test_suitable(args: dict, expected: bool):
         """should be suitable for TextEntry and "Value" property"""
         rule = TextTwoWaysRule()
 
-        actual = rule.suitable(**args)
+        actual = rule.suitable(BindingContext(args))
 
         assert expected == actual
 
@@ -157,8 +157,12 @@ class TextTwoWaysRuleTests:
         node = Mock(node_globals=InheritedDict(node_globals))
 
         with raises(BindingError):
-            rule.apply(node=node, expr_body=expr_body,
-                       modifier=Mock(), attr=XmlAttr('Value'))
+            rule.apply(BindingContext({
+                'node': node,
+                'expression_body': expr_body,
+                'modifier': Mock(),
+                'xml_attr': XmlAttr('Value')
+            }))
 
     @staticmethod
     @mark.parametrize('expr_body, node_globals, expected_value', [
@@ -172,7 +176,12 @@ class TextTwoWaysRuleTests:
         rule, modifier, xml_attr = (TextTwoWaysRule(), Mock(), XmlAttr('Value'))
         node = Mock(node_globals=InheritedDict(node_globals))
 
-        rule.apply(node=node, expr_body=expr_body, modifier=modifier, attr=xml_attr)
+        rule.apply(BindingContext({
+            'node': node,
+            'expression_body': expr_body,
+            'modifier': modifier,
+            'xml_attr': XmlAttr('Value')
+        }))
 
         assert call(node, xml_attr.name, expected_value) == modifier.call_args
 
@@ -188,7 +197,12 @@ class TextTwoWaysRuleTests:
         view_model = TextViewModel(value)
         node = Mock(instance=TextEntryStub(), node_globals=InheritedDict({'vm': view_model}))
 
-        rule.apply(node=node, expr_body='vm.text_value', modifier=prop_modifier, attr=XmlAttr('Value'))
+        rule.apply(BindingContext({
+            'node': node,
+            'expression_body': 'vm.text_value',
+            'modifier': prop_modifier,
+            'xml_attr': XmlAttr('Value')
+        }))
         view_model.text_value = new_value
 
         assert new_value == node.instance.Value
@@ -201,21 +215,29 @@ class TextTwoWaysRuleTests:
         widget, view_model = TextEntryStub(), TextViewModel(value)
         node = Mock(instance=widget, node_globals=InheritedDict({'vm': view_model}))
 
-        rule.apply(node=node, expr_body='vm.text_value', attr=XmlAttr('Value'), modifier=prop_modifier)
+        rule.apply(BindingContext({
+            'node': node,
+            'expression_body': 'vm.text_value',
+            'modifier': prop_modifier,
+            'xml_attr': XmlAttr('Value')
+        }))
         widget.ChangeValue(new_value)
 
         assert new_value == view_model.text_value
 
     @staticmethod
-    def test_adds_binding_to_node():
-        """apply() should add binding to node"""
+    def test_returns_binding():
+        """apply() should return binding"""
         rule = TextTwoWaysRule()
         node = Mock(node_globals=InheritedDict({'val': 'value'}))
 
-        rule.apply(node=node, expr_body='val', modifier=Mock(), attr=XmlAttr('Value', 'mod'))
-        actual_binding = node.add_binding.call_args[0][0]
+        actual_binding = rule.apply(BindingContext({
+            'node': node,
+            'expression_body': 'val',
+            'modifier': Mock(),
+            'xml_attr': XmlAttr('Value', 'mod')
+        }))
 
-        assert node.add_binding.called
         assert isinstance(actual_binding, TwoWaysBinding)
 
 
@@ -231,17 +253,17 @@ class CheckBoxTwoWaysRuleTests:
     @staticmethod
     @mark.parametrize('args, expected', [
         ({}, False),
-        ({'attr': XmlAttr('Value')}, False),
+        ({'xml_attr': XmlAttr('Value')}, False),
         ({'node': WidgetNode(CheckBoxStub(), Mock())}, False),
-        ({'node': WidgetNode(CheckBoxStub(), Mock()), 'attr': XmlAttr('Hint')}, False),
-        ({'node': WidgetNode(Mock(), Mock()), 'attr': XmlAttr('Value')}, False),
-        ({'node': WidgetNode(CheckBoxStub(), Mock()), 'attr': XmlAttr('Value')}, True)
+        ({'node': WidgetNode(CheckBoxStub(), Mock()), 'xml_attr': XmlAttr('Hint')}, False),
+        ({'node': WidgetNode(Mock(), Mock()), 'xml_attr': XmlAttr('Value')}, False),
+        ({'node': WidgetNode(CheckBoxStub(), Mock()), 'xml_attr': XmlAttr('Value')}, True)
     ])
     def test_suitable(args: dict, expected: bool):
         """should be suitable for CheckBox and "Value" property"""
         rule = CheckBoxTwoWaysRule()
 
-        actual = rule.suitable(**args)
+        actual = rule.suitable(BindingContext(args))
 
         assert expected == actual
 
@@ -260,8 +282,12 @@ class CheckBoxTwoWaysRuleTests:
         node = Mock(node_globals=InheritedDict(node_globals))
 
         with raises(BindingError):
-            rule.apply(node=node, expr_body=expr_body,
-                       modifier=Mock(), attr=XmlAttr('Value'))
+            rule.apply(BindingContext({
+                'node': node,
+                'expression_body': expr_body,
+                'modifier': Mock(),
+                'xml_attr': XmlAttr('Value')
+            }))
 
     @staticmethod
     @mark.parametrize('expr_body, node_globals, expected_value', [
@@ -274,7 +300,12 @@ class CheckBoxTwoWaysRuleTests:
         rule, modifier, xml_attr = (CheckBoxTwoWaysRule(), Mock(), XmlAttr('Value'))
         node = Mock(node_globals=InheritedDict(node_globals))
 
-        rule.apply(node=node, expr_body=expr_body, modifier=modifier, attr=xml_attr)
+        rule.apply(BindingContext({
+            'node': node,
+            'expression_body': expr_body,
+            'modifier': modifier,
+            'xml_attr': xml_attr
+        }))
 
         assert call(node, xml_attr.name, expected_value) == modifier.call_args
 
@@ -291,7 +322,12 @@ class CheckBoxTwoWaysRuleTests:
         view_model = CheckViewModel(value)
         node = Mock(instance=CheckBoxStub(), node_globals=InheritedDict({'vm': view_model}))
 
-        rule.apply(node=node, expr_body='vm.value', modifier=prop_modifier, attr=XmlAttr('Value'))
+        rule.apply(BindingContext({
+            'node': node,
+            'expression_body': 'vm.value',
+            'modifier': prop_modifier,
+            'xml_attr': XmlAttr('Value')
+        }))
         view_model.value = new_value
 
         assert new_value == node.instance.Value
@@ -307,19 +343,27 @@ class CheckBoxTwoWaysRuleTests:
         view_model = CheckViewModel(value)
         node = Mock(instance=CheckBoxStub(), node_globals=InheritedDict({'vm': view_model}))
 
-        rule.apply(node=node, expr_body='vm.value', attr=XmlAttr('Value'), modifier=prop_modifier)
+        rule.apply(BindingContext({
+            'node': node,
+            'expression_body': 'vm.value',
+            'modifier': prop_modifier,
+            'xml_attr': XmlAttr('Value')
+        }))
         node.instance.SetValue(new_value)
 
         assert new_value == view_model.value
 
     @staticmethod
-    def test_adds_binding_to_node():
-        """apply() should add binding to node"""
+    def test_returns_binding():
+        """apply() should return binding"""
         rule = TextTwoWaysRule()
         node = Mock(node_globals=InheritedDict({'val': 'value'}))
 
-        rule.apply(node=node, expr_body='val', modifier=Mock(), attr=XmlAttr('Value', 'mod'))
-        actual_binding = node.add_binding.call_args[0][0]
+        actual_binding = rule.apply(BindingContext({
+            'node': node,
+            'expression_body': 'val',
+            'modifier': Mock(),
+            'xml_attr': XmlAttr('Value', 'mod')
+        }))
 
-        assert node.add_binding.called
         assert isinstance(actual_binding, TwoWaysBinding)
