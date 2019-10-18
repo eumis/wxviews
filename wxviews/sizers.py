@@ -1,11 +1,11 @@
 """Rendering pipeline for SizerNode"""
 from typing import Any
 
-from wx import FlexGridSizer, Sizer
+from wx import Sizer
 from pyviews.core import InheritedDict, InstanceNode, Node, XmlNode
 from pyviews.rendering import RenderingPipeline, render_children
 
-from wxviews.core import Sizerable
+from wxviews.core import Sizerable, WxRenderingContext
 from wxviews.core.pipeline import instance_node_setter, apply_attributes, add_to_sizer
 
 
@@ -44,24 +44,25 @@ def get_sizer_pipeline() -> RenderingPipeline:
     ])
 
 
-def setup_setter(node: SizerNode, **_):
+def setup_setter(node: SizerNode, _: WxRenderingContext):
     """Sets attr_setter for SizerNode"""
     node.attr_setter = instance_node_setter
 
 
-def render_sizer_children(node: SizerNode, parent=None, **_):
+def render_sizer_children(node: SizerNode, context: WxRenderingContext):
     """Renders sizer children"""
-    render_children(node,
-                    parent_node=node,
-                    parent=parent,
-                    node_globals=InheritedDict(node.node_globals),
-                    sizer=node.instance)
+    render_children(node, WxRenderingContext({
+        'parent_node': node,
+        'parent': context.parent,
+        'node_globals': InheritedDict(node.node_globals),
+        'sizer': node.instance
+    }))
 
 
-def set_sizer_to_parent(node, parent=None, sizer=None, **_):
+def set_sizer_to_parent(node, context: WxRenderingContext):
     """Pass sizer to parent SetSizer"""
-    if parent is not None and sizer is None:
-        parent.SetSizer(node.instance, True)
+    if context.parent is not None and context.sizer is None:
+        context.parent.SetSizer(node.instance, True)
 
 
 class GrowableRow(Node):
@@ -81,9 +82,9 @@ def get_growable_row_pipeline() -> RenderingPipeline:
     ])
 
 
-def add_growable_row_to_sizer(node: GrowableRow, sizer: FlexGridSizer, **_):
+def add_growable_row_to_sizer(node: GrowableRow, context: WxRenderingContext):
     """Calls AddGrowableRow for sizer"""
-    sizer.AddGrowableRow(node.idx, node.proportion)
+    context.sizer.AddGrowableRow(node.idx, node.proportion)
 
 
 class GrowableCol(Node):
@@ -103,9 +104,9 @@ def get_growable_col_pipeline() -> RenderingPipeline:
     ])
 
 
-def add_growable_col_to_sizer(node: GrowableCol, sizer: FlexGridSizer, **_):
+def add_growable_col_to_sizer(node: GrowableCol, context: WxRenderingContext):
     """Calls AddGrowableCol for sizer"""
-    sizer.AddGrowableCol(node.idx, node.proportion)
+    context.sizer.AddGrowableCol(node.idx, node.proportion)
 
 
 def sizer(node: Sizerable, key: str, value: Any):

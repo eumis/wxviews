@@ -4,6 +4,8 @@ from unittest.mock import Mock, call
 from pytest import mark, raises
 from wx import Frame, MenuBar, Menu
 from pyviews.core import InstanceNode, Property
+
+from wxviews.core import WxRenderingContext
 from wxviews.menus import set_to_frame, add_menu_properties, set_to_menu_bar, set_to_menu
 
 
@@ -26,7 +28,7 @@ class SetToFrameTests:
         node = Mock()
 
         with raises(TypeError):
-            set_to_frame(node, parent=parent)
+            set_to_frame(node, WxRenderingContext({'parent': parent}))
 
     @staticmethod
     def test_sets_menu_bar_to_frame():
@@ -34,7 +36,7 @@ class SetToFrameTests:
         node = Mock()
         frame = FrameStub()
 
-        set_to_frame(node, parent=frame)
+        set_to_frame(node, WxRenderingContext({'parent': frame}))
 
         assert frame.SetMenuBar.call_args == call(node.instance)
 
@@ -44,7 +46,7 @@ def test_add_menu_specific_properties(prop: str):
     """should add {0} property for menu node"""
     node = InstanceNode(Mock(), Mock())
 
-    add_menu_properties(node)
+    add_menu_properties(node, WxRenderingContext())
 
     assert prop in node.properties
     assert prop == node.properties[prop].name
@@ -65,7 +67,7 @@ class SetToMenuBarTests:
         node = Mock()
 
         with raises(TypeError):
-            set_to_menu_bar(node, parent=parent)
+            set_to_menu_bar(node, WxRenderingContext({'parent': parent}))
 
     @staticmethod
     def test_sets_menu_to_bar():
@@ -76,7 +78,7 @@ class SetToMenuBarTests:
         node.properties['title'].set(title)
         menu_bar = MenuBarStub()
 
-        set_to_menu_bar(node, parent=menu_bar)
+        set_to_menu_bar(node, WxRenderingContext({'parent': menu_bar}))
 
         assert menu_bar.Append.call_args == call(node.instance, title)
 
@@ -96,7 +98,7 @@ class SetToMenuTests:
         node = Mock()
 
         with raises(TypeError):
-            set_to_menu(node, parent=parent)
+            set_to_menu(node, WxRenderingContext({'parent': parent}))
 
     @staticmethod
     def test_sets_item_to_menu():
@@ -104,6 +106,6 @@ class SetToMenuTests:
         node = Mock()
         menu = MenuStub()
 
-        set_to_menu(node, parent=menu)
+        set_to_menu(node, WxRenderingContext({'parent': menu}))
 
         assert menu.Append.call_args == call(node.instance)

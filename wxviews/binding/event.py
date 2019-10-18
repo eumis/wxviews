@@ -6,8 +6,8 @@ from injectool import resolve
 from wx import EvtHandler, TextEntry, CheckBox
 from wx import Event, CommandEvent, EVT_TEXT, EVT_CHECKBOX
 from pyviews.core import Modifier, XmlAttr, InstanceNode, Expression
-from pyviews.core import Binding, BindingTarget, BindingRule
-from pyviews.binding import ExpressionBinding, TwoWaysBinding
+from pyviews.core import Binding, BindingTarget
+from pyviews.binding import ExpressionBinding, TwoWaysBinding, BindingRule
 from pyviews.binding import get_expression_target, PropertyTarget
 from pyviews.compilation import parse_expression, is_expression
 

@@ -7,6 +7,7 @@ from pyviews.core import XmlAttr, InheritedDict, Node, CoreError, Modifier, XmlN
 from pyviews.compilation import is_expression, parse_expression
 from pyviews.rendering import get_setter, render_children, RenderingPipeline, apply_attributes
 from wxviews.containers import render_view_children
+from wxviews.core import WxRenderingContext
 
 STYLES_KEY = '_node_styles'
 
@@ -60,27 +61,26 @@ class Style(Node):
 
 def get_style_pipeline() -> RenderingPipeline:
     """Returns pipeline for style node"""
-    node_setup = RenderingPipeline()
-    node_setup.steps = [
+    return RenderingPipeline(steps=[
         setup_node_styles,
         apply_style_items,
         apply_parent_items,
         store_to_node_styles,
-        render_child_styles,
-    ]
-    return node_setup
+        render_child_styles
+    ])
 
 
-def setup_node_styles(_: Style, parent_node: Node = None, node_styles: InheritedDict = None, **__):
+def setup_node_styles(_: Style, context: WxRenderingContext):
     """Initializes node styles"""
-    if node_styles is not None:
-        return {}
-    if STYLES_KEY not in parent_node.node_globals:
-        parent_node.node_globals[STYLES_KEY] = InheritedDict()
-    return {'node_styles': parent_node.node_globals[STYLES_KEY]}
+    if STYLES_KEY not in context.parent_node.node_globals:
+        context.parent_node.node_globals[STYLES_KEY] = InheritedDict()
 
 
-def apply_style_items(node: Style, **_):
+def _get_styles(context: WxRenderingContext) -> InheritedDict:
+    return context.parent_node.node_globals[STYLES_KEY]
+
+
+def apply_style_items(node: Style, _: WxRenderingContext):
     """Parsing step. Parses attributes to style items and sets them to style"""
     attrs = node.xml_node.attrs
     try:
@@ -102,23 +102,24 @@ def _get_style_item(node: Style, attr: XmlAttr):
     return StyleItem(setter, attr.name, value)
 
 
-def apply_parent_items(node: Style, parent_node: Style = None, **_):
+def apply_parent_items(node: Style, context: WxRenderingContext):
     """Sets style items from parent style"""
-    if isinstance(parent_node, Style):
-        node.items = {**parent_node.items, **node.items}
+    if isinstance(context.parent_node, Style):
+        node.items = {**context.parent_node.items, **node.items}
 
 
-def store_to_node_styles(node: Style, node_styles: InheritedDict = None, **_):
+def store_to_node_styles(node: Style, context: WxRenderingContext):
     """Store styles to node styles"""
-    node_styles[node.name] = node.items.values()
+    _get_styles(context)[node.name] = node.items.values()
 
 
-def render_child_styles(node: Style, node_styles: InheritedDict = None, **_):
+def render_child_styles(node: Style, context: WxRenderingContext):
     """Renders child styles"""
-    render_children(node,
-                    parent_node=node,
-                    node_globals=InheritedDict(node.node_globals),
-                    node_styles=node_styles)
+    render_children(node, WxRenderingContext({
+        'parent_node': node,
+        'node_globals': InheritedDict(node.node_globals),
+        'node_styles': _get_styles(context)
+    }))
 
 
 class StylesView(Node):
@@ -138,15 +139,15 @@ def get_styles_view_pipeline() -> RenderingPipeline:
     ])
 
 
-def store_to_globals(view: StylesView, parent_node: Node = None, **_):
+def store_to_globals(view: StylesView, context: WxRenderingContext):
     """Stores styles to parent node globals"""
     child: Node = view.children[0]
     styles: InheritedDict = child.node_globals[STYLES_KEY]
-    if STYLES_KEY in parent_node.node_globals:
-        parent_styles = parent_node.node_globals[STYLES_KEY]
+    if STYLES_KEY in context.parent_node.node_globals:
+        parent_styles = context.parent_node.node_globals[STYLES_KEY]
         merged_styles = {**parent_styles.to_dictionary(), **styles.to_dictionary()}
         styles = InheritedDict(merged_styles)
-    parent_node.node_globals[STYLES_KEY] = styles
+    context.parent_node.node_globals[STYLES_KEY] = styles
 
 
 def style(node: Node, _: str, keys: List[str]):

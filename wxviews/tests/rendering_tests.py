@@ -1,16 +1,17 @@
 from unittest.mock import Mock, patch
 
-from injectool import add_resolve_function
-from pytest import mark
+from injectool import add_function_resolver
+from pytest import mark, fixture
 from wx import Sizer, GridSizer
 from pyviews.core import XmlAttr, Node, InheritedDict, Expression
 from pyviews.compilation import CompiledExpression
 from wxviews import rendering
+from wxviews.core import WxRenderingContext
 from wxviews.rendering import create_node, get_attr_args
 from wxviews.sizers import SizerNode
 from wxviews.widgets import WidgetNode
 
-add_resolve_function(Expression, lambda c, p: CompiledExpression(p))
+add_function_resolver(Expression, lambda c, p: CompiledExpression(p))
 
 
 class SomeNode(Node):
@@ -47,6 +48,15 @@ class AnyGridSizer(GridSizer):
         self.init_args = init_args
 
 
+@fixture
+def create_node_fixture(request):
+    with patch(rendering.__name__ + '.get_inst_type') as get_inst_type:
+        request.cls.xml_node = Mock(attrs=[])
+        request.cls.get_inst_type = get_inst_type
+        yield get_inst_type
+
+
+@mark.usefixtures('create_node_fixture')
 class CreateNodeTests:
     """create_node tests"""
 
@@ -54,19 +64,21 @@ class CreateNodeTests:
     def _setup_mocks(get_inst_type: Mock, inst_type, attrs=None):
         attrs = attrs if attrs else []
         xml_node = Mock(attrs=attrs)
-        get_inst_type.side_effect = lambda *a, **k: inst_type
+        get_inst_type.side_effect = lambda xmlnode: inst_type
 
         return xml_node
+
+    def _setup_type(self, inst_type):
+        self.get_inst_type.side_effect = lambda xml_node: inst_type
 
     @mark.parametrize('inst_type', [Node, SomeNode, OtherNode])
     def test_creates_node(self, inst_type):
         """should create node from xml node name and namespace with right type"""
-        with patch(rendering.__name__ + '.get_inst_type') as get_inst_type:
-            xml_node = self._setup_mocks(get_inst_type, inst_type)
+        self._setup_type(inst_type)
 
-            actual_node = create_node(xml_node)
+        actual_node = create_node(self.xml_node, WxRenderingContext())
 
-            assert isinstance(actual_node, inst_type)
+        assert isinstance(actual_node, inst_type)
 
     @mark.parametrize('inst_type, init_args', [
         (SomeNode, {}),
@@ -75,13 +87,12 @@ class CreateNodeTests:
     ])
     def test_passes_init_args_to_node(self, inst_type, init_args):
         """should pass arguments to node"""
-        with patch(rendering.__name__ + '.get_inst_type') as get_inst_type:
-            xml_node = self._setup_mocks(get_inst_type, inst_type)
+        self._setup_type(inst_type)
 
-            actual_node = create_node(xml_node, **init_args)
+        actual_node = create_node(self.xml_node, WxRenderingContext(init_args))
 
-            assert actual_node.xml_node == xml_node
-            assert actual_node.init_args == init_args
+        assert actual_node.xml_node == self.xml_node
+        assert actual_node.init_args == init_args
 
     @mark.parametrize('inst_type, node_type', [
         (WxInstance, WidgetNode),
@@ -91,13 +102,12 @@ class CreateNodeTests:
     ])
     def test_creates_instance(self, inst_type, node_type):
         """should wrap instance to node"""
-        with patch(rendering.__name__ + '.get_inst_type') as get_inst_type:
-            xml_node = self._setup_mocks(get_inst_type, inst_type)
+        self._setup_type(inst_type)
 
-            actual_node = create_node(xml_node)
+        actual_node = create_node(self.xml_node, WxRenderingContext())
 
-            assert isinstance(actual_node.instance, inst_type)
-            assert isinstance(actual_node, node_type)
+        assert isinstance(actual_node.instance, inst_type)
+        assert isinstance(actual_node, node_type)
 
     @mark.parametrize('inst_type, parent', [
         (WxInstance, None),
@@ -107,12 +117,11 @@ class CreateNodeTests:
     ])
     def test_passes_parent_to_instance(self, inst_type, parent):
         """should pass parent to instance constructor"""
-        with patch(rendering.__name__ + '.get_inst_type') as get_inst_type:
-            xml_node = self._setup_mocks(get_inst_type, inst_type)
+        self._setup_type(inst_type)
 
-            actual_node = create_node(xml_node, parent=parent)
+        actual_node = create_node(self.xml_node, WxRenderingContext({'parent': parent}))
 
-            assert actual_node.instance.parent == parent
+        assert actual_node.instance.parent == parent
 
     @mark.parametrize('inst_type, attrs, args', [
         (WxInstance, [], {}),
@@ -134,12 +143,12 @@ class CreateNodeTests:
     ])
     def test_passes_init_attrs_to_instance(self, inst_type, attrs, args):
         """should pass parent to instance constructor"""
-        with patch(rendering.__name__ + '.get_inst_type') as get_inst_type:
-            xml_node = self._setup_mocks(get_inst_type, inst_type, attrs)
+        self.xml_node = Mock(attrs=attrs)
+        self._setup_type(inst_type)
 
-            actual_node = create_node(xml_node)
+        actual_node = create_node(self.xml_node, WxRenderingContext())
 
-            assert actual_node.instance.init_args == args
+        assert actual_node.instance.init_args == args
 
     @mark.parametrize('attr', [
         XmlAttr('key', '1'),
@@ -148,12 +157,12 @@ class CreateNodeTests:
     ])
     def test_skips_not_init_attrs(self, attr: XmlAttr):
         """should pass parent to instance constructor"""
-        with patch(rendering.__name__ + '.get_inst_type') as get_inst_type:
-            xml_node = self._setup_mocks(get_inst_type, WxInstance, [attr])
+        self.xml_node = Mock(attrs=[attr])
+        self._setup_type(WxInstance)
 
-            actual_node = create_node(xml_node)
+        actual_node = create_node(self.xml_node, WxRenderingContext())
 
-            assert actual_node.instance.init_args == {}
+        assert actual_node.instance.init_args == {}
 
 
 @mark.parametrize('namespace, attrs, args', [

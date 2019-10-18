@@ -9,50 +9,47 @@ from pyviews.core.node import Node
 from pyviews.compilation import is_expression, parse_expression
 from pyviews.rendering import get_inst_type, get_init_args
 
+from wxviews.core import WxRenderingContext
 from wxviews.sizers import SizerNode
 from wxviews.widgets import WidgetNode
 
 
-def create_node(xml_node: XmlNode,
-                parent=None,
-                node_globals: InheritedDict = None,
-                sizer=None,
-                **init_args) -> Node:
+def create_node(xml_node: XmlNode, context: WxRenderingContext) -> Node:
     """Creates node from xml node using namespace as module and tag name as class name"""
     inst_type = get_inst_type(xml_node)
     if issubclass(inst_type, Node):
-        args = {**init_args, **{'xml_node': xml_node}}
-        if parent is not None:
-            args['parent'] = parent
-        if node_globals is not None:
-            args['node_globals'] = node_globals
+        args = {**context, **{'xml_node': xml_node}}
+        if context.parent is not None:
+            args['parent'] = context.parent
+        if context.node_globals is not None:
+            args['node_globals'] = context.node_globals
         return _create_inst(inst_type, **args)
     if issubclass(inst_type, GridSizer):
-        args = _get_attr_args_values(xml_node, 'init', node_globals)
+        args = _get_attr_args_values(xml_node, 'init', context.node_globals)
         inst = inst_type(*args)
-        return SizerNode(inst, xml_node, node_globals=node_globals)
+        return SizerNode(inst, xml_node, node_globals=context.node_globals)
     if issubclass(inst_type, StaticBoxSizer):
-        init_args = get_attr_args(xml_node, 'init', node_globals)
+        init_args = get_attr_args(xml_node, 'init', context.node_globals)
         args = []
         try:
             static_box = init_args.pop('box')
             args.append(static_box)
         except KeyError:
             args.append(init_args.pop('orient'))
-            args.append(parent)
+            args.append(context.parent)
         inst = inst_type(*args, **init_args)
         return SizerNode(inst, xml_node,
-                         node_globals=node_globals, parent=inst.GetStaticBox(), sizer=sizer)
+                         node_globals=context.node_globals, parent=inst.GetStaticBox(), sizer=context.sizer)
     if issubclass(inst_type, Sizer):
-        args = get_attr_args(xml_node, 'init', node_globals)
+        args = get_attr_args(xml_node, 'init', context.node_globals)
         inst = inst_type(**args)
-        return SizerNode(inst, xml_node, node_globals=node_globals, parent=parent, sizer=sizer)
+        return SizerNode(inst, xml_node, node_globals=context.node_globals, parent=context.parent, sizer=context.sizer)
     if issubclass(inst_type, MenuBar) or issubclass(inst_type, Menu):
-        return WidgetNode(inst_type(), xml_node, node_globals=node_globals)
+        return WidgetNode(inst_type(), xml_node, node_globals=context.node_globals)
 
-    args = get_attr_args(xml_node, 'init', node_globals)
-    inst = inst_type(parent, **args)
-    return WidgetNode(inst, xml_node, node_globals=node_globals)
+    args = get_attr_args(xml_node, 'init', context.node_globals)
+    inst = inst_type(context.parent, **args)
+    return WidgetNode(inst, xml_node, node_globals=context.node_globals)
 
 
 def _create_inst(inst_type, **init_args):

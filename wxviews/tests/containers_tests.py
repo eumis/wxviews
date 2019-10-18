@@ -8,6 +8,7 @@ from wxviews.containers import Container, render_container_children
 from wxviews.containers import View, render_view_children, rerender_on_view_change
 from wxviews.containers import For, render_for_items, rerender_on_items_change
 from wxviews.containers import If, render_if, rerender_on_condition_change
+from wxviews.core import WxRenderingContext
 
 
 @mark.parametrize('nodes', [
@@ -32,9 +33,9 @@ def test_render_container_children(nodes):
                 'sizer': sizer
             }
 
-            render_container_children(node, parent=parent, sizer=sizer)
+            render_container_children(node, WxRenderingContext({'parent': parent, 'sizer': sizer}))
 
-            assert render_children_mock.call_args == call(node, **child_args)
+            assert render_children_mock.call_args == call(node, WxRenderingContext(child_args))
 
 
 class ViewTests:
@@ -72,12 +73,12 @@ class RenderViewChildrenTests:
         """should render view by node name and set result as view child"""
         view_name = 'name'
         child = Mock()
-        render_view.side_effect = lambda name, **args: child if name == view_name else None
+        render_view.side_effect = lambda name, ctx: child if name == view_name else None
 
         node = View(Mock())
         node.name = view_name
 
-        render_view_children(node)
+        render_view_children(node, WxRenderingContext())
 
         assert node.children[-1] == child
 
@@ -100,9 +101,9 @@ class RenderViewChildrenTests:
             'sizer': sizer
         }
 
-        render_view_children(node, parent=parent, sizer=sizer)
+        render_view_children(node, WxRenderingContext({'parent': parent, 'sizer': sizer}))
 
-        assert render_view.call_args == call(view_name, **args)
+        assert render_view.call_args == call(view_name, WxRenderingContext(args))
 
     @staticmethod
     @mark.parametrize('view_name', ['', None])
@@ -113,7 +114,7 @@ class RenderViewChildrenTests:
             node.set_content = Mock()
             node.name = view_name
 
-            render_view_children(node)
+            render_view_children(node, WxRenderingContext())
 
             assert not render_view_mock.called
 
@@ -135,10 +136,10 @@ class RerenderOnViewChangeTests:
             node = View(Mock())
             node.view = view
 
-            rerender_on_view_change(node, **args)
+            rerender_on_view_change(node, WxRenderingContext(args))
             node.name = new_view
 
-            assert render_view_children_mock.call_args == call(node, **args)
+            assert render_view_children_mock.call_args == call(node, WxRenderingContext(args))
 
     @staticmethod
     @mark.parametrize('view, new_view', [
@@ -155,7 +156,7 @@ class RerenderOnViewChangeTests:
             node.name = view
             node.destroy_children = Mock()
 
-            rerender_on_view_change(node)
+            rerender_on_view_change(node, WxRenderingContext())
             node.name = new_view
 
             assert node.destroy_children.called
@@ -169,7 +170,7 @@ class RerenderOnViewChangeTests:
             node.set_content = Mock()
             node.name = 'view'
 
-            rerender_on_view_change(node, **{})
+            rerender_on_view_change(node, WxRenderingContext())
             node.name = empty_view_name
 
             assert not (render_view_mock.called or node.set_content.called)
@@ -190,7 +191,7 @@ class RerenderOnViewChangeTests:
             node.name = view
             parent = Mock()
 
-            rerender_on_view_change(node, parent=parent)
+            rerender_on_view_change(node, WxRenderingContext({'parent': parent}))
             node.name = new_view
 
             assert not node.destroy_children.called
@@ -210,7 +211,7 @@ class RerenderOnViewChangeTests:
             node.view = view
             parent = Mock()
 
-            rerender_on_view_change(node, parent=parent)
+            rerender_on_view_change(node, WxRenderingContext({'parent': parent}))
             node.name = new_view
 
             assert parent.Layout.called
@@ -256,9 +257,9 @@ class ForTests:
             xml_node = Mock(children=nodes)
             node = For(xml_node)
             node.items = items
-            render_mock.side_effect = lambda xmlnode, **args: xmlnode
+            render_mock.side_effect = lambda xmlnode, ctx: xmlnode
 
-            render_for_items(node)
+            render_for_items(node, WxRenderingContext())
 
             assert node.children == expected_children
 
@@ -277,10 +278,10 @@ class ForTests:
             xml_node = Mock(children=nodes)
             node = For(xml_node)
             node.items = items
-            render_mock.side_effect = lambda *_, **args: \
-                (args['node_globals']['index'], args['node_globals']['item'])
+            render_mock.side_effect = lambda xmlnode, ctx: \
+                (ctx.node_globals['index'], ctx.node_globals['item'])
 
-            render_for_items(node)
+            render_for_items(node, WxRenderingContext())
 
             assert node.children == expected_children
 
@@ -313,7 +314,7 @@ class ForTests:
             to_destroy = node.children[xml_child_count * new_items_count:]
             to_left = node.children[:xml_child_count * new_items_count]
 
-            rerender_on_items_change(node)
+            rerender_on_items_change(node, WxRenderingContext())
             node.items = self._get_mock_items(new_items_count)
 
             for child in to_destroy:
@@ -336,7 +337,7 @@ class ForTests:
             node = self._setup_node(xml_child_count, items_count, render_mock)
             children_to_update = node.children[:xml_child_count * new_items_count]
 
-            rerender_on_items_change(node)
+            rerender_on_items_change(node, WxRenderingContext())
             node.items = self._get_mock_items(new_items_count)
 
             for i, child in enumerate(children_to_update):
@@ -353,7 +354,7 @@ class ForTests:
         with patch(containers.__name__ + '.render') as render_mock:
             node = self._setup_node(xml_child_count, items_count, render_mock)
 
-            rerender_on_items_change(node)
+            rerender_on_items_change(node, WxRenderingContext())
             node.items = self._get_mock_items(new_items_count)
 
             assert len(node.children) == xml_child_count * new_items_count
@@ -367,9 +368,9 @@ class ForTests:
         """should create new children on items change"""
         with patch(containers.__name__ + '.render') as render_mock:
             node = self._setup_node(1, 0, render_mock)
-            render_mock.side_effect = lambda n, **args: args
+            render_mock.side_effect = lambda n, ctx: ctx
 
-            rerender_on_items_change(node, **expected_args)
+            rerender_on_items_change(node, WxRenderingContext(expected_args))
             node.items = self._get_mock_items(1)
 
             assert node.children[0].items() >= expected_args.items()
@@ -390,7 +391,7 @@ class ForTests:
             node = self._setup_node(xml_child_count, items_count, render_mock)
             parent = Mock()
 
-            rerender_on_items_change(node, parent=parent)
+            rerender_on_items_change(node, WxRenderingContext({'parent': parent}))
             node.items = self._get_mock_items(new_items_count)
 
             assert parent.Layout.called
@@ -430,7 +431,7 @@ class IfTests:
             node = If(Mock())
             node.condition = condition
 
-            render_if(node)
+            render_if(node, WxRenderingContext())
 
             assert render_children_mock.called == condition
 
@@ -447,10 +448,10 @@ class IfTests:
             node = If(Mock())
             node.condition = False
 
-            rerender_on_condition_change(node, **expected_args)
+            rerender_on_condition_change(node, WxRenderingContext(expected_args))
             node.condition = True
 
-            assert render_children.call_args[-1].items() >= expected_args.items()
+            assert render_children.call_args[0][-1].items() >= expected_args.items()
 
     @staticmethod
     @patch(containers.__name__ + '.render_children')
@@ -460,7 +461,7 @@ class IfTests:
         node.condition = True
         node.destroy_children = Mock()
 
-        rerender_on_condition_change(node)
+        rerender_on_condition_change(node, WxRenderingContext())
         node.condition = False
 
         assert node.destroy_children
@@ -474,7 +475,7 @@ class IfTests:
             node.condition = not new_condition
             parent = Mock()
 
-            rerender_on_condition_change(node, parent=parent)
+            rerender_on_condition_change(node, WxRenderingContext({'parent': parent}))
             node.condition = new_condition
 
             assert parent.Layout.called

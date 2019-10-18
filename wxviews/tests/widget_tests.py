@@ -1,3 +1,4 @@
+from typing import cast
 from unittest.mock import Mock, call, patch
 
 from pytest import mark, raises
@@ -5,6 +6,7 @@ from pyviews.core import XmlNode
 from wx import EVT_MENU, EVT_BUTTON
 
 from wxviews import widgets
+from wxviews.core import WxRenderingContext
 from wxviews.widgets import render_wx_children, WidgetNode, store_root, get_root
 
 
@@ -52,22 +54,22 @@ def test_render_wx_children(inherited_dict: Mock, render_children: Mock):
         'node_globals': child_globals
     }
 
-    render_wx_children(node, sizer=sizer)
+    render_wx_children(node, WxRenderingContext({'sizer': sizer}))
 
-    assert render_children.call_args == call(node, **expected_args)
+    assert render_children.call_args == call(node, WxRenderingContext(expected_args))
 
 
 def test_root():
     """store_root should set WidgetNode.Root to passed node"""
     node = Mock()
 
-    store_root(node)
+    store_root(node, WxRenderingContext())
 
     assert get_root() == node
 
 
 def test_get_root():
-    store_root(None)
+    store_root(cast(WidgetNode, None), WxRenderingContext())
 
     with raises(ValueError):
         get_root()
