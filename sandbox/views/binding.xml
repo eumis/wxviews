@@ -5,7 +5,6 @@
                xmlns:sizer='wxviews.sizer'
                xmlns:import='wxviews.import_global'
                xmlns:global='wxviews.set_global'
-               xmlns:bind='wxviews.bind'
 
                import:wx='wx'
                import:TwoWaysViewModel='viewmodel.TwoWaysViewModel'

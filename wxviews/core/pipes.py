@@ -1,9 +1,10 @@
 """Common pipeline functionality"""
+from typing import Any
 
-from pyviews.core.node import Node, InstanceNode
-from pyviews.rendering.pipeline import apply_attribute
+from pyviews.core import InstanceNode, Node
+from pyviews.pipes import apply_attribute
 
-from wxviews.core import WxRenderingContext
+from .rendering import WxRenderingContext
 from .node import Sizerable
 
 
@@ -12,11 +13,9 @@ def setup_instance_node_setter(node: InstanceNode, _: WxRenderingContext):
     node.attr_setter = instance_node_setter
 
 
-def instance_node_setter(node: InstanceNode, key, value):
+def instance_node_setter(node: InstanceNode, key: str, value: Any):
     """Sets default wxviews attr_setter"""
-    if key in node.properties:
-        node.properties[key].set(value)
-    elif hasattr(node, key):
+    if hasattr(node, key):
         setattr(node, key, value)
     elif hasattr(node.instance, key):
         setattr(node.instance, key, value)

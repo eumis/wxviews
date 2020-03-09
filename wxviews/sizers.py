@@ -3,10 +3,9 @@ from typing import Any
 
 from wx import Sizer
 from pyviews.core import InheritedDict, InstanceNode, Node, XmlNode
-from pyviews.rendering import RenderingPipeline, render_children
+from pyviews.rendering import RenderingPipeline
 
 from wxviews.core import Sizerable, WxRenderingContext
-from wxviews.core.pipeline import instance_node_setter, apply_attributes, add_to_sizer
 
 
 class SizerNode(InstanceNode, Sizerable):

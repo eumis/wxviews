@@ -3,23 +3,22 @@
 from typing import Any, List
 
 from injectool import resolve
-from pyviews.core import XmlAttr, InheritedDict, Node, CoreError, Modifier, XmlNode, Expression
-from pyviews.compilation import is_expression, parse_expression
-from pyviews.rendering import get_setter, render_children, RenderingPipeline, apply_attributes
+from pyviews.core import PyViewsError, Setter, Node
+
 from wxviews.containers import render_view_children
 from wxviews.core import WxRenderingContext
 
 STYLES_KEY = '_node_styles'
 
 
-class StyleError(CoreError):
+class StyleError(PyViewsError):
     """Error for style"""
 
 
 class StyleItem:
     """Wrapper under option"""
 
-    def __init__(self, modifier: Modifier, name: str, value: Any):
+    def __init__(self, modifier: Setter, name: str, value: Any):
         self._modifier = modifier
         self._name = name
         self._value = value

@@ -228,7 +228,7 @@ class ViewInspectionInfoPanel(InspectionInfoPanel):
             source = f'{binding._observable.__class__.__name__}.{binding._prop}'
             lines.append(f'    {binding_name}: {target} <= {source}')
         elif isinstance(binding, EventBinding):
-            target = self._get_target(binding._target)
+            target = self._get_target(binding._callback)
             source = self._evt_names[binding._event.typeId]
             lines.append(f'    {binding_name}: {target} <= {source}')
         elif isinstance(binding, TwoWaysBinding):

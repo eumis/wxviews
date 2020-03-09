@@ -4,7 +4,7 @@ from pytest import mark
 import wx
 from wx.lib.newevent import NewEvent
 
-from wxviews.binding.modifiers import bind
+from wxviews.widgets.setters import bind
 
 CustomEvent, EVT_CUSTOM_EVENT = NewEvent()
 

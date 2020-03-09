@@ -1,13 +1,11 @@
 from unittest.mock import Mock, call, patch
 
-from injectool import add_function_resolver
 from pytest import fixture, mark, fail
-from pyviews.core import InstanceNode, XmlAttr, Expression
-from pyviews.compilation import CompiledExpression
-from wxviews.core import pipeline, WxRenderingContext
-from wxviews.core.pipeline import setup_instance_node_setter, instance_node_setter, apply_attributes, add_to_sizer
+from pyviews.core import InstanceNode, XmlAttr
 
-add_function_resolver(Expression, lambda c, p: CompiledExpression(p))
+from wxviews.core import pipes, WxRenderingContext
+from wxviews.core.pipes import setup_instance_node_setter, instance_node_setter, apply_attributes, \
+    add_to_sizer
 
 
 def test_setup_instance_node_setter():
@@ -62,7 +60,7 @@ class InstanceNodeSetterTests:
 
 @fixture
 def apply_attribute_fixture(request):
-    with patch(pipeline.__name__ + '.apply_attribute') as apply_attribute_mock:
+    with patch(pipes.__name__ + '.apply_attribute') as apply_attribute_mock:
         request.cls.apply_attribute = apply_attribute_mock
         yield apply_attribute_mock
 
@@ -85,14 +83,14 @@ class ApplyAttributesTests:
 
     @mark.parametrize('attrs', [
         [XmlAttr('key', 'value')],
-        [XmlAttr('key', 'value', ''), XmlAttr('other_key', 1, 'some namespace')]
+        [XmlAttr('key', 'value', ''), XmlAttr('other_key', 'key', 'some namespace')]
     ])
     def test_apply_attributes(self, attrs):
         """should apply passed attributes"""
         self.apply_attribute.reset_mock()
         node = Mock(xml_node=Mock(attrs=attrs))
 
-        apply_attributes(node, WxRenderingContext)
+        apply_attributes(node, WxRenderingContext())
 
         assert self.apply_attribute.call_args_list == [call(node, attr) for attr in attrs]
 

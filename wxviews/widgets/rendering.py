@@ -3,11 +3,12 @@
 from typing import Callable
 
 from pyviews.core import InheritedDict, InstanceNode, XmlNode
-from pyviews.rendering import RenderingPipeline, render_children
+from pyviews.pipes import render_children
+from pyviews.rendering import RenderingPipeline
 from wx import PyEventBinder, Event
 
 from wxviews.core import Sizerable, WxRenderingContext
-from wxviews.core.pipeline import setup_instance_node_setter, apply_attributes, add_to_sizer
+from wxviews.core import setup_instance_node_setter, apply_attributes, add_to_sizer
 
 
 class WidgetNode(InstanceNode, Sizerable):
@@ -38,7 +39,7 @@ class WidgetNode(InstanceNode, Sizerable):
 
 def get_wx_pipeline() -> RenderingPipeline:
     """Returns rendering pipeline for WidgetNode"""
-    return RenderingPipeline(steps=[
+    return RenderingPipeline(pipes=[
         setup_instance_node_setter,
         apply_attributes,
         add_to_sizer,
@@ -46,18 +47,18 @@ def get_wx_pipeline() -> RenderingPipeline:
     ])
 
 
-def render_wx_children(node: WidgetNode, _: WxRenderingContext):
+def render_wx_children(node: WidgetNode, context: WxRenderingContext):
     """Renders WidgetNode children"""
-    render_children(node, WxRenderingContext({
-        'parent': node.instance,
-        'parent_node': node,
-        'node_globals': InheritedDict(node.node_globals)
+    render_children(node, context, lambda _, n: WxRenderingContext({
+        'parent': n.instance,
+        'parent_node': n,
+        'node_globals': InheritedDict(n.node_globals)
     }))
 
 
 def get_frame_pipeline():
     """Returns rendering pipeline for Frame"""
-    return RenderingPipeline(steps=[
+    return RenderingPipeline(pipes=[
         setup_instance_node_setter,
         apply_attributes,
         render_wx_children,
@@ -67,7 +68,7 @@ def get_frame_pipeline():
 
 def get_app_pipeline():
     """Returns rendering pipeline for App"""
-    return RenderingPipeline(steps=[
+    return RenderingPipeline(pipes=[
         store_root,
         setup_instance_node_setter,
         apply_attributes,
@@ -80,10 +81,10 @@ def store_root(node: WidgetNode, _: WxRenderingContext):
     WidgetNode.Root = node
 
 
-def render_app_children(node: WidgetNode, _: WxRenderingContext):
+def render_app_children(node: WidgetNode, context: WxRenderingContext):
     """Renders App children"""
-    render_children(node, WxRenderingContext({
-        'parent_node': node,
+    render_children(node, context, lambda _, n: WxRenderingContext({
+        'parent_node': n,
         'node_globals': InheritedDict(node.node_globals)
     }))
 
