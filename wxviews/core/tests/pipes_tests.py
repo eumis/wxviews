@@ -1,61 +1,51 @@
 from unittest.mock import Mock, call, patch
 
 from pytest import fixture, mark, fail
-from pyviews.core import InstanceNode, XmlAttr
+from pyviews.core import XmlAttr
 
 from wxviews.core import pipes, WxRenderingContext
-from wxviews.core.pipes import setup_instance_node_setter, instance_node_setter, apply_attributes, \
-    add_to_sizer
+from wxviews.core.pipes import setup_instance_node_setter, apply_attributes, add_to_sizer
+from wxviews.widgets import WidgetNode
 
 
-def test_setup_instance_node_setter():
-    """setup_instance_node_setter should set attr_setter"""
-    node = Mock()
-
-    setup_instance_node_setter(node, WxRenderingContext())
-
-    assert node.attr_setter == instance_node_setter  # pylint: disable=comparison-with-callable
+class TestControl:
+    def __init__(self):
+        self.node_key = None
+        self.instance_key = None
 
 
-class InstanceNodeSetterTests:
-    """instance_node_setter() tests"""
+class TestNode(WidgetNode):
+    def __init__(self, widget):
+        super().__init__(widget, Mock())
+        self.node_key = None
 
-    @staticmethod
-    def _data(inst=None):
-        return InstanceNode(inst if inst else Mock(), Mock()), 'key', 'value'
 
-    def test_sets_properties(self):
-        """should set properties """
-        node, key, value = self._data()
-        setter = Mock()
-        node.properties = {key: Mock(set=setter)}
+@fixture
+def setter_fixture(request):
+    inst = TestControl()
+    test_node = TestNode(inst)
+    setup_instance_node_setter(test_node, WxRenderingContext())
 
-        instance_node_setter(node, key, value)
+    request.cls.inst = inst
+    request.cls.node = test_node
 
-        assert setter.call_args == call(value)
 
-    def test_sets_node_property(self):
-        """should setup set to node property"""
-        node, key, value = self._data()
-        setattr(node, key, None)
+@mark.usefixtures('setter_fixture')
+class SetupWidgetSetterTests:
+    @mark.parametrize('value', [1, 'value'])
+    def test_sets_node_key(self, value):
+        """should set node attribute if it exists"""
+        self.node.set_attr('node_key', value)
 
-        instance_node_setter(node, key, value)
+        assert self.node.node_key == value
+        assert self.inst.node_key is None
 
-        assert getattr(node, key) == value
+    @mark.parametrize('value', [1, 'value'])
+    def test_sets_instance_key(self, value):
+        """should set widget attribute if it exists"""
+        self.node.set_attr('instance_key', value)
 
-    def test_sets_instance_property(self):
-        """should setup set to instance property"""
-
-        class Instance:
-            pass
-
-        inst = Instance()
-        node, key, value = self._data(inst)
-        setattr(inst, key, None)
-
-        instance_node_setter(node, key, value)
-
-        assert getattr(inst, key) == value
+        assert self.inst.instance_key == value
 
 
 @fixture

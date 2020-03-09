@@ -1,4 +1,5 @@
 """Common pipeline functionality"""
+
 from typing import Any
 
 from pyviews.core import InstanceNode, Node
