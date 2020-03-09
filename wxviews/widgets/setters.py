@@ -1,4 +1,4 @@
-"""Bind modifiers"""
+"""Bind setters"""
 
 from typing import Tuple, Callable
 

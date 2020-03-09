@@ -18,15 +18,15 @@ class StyleError(PyViewsError):
 class StyleItem:
     """Wrapper under option"""
 
-    def __init__(self, modifier: Setter, name: str, value: Any):
-        self._modifier = modifier
+    def __init__(self, setter: Setter, name: str, value: Any):
+        self._setter = setter
         self._name = name
         self._value = value
 
     @property
     def setter(self):
         """Returns setter"""
-        return self._modifier
+        return self._setter
 
     @property
     def name(self):
@@ -40,10 +40,10 @@ class StyleItem:
 
     def apply(self, node: Node):
         """Applies option to passed node"""
-        self._modifier(node, self._name, self._value)
+        self._setter(node, self._name, self._value)
 
     def __hash__(self):
-        return hash((self._name, self._modifier))
+        return hash((self._name, self._setter))
 
     def __eq__(self, other):
         return hash(self) == hash(other)
