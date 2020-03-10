@@ -1,11 +1,14 @@
 """Rendering pipeline for SizerNode"""
+
 from typing import Any
 
+from pyviews.pipes import render_children
 from wx import Sizer
 from pyviews.core import InheritedDict, InstanceNode, Node, XmlNode
 from pyviews.rendering import RenderingPipeline
 
-from wxviews.core import Sizerable, WxRenderingContext
+from wxviews.core import Sizerable, WxRenderingContext, apply_attributes, add_to_sizer, \
+    instance_node_setter
 
 
 class SizerNode(InstanceNode, Sizerable):
@@ -34,7 +37,7 @@ class SizerNode(InstanceNode, Sizerable):
 
 def get_sizer_pipeline() -> RenderingPipeline:
     """Returns rendering pipeline for SizerNode"""
-    return RenderingPipeline(steps=[
+    return RenderingPipeline(pipes=[
         setup_setter,
         apply_attributes,
         add_to_sizer,
@@ -75,7 +78,7 @@ class GrowableRow(Node):
 
 def get_growable_row_pipeline() -> RenderingPipeline:
     """Returns rendering pipeline for GrowableRow"""
-    return RenderingPipeline(steps=[
+    return RenderingPipeline(pipes=[
         apply_attributes,
         add_growable_row_to_sizer
     ])
@@ -97,7 +100,7 @@ class GrowableCol(Node):
 
 def get_growable_col_pipeline() -> RenderingPipeline:
     """Returns rendering pipeline for GrowableRow"""
-    return RenderingPipeline(steps=[
+    return RenderingPipeline(pipes=[
         apply_attributes,
         add_growable_col_to_sizer
     ])
