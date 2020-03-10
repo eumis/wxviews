@@ -4,7 +4,7 @@ from typing import Any, List
 
 from injectool import resolve
 from pyviews.core import PyViewsError, Setter, Node, XmlNode, InheritedDict, XmlAttr
-from pyviews.expression import parse_expression, Expression, is_expression
+from pyviews.expression import parse_expression, is_expression, execute
 from pyviews.pipes import render_children, get_setter
 from pyviews.rendering import RenderingPipeline
 
@@ -99,8 +99,8 @@ def _get_style_item(node: Style, attr: XmlAttr):
     setter = get_setter(attr)
     value = attr.value if attr.value else ''
     if is_expression(value):
-        expression_ = resolve(Expression, parse_expression(value)[1])
-        value = expression_.execute(node.node_globals.to_dictionary())
+        expression_body = parse_expression(value).body
+        value = execute(expression_body, node.node_globals.to_dictionary())
     return StyleItem(setter, attr.name, value)
 
 
