@@ -3,10 +3,9 @@ from unittest.mock import Mock, call
 
 from pytest import mark, raises
 from wx import Frame, MenuBar, Menu
-from pyviews.core import InstanceNode
 
 from wxviews.core import WxRenderingContext
-from wxviews.menus import set_to_frame, add_menu_properties, set_to_menu_bar, set_to_menu
+from wxviews.menus import set_to_frame, set_to_menu_bar, set_to_menu
 
 
 class EmptyClass:
@@ -41,17 +40,6 @@ class SetToFrameTests:
         assert frame.SetMenuBar.call_args == call(node.instance)
 
 
-@mark.parametrize('prop', ['title'])
-def test_add_menu_specific_properties(prop: str):
-    """should add {0} property for menu node"""
-    node = InstanceNode(Mock(), Mock())
-
-    add_menu_properties(node, WxRenderingContext())
-
-    assert prop in node.properties
-    assert prop == node.properties[prop].name
-
-
 class MenuBarStub(MenuBar):
     def __init__(self):
         self.Append = Mock()
@@ -80,7 +68,7 @@ class SetToMenuBarTests:
 
         set_to_menu_bar(node, WxRenderingContext({'parent': menu_bar}))
 
-        assert menu_bar.Append.call_args == call(node.instance, title)
+        assert menu_bar.Append.call_args == call(node.instance, node.instance)
 
 
 class MenuStub(Menu):
