@@ -1,11 +1,10 @@
 """Rendering pipeline for menus"""
-
+from pyviews.pipes import render_children
 from wx import Frame, MenuBar, Menu
-from pyviews.core import InstanceNode, Property, InheritedDict
-from pyviews.rendering import RenderingPipeline, render_children
+from pyviews.core import InstanceNode, InheritedDict
+from pyviews.rendering import RenderingPipeline
 
-from wxviews.core import WxRenderingContext
-from wxviews.core.pipeline import setup_instance_node_setter, apply_attributes
+from wxviews.core import WxRenderingContext, setup_instance_node_setter, apply_attributes
 
 
 def get_menu_bar_pipeline() -> RenderingPipeline:
@@ -48,7 +47,7 @@ def get_menu_pipeline() -> RenderingPipeline:
 
 def add_menu_properties(node: InstanceNode, _: WxRenderingContext):
     """Adds menu specific properties to node"""
-    node.properties['title'] = Property('title')
+    # node.properties['title'] = Property('title')
 
 
 def set_to_menu_bar(node: InstanceNode, context: WxRenderingContext):

@@ -3,8 +3,7 @@ from unittest.mock import Mock, call, patch
 from pytest import fail, mark
 from wx import Sizer
 
-from wxviews.core import WxRenderingContext
-from wxviews.core.pipeline import instance_node_setter
+from wxviews.core import WxRenderingContext, instance_node_setter
 from wxviews import sizers
 from wxviews.sizers import SizerNode, GrowableCol, GrowableRow, sizer
 from wxviews.sizers import setup_setter, render_sizer_children, set_sizer_to_parent

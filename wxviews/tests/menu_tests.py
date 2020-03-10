@@ -3,7 +3,7 @@ from unittest.mock import Mock, call
 
 from pytest import mark, raises
 from wx import Frame, MenuBar, Menu
-from pyviews.core import InstanceNode, Property
+from pyviews.core import InstanceNode
 
 from wxviews.core import WxRenderingContext
 from wxviews.menus import set_to_frame, add_menu_properties, set_to_menu_bar, set_to_menu
@@ -74,8 +74,8 @@ class SetToMenuBarTests:
         """should call Append on menu baar and pass menu instance"""
         title = 'some title'
         node = Mock(properties={})
-        node.properties['title'] = Property('title')
-        node.properties['title'].set(title)
+        # node.properties['title'] = Property('title')
+        # node.properties['title'].set(title)
         menu_bar = MenuBarStub()
 
         set_to_menu_bar(node, WxRenderingContext({'parent': menu_bar}))

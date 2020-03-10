@@ -3,10 +3,13 @@
 from typing import Any, List
 
 from injectool import resolve
-from pyviews.core import PyViewsError, Setter, Node
+from pyviews.core import PyViewsError, Setter, Node, XmlNode, InheritedDict, XmlAttr
+from pyviews.expression import parse_expression, Expression, is_expression
+from pyviews.pipes import render_children, get_setter
+from pyviews.rendering import RenderingPipeline
 
-from wxviews.containers import render_view_children
-from wxviews.core import WxRenderingContext
+from wxviews.containers import render_view_content
+from wxviews.core import WxRenderingContext, apply_attributes
 
 STYLES_KEY = '_node_styles'
 
@@ -133,7 +136,7 @@ def get_styles_view_pipeline() -> RenderingPipeline:
     """Returns setup for container"""
     return RenderingPipeline(steps=[
         apply_attributes,
-        render_view_children,
+        render_view_content,
         store_to_globals
     ])
 

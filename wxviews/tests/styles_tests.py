@@ -1,19 +1,14 @@
 from itertools import chain
 from unittest.mock import Mock
 
-from injectool import make_default, add_function_resolver
 from pytest import mark, raises
-from pyviews.core import XmlAttr, InheritedDict, Node, Expression
-from pyviews.compilation import CompiledExpression
-from pyviews.rendering import call_set_attr
+from pyviews.core import XmlAttr, InheritedDict, Node
+from pyviews.pipes import call_set_attr
 
 from wxviews.core import WxRenderingContext
 from wxviews.styles import Style, StyleError, StylesView, style, STYLES_KEY
 from wxviews.styles import setup_node_styles, apply_style_items, apply_parent_items, store_to_globals
 from wxviews.styles import store_to_node_styles
-
-with make_default('styles_tests'):
-    add_function_resolver(Expression, lambda c, p: CompiledExpression(c))
 
 
 def some_setter():

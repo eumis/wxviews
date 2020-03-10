@@ -6,9 +6,7 @@ from traceback import format_exc
 from typing import Any, Union, List
 from unittest.mock import patch
 
-from pyviews.binding import ExpressionBinding, PropertyTarget, FunctionTarget
-from pyviews.binding import GlobalValueExpressionTarget, ObservableBinding, TwoWaysBinding
-from pyviews.binding import PropertyExpressionTarget
+from pyviews.binding import ExpressionBinding, ObservableBinding, TwoWaysBinding
 from pyviews.core import Node, InstanceNode
 import wx
 from wx import Point, DefaultPosition, Size, MenuBar
@@ -16,8 +14,7 @@ from wx import Menu, MenuItem, Window, Sizer, SizerItem
 from wx.lib.agw.customtreectrl import GenericTreeItem
 from wx.lib.inspection import InspectionTree, InspectionFrame, InspectionInfoPanel
 
-from wxviews.binding import EventBinding
-from wxviews.widgets import WidgetNode, get_root
+from wxviews.widgets import WidgetNode, get_root, EventBinding
 
 
 class ViewInspectionTool:
@@ -240,14 +237,14 @@ class ViewInspectionInfoPanel(InspectionInfoPanel):
     # noinspection PyProtectedMember
     @staticmethod
     def _get_target(target) -> str:
-        if isinstance(target, PropertyTarget):
-            return f'{target.inst.__class__.__name__}.{target.prop}'
-        if isinstance(target, FunctionTarget):
-            return str(target.func)
-        if isinstance(target, PropertyExpressionTarget):
-            return target._expression_code
-        if isinstance(target, GlobalValueExpressionTarget):
-            return f'node_globals["{target._key}"]'
+        # if isinstance(target, PropertyTarget):
+        #     return f'{target.inst.__class__.__name__}.{target.prop}'
+        # if isinstance(target, FunctionTarget):
+        #     return str(target.func)
+        # if isinstance(target, PropertyExpressionTarget):
+        #     return target._expression_code
+        # if isinstance(target, GlobalValueExpressionTarget):
+        #     return f'node_globals["{target._key}"]'
         return target.__class__.__name__
 
     def format_menu_bar(self, obj: MenuBar):

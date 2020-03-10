@@ -3,15 +3,12 @@ from unittest.mock import Mock, patch
 from injectool import add_function_resolver
 from pytest import mark, fixture
 from wx import Sizer, GridSizer
-from pyviews.core import XmlAttr, Node, InheritedDict, Expression
-from pyviews.compilation import CompiledExpression
+from pyviews.core import XmlAttr, Node, InheritedDict
 from wxviews import rendering
 from wxviews.core import WxRenderingContext
 from wxviews.rendering import create_node, get_attr_args
 from wxviews.sizers import SizerNode
 from wxviews.widgets import WidgetNode
-
-add_function_resolver(Expression, lambda c, p: CompiledExpression(p))
 
 
 class SomeNode(Node):

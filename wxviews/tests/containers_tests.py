@@ -1,49 +1,50 @@
-from math import floor
 from unittest.mock import Mock, call, patch
 
-from pytest import mark
+from injectool import add_singleton
+from pytest import mark, fixture
+from pyviews.core import Node, XmlNode, InheritedDict
+from pyviews.rendering import render
+from pyviews.rendering.views import render_view
 
 from wxviews import containers
 from wxviews.containers import Container, render_container_children
-from wxviews.containers import View, render_view_children, rerender_on_view_change
+from wxviews.containers import View, render_view_content, rerender_on_view_change
 from wxviews.containers import For, render_for_items, rerender_on_items_change
 from wxviews.containers import If, render_if, rerender_on_condition_change
 from wxviews.core import WxRenderingContext
 
 
-@mark.parametrize('nodes', [
-    [],
-    ['item1'],
-    ['item1', 'item2']
-])
-def test_render_container_children(nodes):
+@mark.usefixtures('container_fixture')
+@mark.parametrize('nodes_count', [1, 2, 5])
+def test_render_container_children(nodes_count):
     """should render all xml children for every item"""
-    with patch(containers.__name__ + '.render_children') as render_children_mock:
-        with patch(containers.__name__ + '.InheritedDict') as inherited_dict_mock:
-            xml_node = Mock(children=nodes)
-            node = Container(xml_node)
-            parent = Mock()
-            child_globals = Mock()
-            inherited_dict_mock.side_effect = lambda globs: child_globals
-            sizer = Mock()
-            child_args = {
+    render_mock = Mock()
+    add_singleton(render, render_mock)
+    with patch(containers.__name__ + '.InheritedDict') as inherited_dict_mock:
+        inherited_dict_mock.side_effect = lambda parent: {'source': parent} if parent else parent
+        xml_node = Mock(children=[Mock() for _ in range(nodes_count)])
+        node, parent, sizer = Container(xml_node), Mock(), Mock()
+        context = WxRenderingContext({'node': node, 'parent': parent, 'sizer': sizer})
+
+        render_container_children(node, context)
+
+        for actual_call, child_xml_node in zip(render_mock.call_args_list, xml_node.children):
+            child_context = WxRenderingContext({
                 'parent_node': node,
                 'parent': parent,
-                'node_globals': child_globals,
-                'sizer': sizer
-            }
-
-            render_container_children(node, WxRenderingContext({'parent': parent, 'sizer': sizer}))
-
-            assert render_children_mock.call_args == call(node, WxRenderingContext(child_args))
+                'node_globals': inherited_dict_mock(node.node_globals),
+                'sizer': sizer,
+                'xml_node': child_xml_node
+            })
+            assert actual_call == call(child_context)
 
 
 class ViewTests:
     """View node class tests"""
 
     @staticmethod
-    def test_name_is_none_by_default():
-        """name should be None by default"""
+    def test_init():
+        """__init__() should sent name to None"""
         view = View(Mock())
 
         assert view.name is None
@@ -53,8 +54,8 @@ class ViewTests:
         (None, 'name'),
         ('name', 'another name')
     ])
-    def test_called_on_name_changed(old_name, new_name):
-        """should call name_changed on name change"""
+    def test_name_changed(old_name, new_name):
+        """name_changed() should be called on name change"""
         view = View(Mock())
         view.name = old_name
         view.name_changed = Mock()
@@ -64,157 +65,98 @@ class ViewTests:
         assert view.name_changed.call_args == call(view, new_name, old_name)
 
 
-class RenderViewChildrenTests:
-    """render_view_children tests"""
+@fixture
+def view_fixture(request):
+    render_view_mock = Mock()
+    add_singleton(render_view, render_view_mock)
 
-    @staticmethod
-    @patch(containers.__name__ + '.render_view')
-    def test_renders_view(render_view: Mock):
+    view = View(Mock(), node_globals=InheritedDict({'key': 'value'}))
+    view.name = 'view'
+
+    request.cls.render_view = render_view_mock
+    request.cls.view = view
+    request.cls.parent = Mock()
+    request.cls.sizer = Mock()
+
+
+@mark.usefixtures('container_fixture', 'view_fixture')
+class RenderViewContentTests:
+    """render_view_content tests"""
+
+    def test_renders_view(self):
         """should render view by node name and set result as view child"""
-        view_name = 'name'
         child = Mock()
-        render_view.side_effect = lambda name, ctx: child if name == view_name else None
+        self.render_view.side_effect = lambda name, ctx: child if name == self.view.name else None
 
-        node = View(Mock())
-        node.name = view_name
+        render_view_content(self.view, WxRenderingContext())
 
-        render_view_children(node, WxRenderingContext())
+        assert self.view.children == [child]
 
-        assert node.children[-1] == child
-
-    @staticmethod
-    @patch(containers.__name__ + '.render_view')
-    @patch(containers.__name__ + '.InheritedDict')
-    def test_renders_view_with_args(inherit_dict: Mock, render_view: Mock):
+    def test_renders_view_with_context(self):
         """should render view by node name and set result as view child"""
-        view_name = 'name'
-        inherit_dict.side_effect = lambda source: source
+        actual = WxRenderingContext()
+        self.render_view.side_effect = lambda name, ctx: actual.update(**ctx)
 
-        node = View(Mock())
-        node.name = view_name
-        parent = Mock()
-        sizer = Mock()
-        args = {
-            'parent_node': node,
-            'parent': parent,
-            'node_globals': inherit_dict(node.node_globals),
-            'sizer': sizer
-        }
+        render_view_content(self.view,
+                            WxRenderingContext({'parent': self.parent, 'sizer': self.sizer}))
 
-        render_view_children(node, WxRenderingContext({'parent': parent, 'sizer': sizer}))
+        assert actual.parent == self.parent
+        assert actual.sizer == self.sizer
+        assert actual.parent_node == self.view
+        assert actual.node_globals.to_dictionary() == self.view.node_globals.to_dictionary()
 
-        assert render_view.call_args == call(view_name, WxRenderingContext(args))
-
-    @staticmethod
     @mark.parametrize('view_name', ['', None])
-    def test_not_render_empty_view_name(view_name):
+    def test_not_render_empty_view_name(self, view_name):
         """should not render view if name is empty or None"""
-        with patch(containers.__name__ + '.render_view') as render_view_mock:
-            node = Mock()
-            node.set_content = Mock()
-            node.name = view_name
+        self.view.name = view_name
 
-            render_view_children(node, WxRenderingContext())
+        render_view_content(self.view, WxRenderingContext())
 
-            assert not render_view_mock.called
+        assert self.view.children == []
 
 
+@mark.usefixtures('container_fixture', 'view_fixture')
 class RerenderOnViewChangeTests:
-    """rerender_on_view_change tests"""
+    """rerender_on_view_change() tests"""
 
-    @staticmethod
-    @mark.parametrize('view, new_view, args', [
-        ('', 'view', {}),
-        ('', 'view', {'parent': Mock()}),
-        (None, 'view', {'parent': Mock(), 'sizer': Mock()}),
-        ('view', 'new view', {}),
-        ('view', 'new view', {'parent': Mock()})
-    ])
-    def test_renders_new_view(view, new_view, args: dict):
-        """should be called on view change"""
-        with patch(containers.__name__ + '.render_view_children') as render_view_children_mock:
-            node = View(Mock())
-            node.view = view
+    def test_handles_new_view(self):
+        """render_view_children should be called on view change"""
+        self.view.add_child(Mock())
+        self.render_view.side_effect = lambda name, ctx: {'name': name}
+        new_view = 'new view'
 
-            rerender_on_view_change(node, WxRenderingContext(args))
-            node.name = new_view
+        rerender_on_view_change(self.view, WxRenderingContext())
+        self.view.name = new_view
 
-            assert render_view_children_mock.call_args == call(node, WxRenderingContext(args))
+        assert self.view.children == [{'name': new_view}]
 
-    @staticmethod
-    @mark.parametrize('view, new_view', [
-        ('view', None),
-        ('view', ''),
-        ('', 'view'),
-        (None, 'view'),
-        ('view', 'another view')
-    ])
-    def test_destroys_children(view, new_view):
-        """destroy_children should be called on view change"""
-        with patch(containers.__name__ + '.render_view_children'):
-            node = View(Mock())
-            node.name = view
-            node.destroy_children = Mock()
-
-            rerender_on_view_change(node, WxRenderingContext())
-            node.name = new_view
-
-            assert node.destroy_children.called
-
-    @staticmethod
-    @mark.parametrize('empty_view_name', ['', None])
-    def test_not_render_empty_name(empty_view_name):
+    @mark.parametrize('view_name', ['', None])
+    def test_not_render_empty_new_name(self, view_name):
         """should not render in case name is not set or empty"""
-        with patch(containers.__name__ + '.render_view') as render_view_mock:
-            node = View(Mock())
-            node.set_content = Mock()
-            node.name = 'view'
+        rerender_on_view_change(self.view, WxRenderingContext())
+        self.view.name = view_name
 
-            rerender_on_view_change(node, WxRenderingContext())
-            node.name = empty_view_name
+        assert self.view.children == []
 
-            assert not (render_view_mock.called or node.set_content.called)
+    def test_not_rerender_same_view(self):
+        """render_view_children should be called on view change"""
+        current_content = Mock()
+        self.view.add_child(current_content)
+        rerender_on_view_change(self.view, WxRenderingContext())
+        self.view.name = self.view.name
 
-    @staticmethod
-    @mark.parametrize('view, new_view', [
-        (None, ''),
-        ('', None),
-        ('', ''),
-        (None, None),
-        ('view', 'view')
-    ])
-    def test_not_rerender_same_view(view, new_view):
-        """should do nothing if same view is set"""
-        with patch(containers.__name__ + '.render_view_children') as render_view_children_mock:
-            node = View(Mock())
-            node.destroy_children = Mock()
-            node.name = view
-            parent = Mock()
+        assert self.view.children == [current_content]
 
-            rerender_on_view_change(node, WxRenderingContext({'parent': parent}))
-            node.name = new_view
-
-            assert not node.destroy_children.called
-            assert not render_view_children_mock.called
-            assert not parent.Layout.called
-
-    @staticmethod
-    @mark.parametrize('view, new_view', [
-        ('view', 'new view'),
-        ('', 'view'),
-        (None, 'view')
-    ])
-    def test_calls_parent_layout(view, new_view):
+    def test_calls_parent_layout(self):
         """should call parent Layout method"""
-        with patch(containers.__name__ + '.render_view_children'):
-            node = View(Mock())
-            node.view = view
-            parent = Mock()
+        self.view.add_child(Mock())
+        self.render_view.side_effect = lambda name, ctx: {'name': name}
+        new_view = 'new view'
 
-            rerender_on_view_change(node, WxRenderingContext({'parent': parent}))
-            node.name = new_view
+        rerender_on_view_change(self.view, WxRenderingContext({'parent': self.parent}))
+        self.view.name = new_view
 
-            assert parent.Layout.called
+        assert self.parent.Layout.called
 
 
 class ForTests:
@@ -233,7 +175,7 @@ class ForTests:
         ([Mock()], []),
         ([Mock()], [Mock(), Mock()])
     ])
-    def test_called_on_items_changed(old_items, new_items):
+    def test_calls_items_changed(old_items, new_items):
         """should call items_changed on items change"""
         node = For(Mock())
         node.items = old_items
@@ -243,165 +185,105 @@ class ForTests:
 
         assert node.items_changed.call_args == call(node, new_items, old_items)
 
-    @staticmethod
-    @mark.parametrize('items, nodes, expected_children', [
-        ([], [], []),
-        (['item1'], ['node1'], ['node1']),
-        (['item1'], ['node1', 'node2'], ['node1', 'node2']),
-        (['item1', 'item2'], ['node1'], ['node1', 'node1']),
-        (['item1', 'item2'], ['node1', 'node2'], ['node1', 'node2', 'node1', 'node2'])
+
+@fixture
+def for_fixture(request):
+    render_mock = Mock()
+    render_mock.side_effect = lambda ctx: Node(ctx.xml_node, node_globals=ctx.node_globals)
+    add_singleton(render, render_mock)
+
+    for_node = For(XmlNode('wxviews', 'For'),
+                   node_globals=InheritedDict({'key': 'value'}))
+
+    request.cls.render = render_mock
+    request.cls.for_node = for_node
+
+
+@mark.usefixtures('container_fixture', 'for_fixture')
+class RenderForItemsTests:
+    """render_for_items tests"""
+
+    def _setup_for_children(self, items, xml_children):
+        self.for_node.items = items
+        self.for_node._xml_node = self.for_node._xml_node._replace(children=xml_children)
+
+    @mark.parametrize('items, xml_children', [
+        ([], []),
+        (['item1'], ['node1']),
+        (['item1'], ['node1', 'node2']),
+        (['item1', 'item2'], ['node1']),
+        (['item1', 'item2'], ['node1', 'node2'])
     ])
-    def test_renders_children_for_every_item(items, nodes, expected_children):
+    def test_renders_children_for_every_item(self, items, xml_children):
         """should render all xml children for every item"""
-        with patch(containers.__name__ + '.render') as render_mock:
-            xml_node = Mock(children=nodes)
-            node = For(xml_node)
-            node.items = items
-            render_mock.side_effect = lambda xmlnode, ctx: xmlnode
+        self._setup_for_children(items, xml_children)
 
-            render_for_items(node, WxRenderingContext())
+        render_for_items(self.for_node, WxRenderingContext())
 
-            assert node.children == expected_children
+        actual = iter(self.for_node.children)
+        parent_globals = self.for_node.node_globals.to_dictionary()
+        for index, item in enumerate(items):
+            for xml_node in xml_children:
+                child = next(actual)
 
-    @staticmethod
-    @mark.parametrize('items, nodes, expected_children', [
-        ([], [], []),
-        (['item1'], ['node1'], [(0, 'item1')]),
-        (['item1'], ['node1', 'node2'], [(0, 'item1'), (0, 'item1')]),
-        (['item1', 'item2'], ['node1'], [(0, 'item1'), (1, 'item2')]),
-        (['item1', 'item2'], ['node1', 'node2'],
-         [(0, 'item1'), (0, 'item1'), (1, 'item2'), (1, 'item2')])
+                assert child.xml_node == xml_node
+                assert child.node_globals.to_dictionary() == {'index': index, 'item': item,
+                                                              **parent_globals,
+                                                              'node': child}
+
+    @mark.parametrize('items, xml_children, new_items', [
+        (['item1'], ['node1'], ['item2']),
+        (['item1'], ['node1'], ['item1', 'item2']),
+        (['item1'], ['node1', 'node2'], ['item2']),
+        (['item1'], ['node1', 'node2'], ['item1', 'item2']),
+        (['item1', 'item2'], ['node1'], ['item2', 'item3']),
+        (['item1', 'item2'], ['node1'], ['item1']),
+        (['item1', 'item2'], ['node1'], ['item4']),
+        (['item1', 'item2'], ['node1'], []),
+        (['item1', 'item2'], ['node1', 'node2'], ['item1', 'item2', 'item3'])
     ])
-    def test_adds_item_and_index_to_globals(items, nodes, expected_children):
-        """should add item and index to child globals"""
-        with patch(containers.__name__ + '.render') as render_mock:
-            xml_node = Mock(children=nodes)
-            node = For(xml_node)
-            node.items = items
-            render_mock.side_effect = lambda xmlnode, ctx: \
-                (ctx.node_globals['index'], ctx.node_globals['item'])
+    def test_renders_new_items(self, items, xml_children, new_items):
+        """should add new items, delete overflow and update existing"""
+        self._setup_for_children(items, xml_children)
+        render_for_items(self.for_node, WxRenderingContext())
 
-            render_for_items(node, WxRenderingContext())
+        rerender_on_items_change(self.for_node, WxRenderingContext())
+        self.for_node.items = new_items
 
-            assert node.children == expected_children
+        actual = iter(self.for_node.children)
+        parent_globals = self.for_node.node_globals.to_dictionary()
+        for index, item in enumerate(new_items):
+            for xml_node in xml_children:
+                child = next(actual)
 
-    def _setup_node(self, xml_child_count, items_count, render):
-        xml_node = Mock(children=self._get_mock_items(xml_child_count))
-        node = For(xml_node)
-        node.items = self._get_mock_items(items_count)
-        node.add_children([Mock(destroy=Mock(), node_globals={})
-                           for _ in range(xml_child_count * items_count)])
-        render.side_effect = lambda *_, **__: Mock()
-        return node
+                assert child.xml_node == xml_node
+                assert child.node_globals.to_dictionary() == {'index': index, 'item': item,
+                                                              **parent_globals,
+                                                              'node': child}
 
-    @staticmethod
-    def _get_mock_items(items_count):
-        return [Mock() for _ in range(items_count)]
-
-    @mark.parametrize('xml_child_count, items_count, new_items_count', [
-        (2, 4, 4),
-        (2, 4, 2),
-        (1, 4, 2),
-        (4, 3, 0),
-        (1, 3, 0),
-        (3, 10, 1)
+    @mark.parametrize('items, xml_children, new_items', [
+        (['item1'], ['node1'], ['item2']),
+        (['item1'], ['node1'], ['item1', 'item2']),
+        (['item1', 'item2'], ['node1'], ['item2', 'item3']),
+        (['item1', 'item2'], ['node1'], [])
     ])
-    def test_destroys_overflow_children(self, xml_child_count, items_count, new_items_count):
-        """should destroy overflow children"""
-        with patch(containers.__name__ + '.render') as render_mock:
-            node = self._setup_node(xml_child_count, items_count, render_mock)
+    def test_calls_parent_layout(self, items, xml_children, new_items):
+        """should call parent.Layout() after updates"""
+        self._setup_for_children(items, xml_children)
+        parent = Mock()
+        render_for_items(self.for_node, WxRenderingContext())
 
-            to_destroy = node.children[xml_child_count * new_items_count:]
-            to_left = node.children[:xml_child_count * new_items_count]
+        rerender_on_items_change(self.for_node, WxRenderingContext({'parent': parent}))
+        self.for_node.items = new_items
 
-            rerender_on_items_change(node, WxRenderingContext())
-            node.items = self._get_mock_items(new_items_count)
-
-            for child in to_destroy:
-                assert child.destroy.called
-            assert node.children == to_left
-
-    @mark.parametrize('xml_child_count, items_count, new_items_count', [
-        (2, 4, 4),
-        (2, 0, 4),
-        (2, 4, 2),
-        (2, 4, 6),
-        (1, 4, 2),
-        (4, 3, 0),
-        (1, 3, 0),
-        (3, 10, 11)
-    ])
-    def test_updates_items(self, xml_child_count, items_count, new_items_count):
-        """should update item in globals for every children"""
-        with patch(containers.__name__ + '.render') as render_mock:
-            node = self._setup_node(xml_child_count, items_count, render_mock)
-            children_to_update = node.children[:xml_child_count * new_items_count]
-
-            rerender_on_items_change(node, WxRenderingContext())
-            node.items = self._get_mock_items(new_items_count)
-
-            for i, child in enumerate(children_to_update):
-                item = node.items[floor(i / xml_child_count)]
-                assert child.node_globals['item'] == item
-
-    @mark.parametrize('xml_child_count, items_count, new_items_count', [
-        (2, 4, 6),
-        (2, 4, 10),
-        (1, 4, 4)
-    ])
-    def test_creates_new_children(self, xml_child_count, items_count, new_items_count):
-        """should create new children on items change"""
-        with patch(containers.__name__ + '.render') as render_mock:
-            node = self._setup_node(xml_child_count, items_count, render_mock)
-
-            rerender_on_items_change(node, WxRenderingContext())
-            node.items = self._get_mock_items(new_items_count)
-
-            assert len(node.children) == xml_child_count * new_items_count
-
-    @mark.parametrize('expected_args', [
-        {},
-        {'parent': Mock()},
-        {'parent': Mock(), 'sizer': Mock()},
-    ])
-    def test_passes_args_to_new_children(self, expected_args: dict):
-        """should create new children on items change"""
-        with patch(containers.__name__ + '.render') as render_mock:
-            node = self._setup_node(1, 0, render_mock)
-            render_mock.side_effect = lambda n, ctx: ctx
-
-            rerender_on_items_change(node, WxRenderingContext(expected_args))
-            node.items = self._get_mock_items(1)
-
-            assert node.children[0].items() >= expected_args.items()
-
-    @mark.parametrize('xml_child_count, items_count, new_items_count', [
-        (2, 4, 6),
-        (2, 4, 10),
-        (1, 4, 4),
-        (2, 4, 2),
-        (4, 3, 0),
-        (1, 3, 0),
-        (3, 10, 11),
-        (3, 10, 1)
-    ])
-    def test_calls_parent_layout(self, xml_child_count, items_count, new_items_count):
-        """should call parent Layout"""
-        with patch(containers.__name__ + '.render') as render_mock:
-            node = self._setup_node(xml_child_count, items_count, render_mock)
-            parent = Mock()
-
-            rerender_on_items_change(node, WxRenderingContext({'parent': parent}))
-            node.items = self._get_mock_items(new_items_count)
-
-            assert parent.Layout.called
+        assert parent.Layout.called
 
 
 class IfTests:
     """If node tests"""
 
     @staticmethod
-    def test_condition_is_false_by_default():
+    def test_init():
         """condition should be False by default"""
         node = If(Mock())
 
@@ -412,7 +294,7 @@ class IfTests:
         (False, True),
         (True, False)
     ])
-    def test_called_on_condition_changed(old_condition, new_condition):
+    def test_condition_changed(old_condition, new_condition):
         """should call condition_changed on condition change"""
         node = If(Mock())
         node.condition = old_condition
@@ -422,60 +304,66 @@ class IfTests:
 
         assert node.condition_changed.call_args == call(node, new_condition, old_condition)
 
-    @staticmethod
-    @mark.parametrize('condition', [True, False])
-    def test_renders_children(condition):
-        """should render children if condition is True"""
-        with patch(containers.__name__ + '.render_children') as render_children_mock:
-            render_children_mock.reset_mock()
-            node = If(Mock())
-            node.condition = condition
 
-            render_if(node, WxRenderingContext())
+@fixture
+def if_fixture(request):
+    render_mock = Mock()
+    render_mock.side_effect = lambda ctx: Node(ctx.xml_node, node_globals=ctx.node_globals)
+    add_singleton(render, render_mock)
 
-            assert render_children_mock.called == condition
+    if_node = If(XmlNode('wxviews', 'If'), node_globals=InheritedDict({'key': 'value'}))
 
-    @staticmethod
-    @mark.parametrize('expected_args', [
-        {},
-        {'parent': Mock()},
-        {'parent': Mock(), 'sizer': Mock()},
+    request.cls.render = render_mock
+    request.cls.if_node = if_node
+
+
+@mark.usefixtures('container_fixture', 'if_fixture')
+class IfRenderingTests:
+
+    @mark.parametrize('condition, children_count', [
+        (True, 0), (False, 0),
+        (True, 1), (False, 1),
+        (True, 5), (False, 5)
     ])
-    def test_renders_children_if_changed_to_true(expected_args):
+    def test_render_if(self, condition, children_count):
+        """should render children if condition is True"""
+        self.if_node._xml_node = self.if_node.xml_node._replace(
+            children=[Mock() for _ in range(children_count)])
+        self.if_node.condition = condition
+        expected_children = self.if_node.xml_node.children if condition else []
+
+        render_if(self.if_node, WxRenderingContext())
+
+        assert [child.xml_node for child in self.if_node.children] == expected_children
+
+    @mark.parametrize('children_count', [0, 1, 5])
+    def test_renders_children(self, children_count):
         """should render children if condition is changed to True"""
+        self.if_node.xml_node.children.extend([Mock() for _ in range(children_count)])
 
-        with patch(containers.__name__ + '.render_children') as render_children:
-            node = If(Mock())
-            node.condition = False
+        rerender_on_condition_change(self.if_node, WxRenderingContext())
+        self.if_node.condition = True
 
-            rerender_on_condition_change(node, WxRenderingContext(expected_args))
-            node.condition = True
+        assert [child.xml_node for child in self.if_node.children] == self.if_node.xml_node.children
 
-            assert render_children.call_args[0][-1].items() >= expected_args.items()
-
-    @staticmethod
-    @patch(containers.__name__ + '.render_children')
-    def test_destroy_children(_: Mock):
+    @mark.parametrize('children_count', [0, 1, 5])
+    def test_destroy_children(self, children_count):
         """should destroy children if condition is changed to False"""
-        node = If(Mock())
-        node.condition = True
-        node.destroy_children = Mock()
+        self.if_node.condition = True
+        self.if_node.add_children([Mock() for _ in range(children_count)])
 
-        rerender_on_condition_change(node, WxRenderingContext())
-        node.condition = False
+        rerender_on_condition_change(self.if_node, WxRenderingContext())
+        self.if_node.condition = False
 
-        assert node.destroy_children
+        assert self.if_node.children == []
 
-    @staticmethod
     @mark.parametrize('new_condition', [True, False])
-    def test_calls_parent_layout(new_condition):
+    def test_calls_parent_layout(self, new_condition):
         """should call parent Layout method"""
-        with patch(containers.__name__ + '.render_children'):
-            node = If(Mock())
-            node.condition = not new_condition
-            parent = Mock()
+        parent = Mock()
+        self.if_node.condition = not new_condition
 
-            rerender_on_condition_change(node, WxRenderingContext({'parent': parent}))
-            node.condition = new_condition
+        rerender_on_condition_change(self.if_node, WxRenderingContext({'parent': parent}))
+        self.if_node.condition = new_condition
 
-            assert parent.Layout.called
+        assert parent.Layout.called

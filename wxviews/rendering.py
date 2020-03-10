@@ -1,13 +1,13 @@
 """Customizing of wx parsing"""
 from injectool import resolve
+from pyviews.core import Node
+from pyviews.expression import is_expression, parse_expression, Expression
+from pyviews.rendering import get_type
+from pyviews.rendering.pipeline import _get_init_args
 
 from wx import Sizer, GridSizer, MenuBar, Menu, StaticBoxSizer
-from pyviews.core import Expression
 from pyviews.core.xml import XmlNode, XmlAttr
 from pyviews.core.observable import InheritedDict
-from pyviews.core.node import Node
-from pyviews.compilation import is_expression, parse_expression
-from pyviews.rendering import get_inst_type, get_init_args
 
 from wxviews.core import WxRenderingContext
 from wxviews.sizers import SizerNode
@@ -16,7 +16,7 @@ from wxviews.widgets import WidgetNode
 
 def create_node(xml_node: XmlNode, context: WxRenderingContext) -> Node:
     """Creates node from xml node using namespace as module and tag name as class name"""
-    inst_type = get_inst_type(xml_node)
+    inst_type = get_type(xml_node)
     if issubclass(inst_type, Node):
         args = {**context, **{'xml_node': xml_node}}
         if context.parent is not None:
@@ -59,7 +59,7 @@ def create_node(xml_node: XmlNode, context: WxRenderingContext) -> Node:
 
 def _create_inst(inst_type, **init_args):
     """Creates class instance with args"""
-    args, kwargs = get_init_args(inst_type, init_args, True)
+    args, kwargs = _get_init_args(inst_type, init_args, True)
     return inst_type(*args, **kwargs)
 
 

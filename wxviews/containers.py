@@ -1,4 +1,5 @@
 """Contains methods for node setups creation"""
+from typing import Any
 
 from pyviews.core import Node, XmlNode
 from pyviews.pipes import render_children
@@ -15,7 +16,7 @@ class Container(Node):
 
 def get_container_pipeline() -> RenderingPipeline:
     """Returns setup for container"""
-    return RenderingPipeline(steps=[
+    return RenderingPipeline(pipes=[
         apply_attributes,
         render_container_children
     ])
@@ -23,15 +24,17 @@ def get_container_pipeline() -> RenderingPipeline:
 
 def render_container_children(node, context: WxRenderingContext):
     """Renders container children"""
-    render_children(node, _get_child_context(node, context))
+    render_children(node, context, _get_child_context)
 
 
-def _get_child_context(node: Container, context: WxRenderingContext) -> WxRenderingContext:
+def _get_child_context(xml_node: XmlNode, parent_node: Container,
+                       context: WxRenderingContext) -> WxRenderingContext:
     return WxRenderingContext({
-        'parent_node': node,
+        'parent_node': parent_node,
         'parent': context.parent,
-        'node_globals': InheritedDict(node.node_globals),
-        'sizer': context.sizer
+        'node_globals': InheritedDict(parent_node.node_globals),
+        'sizer': context.sizer,
+        'xml_node': xml_node
     })
 
 
@@ -57,17 +60,17 @@ class View(Container):
 
 def get_view_pipeline() -> RenderingPipeline:
     """Returns setup for container"""
-    return RenderingPipeline(steps=[
+    return RenderingPipeline(pipes=[
         apply_attributes,
-        render_view_children,
+        render_view_content,
         rerender_on_view_change
     ])
 
 
-def render_view_children(node: View, context: WxRenderingContext):
+def render_view_content(node: View, context: WxRenderingContext):
     """Finds view by name attribute and renders it as view node child"""
     if node.name:
-        child_context = _get_child_context(node, context)
+        child_context = _get_child_context(node.xml_node, node, context)
         content = render_view(node.name, child_context)
         node.add_child(content)
 
@@ -85,7 +88,7 @@ def _is_different(one: str, two: str):
 
 def _rerender_view(node: View, context: WxRenderingContext):
     node.destroy_children()
-    render_view_children(node, context)
+    render_view_content(node, context)
     if context.parent:
         context.parent.Layout()
 
@@ -112,7 +115,7 @@ class For(Container):
 
 def get_for_pipeline() -> RenderingPipeline:
     """Returns setup for For node"""
-    return RenderingPipeline(steps=[
+    return RenderingPipeline(pipes=[
         apply_attributes,
         render_for_items,
         rerender_on_items_change
@@ -128,13 +131,14 @@ def _render_for_children(node: For, items: list, context: WxRenderingContext, in
     item_xml_nodes = node.xml_node.children
     for index, item in enumerate(items):
         for xml_node in item_xml_nodes:
-            child_context = _get_for_child_args(node, index + index_shift, item, context)
-            child = render(xml_node, child_context)
+            child_context = _get_for_child_args(xml_node, index + index_shift, item, node, context)
+            child = render(child_context)
             node.add_child(child)
 
 
-def _get_for_child_args(node: For, index, item, context: WxRenderingContext):
-    child_context = _get_child_context(node, context)
+def _get_for_child_args(xml_node: XmlNode, index: int, item: Any,
+                        parent_node: For, context: WxRenderingContext):
+    child_context = _get_child_context(xml_node, parent_node, context)
     child_globals = child_context.node_globals
     child_globals['index'] = index
     child_globals['item'] = item
@@ -211,7 +215,7 @@ class If(Container):
 
 def get_if_pipeline() -> RenderingPipeline:
     """Returns setup for For node"""
-    return RenderingPipeline(steps=[
+    return RenderingPipeline(pipes=[
         apply_attributes,
         render_if,
         rerender_on_condition_change
@@ -221,7 +225,7 @@ def get_if_pipeline() -> RenderingPipeline:
 def render_if(node: If, context: WxRenderingContext):
     """Renders children nodes if condition is true"""
     if node.condition:
-        render_children(node, _get_child_context(node, context))
+        render_children(node, context, _get_child_context)
 
 
 def rerender_on_condition_change(node: If, context: WxRenderingContext):
