@@ -62,7 +62,7 @@ class Style(Node):
 
 def get_style_pipeline() -> RenderingPipeline:
     """Returns pipeline for style node"""
-    return RenderingPipeline(steps=[
+    return RenderingPipeline(pipes=[
         setup_node_styles,
         apply_style_items,
         apply_parent_items,
@@ -133,7 +133,7 @@ class StylesView(Node):
 
 def get_styles_view_pipeline() -> RenderingPipeline:
     """Returns setup for container"""
-    return RenderingPipeline(steps=[
+    return RenderingPipeline(pipes=[
         apply_attributes,
         render_view_content,
         store_to_globals
