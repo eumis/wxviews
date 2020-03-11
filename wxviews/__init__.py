@@ -6,6 +6,6 @@ from pyviews.code import Code
 from wxviews.containers import Container, View, For, If
 from wxviews.sizers import GrowableCol, GrowableRow, sizer
 from wxviews.widgets import get_root, bind
-from wxviews.styles import Style, StylesView
+from wxviews.styles import Style, StylesView, style
 
 __version__ = '0.4.0'

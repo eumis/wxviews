@@ -87,11 +87,12 @@ def setup_setter(node: SizerNode, _: WxRenderingContext):
 
 def render_sizer_children(node: SizerNode, context: WxRenderingContext):
     """Renders sizer children"""
-    render_children(node, WxRenderingContext({
-        'parent_node': node,
-        'parent': context.parent,
+    render_children(node, context, lambda x, n, ctx: WxRenderingContext({
+        'parent_node': n,
+        'parent': ctx.parent,
         'node_globals': InheritedDict(node.node_globals),
-        'sizer': node.instance
+        'sizer': node.instance,
+        'xml_node': x
     }))
 
 

@@ -16,7 +16,7 @@ from wxviews.menus import get_menu_item_pipeline, get_menu_pipeline, get_menu_ba
 from wxviews.sizers import get_growable_col_pipeline, get_growable_row_pipeline, get_sizer_pipeline
 from wxviews.styles import get_styles_view_pipeline, get_style_pipeline
 from wxviews.widgets import get_frame_pipeline, get_app_pipeline, get_wx_pipeline, \
-    bind_text_and_expression, bind_check_and_expression, WidgetNode
+    WidgetNode, add_events_rules
 
 
 def register_dependencies():
@@ -32,8 +32,7 @@ def setup_binder() -> Binder:
     binder = Binder()
     binder.add_rule('once', run_once)
     binder.add_rule('oneway', bind_setter_to_expression)
-    binder.add_rule('twoways', bind_text_and_expression)
-    binder.add_rule('twoways', bind_check_and_expression)
+    add_events_rules(binder)
     return binder
 
 

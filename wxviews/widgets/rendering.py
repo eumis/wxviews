@@ -60,8 +60,7 @@ def render_wx_children(node: WidgetNode, context: WxRenderingContext):
         'parent': n.instance,
         'parent_node': n,
         'node_globals': InheritedDict(n.node_globals),
-        'xml_node': xn,
-        'sizer': ctx.sizer
+        'xml_node': xn
     }))
 
 

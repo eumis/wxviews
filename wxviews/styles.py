@@ -116,10 +116,11 @@ def store_to_node_styles(node: Style, context: WxRenderingContext):
 
 def render_child_styles(node: Style, context: WxRenderingContext):
     """Renders child styles"""
-    render_children(node, WxRenderingContext({
-        'parent_node': node,
+    render_children(node, context, lambda x, n, ctx: WxRenderingContext({
+        'parent_node': n,
         'node_globals': InheritedDict(node.node_globals),
-        'node_styles': _get_styles(context)
+        'node_styles': _get_styles(context),
+        'xml_node': x
     }))
 
 
