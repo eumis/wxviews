@@ -2,6 +2,7 @@ from typing import Any
 from unittest.mock import Mock, call
 
 from pytest import mark, raises
+from pyviews.core import XmlNode, XmlAttr
 from wx import Frame, MenuBar, Menu
 
 from wxviews.core import WxRenderingContext
@@ -61,14 +62,12 @@ class SetToMenuBarTests:
     def test_sets_menu_to_bar():
         """should call Append on menu baar and pass menu instance"""
         title = 'some title'
-        node = Mock(properties={})
-        # node.properties['title'] = Property('title')
-        # node.properties['title'].set(title)
+        node = Mock(properties={}, xml_node=XmlNode('wx', 'Menu', attrs=[XmlAttr('title', title)]))
         menu_bar = MenuBarStub()
 
         set_to_menu_bar(node, WxRenderingContext({'parent': menu_bar}))
 
-        assert menu_bar.Append.call_args == call(node.instance, node.instance)
+        assert menu_bar.Append.call_args == call(node.instance, title)
 
 
 class MenuStub(Menu):
