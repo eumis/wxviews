@@ -1,6 +1,7 @@
 <?xml version="1.0"?>
 <App xmlns='wx'
      xmlns:wxv='wxviews'
+     xmlns:init="init"
 
      xmlns:import='wxviews.import_global'
      xmlns:global='wxviews.set_global'
@@ -19,7 +20,7 @@
                 id = get_view_id(index)
                 frame.Bind(wx.EVT_MENU, lambda evt, v=view: change_view(v), id=id)
 
-            frame.Bind(wx.EVT_MENU, lambda evt: wx.Exit(), id=wx.ID_EXIT) 
+            frame.Bind(wx.EVT_MENU, lambda evt: wx.Exit(), id=wx.ID_EXIT)
         </wxv:Code>
         <MenuBar>
             <Menu title='File'>

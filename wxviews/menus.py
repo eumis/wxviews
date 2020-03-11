@@ -9,10 +9,10 @@ from wxviews.core import WxRenderingContext, setup_instance_node_setter, apply_a
 from wxviews.widgets import WidgetNode
 
 
-def create_menu_node(xml_node: XmlNode, context: WxRenderingContext) -> WidgetNode:
+def create_menu_node(context: WxRenderingContext) -> WidgetNode:
     """Creates node from xml node using namespace as module and tag name as class name"""
-    inst_type = get_type(xml_node)
-    return WidgetNode(inst_type(), xml_node, node_globals=context.node_globals)
+    inst_type = get_type(context.xml_node)
+    return WidgetNode(inst_type(), context.xml_node, node_globals=context.node_globals)
 
 
 def get_menu_bar_pipeline() -> RenderingPipeline:
@@ -64,7 +64,7 @@ def set_to_menu_bar(node: InstanceNode, context: WxRenderingContext):
         msg = 'parent for Menu should be MenuBar, but it is {0}'.format(context.parent)
         raise TypeError(msg)
     # context.parent.Append(node.instance, node.properties['title'].get())
-    context.parent.Append(node.instance, node.instance)
+    context.parent.Append(node.instance, str(node.instance))
 
 
 def get_menu_item_pipeline() -> RenderingPipeline:
@@ -73,7 +73,7 @@ def get_menu_item_pipeline() -> RenderingPipeline:
         setup_instance_node_setter,
         apply_attributes,
         set_to_menu
-    ])
+    ], create_node=create_menu_node)
 
 
 def set_to_menu(node: InstanceNode, context: WxRenderingContext):

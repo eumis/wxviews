@@ -92,7 +92,8 @@ def store_root(node: WidgetNode, _: WxRenderingContext):
 
 def render_app_children(node: WidgetNode, context: WxRenderingContext):
     """Renders App children"""
-    render_children(node, context, lambda _, n: WxRenderingContext({
+    render_children(node, context, lambda x, n, ctx: WxRenderingContext({
+        'xml_node': x,
         'parent_node': n,
         'node_globals': InheritedDict(node.node_globals)
     }))
