@@ -3,12 +3,12 @@
 from typing import Any
 
 from pyviews.pipes import render_children
-from wx import Sizer
+from wx import Sizer, GridSizer, StaticBoxSizer
 from pyviews.core import InheritedDict, InstanceNode, Node, XmlNode
-from pyviews.rendering import RenderingPipeline
+from pyviews.rendering import RenderingPipeline, get_type
 
 from wxviews.core import Sizerable, WxRenderingContext, apply_attributes, add_to_sizer, \
-    instance_node_setter
+    instance_node_setter, get_init_value, get_attr_args
 
 
 class SizerNode(InstanceNode, Sizerable):
@@ -43,7 +43,41 @@ def get_sizer_pipeline() -> RenderingPipeline:
         add_to_sizer,
         render_sizer_children,
         set_sizer_to_parent
-    ])
+    ], create_node=_create_sizer_node)
+
+
+def _create_sizer_node(context: WxRenderingContext) -> SizerNode:
+    inst_type = get_type(context.xml_node)
+    if issubclass(inst_type, GridSizer):
+        args = _get_init_values(context.xml_node, context.node_globals)
+        inst = inst_type(*args)
+        return SizerNode(inst, context.xml_node, node_globals=context.node_globals)
+
+    if issubclass(inst_type, StaticBoxSizer):
+        init_args = get_attr_args(context.xml_node, 'init', context.node_globals)
+        args = []
+        try:
+            static_box = init_args.pop('box')
+            args.append(static_box)
+        except KeyError:
+            args.append(init_args.pop('orient'))
+            args.append(context.parent)
+        inst = inst_type(*args, **init_args)
+        return SizerNode(inst, context.xml_node,
+                         node_globals=context.node_globals,
+                         parent=inst.GetStaticBox(),
+                         sizer=context.sizer)
+    args = get_attr_args(context.xml_node, 'init', context.node_globals)
+    inst = inst_type(**args)
+    return SizerNode(inst, context.xml_node,
+                     node_globals=context.node_globals,
+                     parent=context.parent,
+                     sizer=context.sizer)
+
+
+def _get_init_values(xml_node: XmlNode, node_globals: InheritedDict = None) -> list:
+    init_attrs = [attr for attr in xml_node.attrs if attr.namespace == 'init']
+    return [get_init_value(attr, node_globals) for attr in init_attrs]
 
 
 def setup_setter(node: SizerNode, _: WxRenderingContext):

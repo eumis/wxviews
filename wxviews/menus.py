@@ -3,9 +3,16 @@
 from pyviews.pipes import render_children
 from wx import Frame, MenuBar, Menu
 from pyviews.core import InstanceNode, InheritedDict, XmlNode
-from pyviews.rendering import RenderingPipeline
+from pyviews.rendering import RenderingPipeline, get_type
 
 from wxviews.core import WxRenderingContext, setup_instance_node_setter, apply_attributes
+from wxviews.widgets import WidgetNode
+
+
+def create_menu_node(xml_node: XmlNode, context: WxRenderingContext) -> WidgetNode:
+    """Creates node from xml node using namespace as module and tag name as class name"""
+    inst_type = get_type(xml_node)
+    return WidgetNode(inst_type(), xml_node, node_globals=context.node_globals)
 
 
 def get_menu_bar_pipeline() -> RenderingPipeline:
@@ -15,7 +22,7 @@ def get_menu_bar_pipeline() -> RenderingPipeline:
         apply_attributes,
         render_menu_children,
         set_to_frame
-    ])
+    ], create_node=create_menu_node)
 
 
 def render_menu_children(node: InstanceNode, context: WxRenderingContext):
@@ -48,7 +55,7 @@ def get_menu_pipeline() -> RenderingPipeline:
         apply_attributes,
         render_menu_children,
         set_to_menu_bar
-    ])
+    ], create_node=create_menu_node)
 
 
 def set_to_menu_bar(node: InstanceNode, context: WxRenderingContext):

@@ -1,8 +1,9 @@
 from unittest.mock import Mock
 
 from pytest import fixture, mark
+from pyviews.core import XmlAttr
 
-from wxviews.core import WxRenderingContext
+from wxviews.core import WxRenderingContext, get_attr_args
 
 
 @fixture
@@ -46,3 +47,31 @@ class WxRenderingContextTests:
         assert init_value is None
         assert self.context.node_styles == value
         assert self.context['node_styles'] == value
+
+
+@mark.parametrize('namespace, attrs, args', [
+    ('init', [], {}),
+    ('init', [XmlAttr('key', 'value', 'init')], {'key': 'value'}),
+    ('init',
+     [XmlAttr('key', 'value', 'init'), XmlAttr('one', '{1}', 'init')],
+     {'key': 'value', 'one': 1}),
+    ('init',
+     [XmlAttr('key', '{"v" + "alue"}', 'init'), XmlAttr('one', '1', 'init')],
+     {'key': 'value', 'one': '1'}),
+    ('sizer', [XmlAttr('key', 'value', 'sizer')], {'key': 'value'}),
+    ('sizer',
+     [XmlAttr('key', 'value', 'sizer'), XmlAttr('another key', '{1}', 'init')],
+     {'key': 'value'}),
+    ('sizer', [XmlAttr('key', 'value', 'init')], {}),
+    ('init', [XmlAttr('', '{dict({"key":"value"})}', 'init')], {'key': 'value'}),
+    ('init', [XmlAttr('', '{dict({"one":"1", "two": 2})}', 'init')], {'one': '1', 'two': 2}),
+    ('init', [XmlAttr('', '{dict({"key":1})}', 'init'), XmlAttr('key', '{2}', 'init')], {'key': 2}),
+    ('init', [XmlAttr('key', '{2}', 'init'), XmlAttr('', '{dict({"key":1})}', 'init')], {'key': 1})
+])
+def test_get_attr_args(namespace, attrs, args):
+    """should pass parent to instance constructor"""
+    xml_node = Mock(attrs=attrs)
+
+    actual = get_attr_args(xml_node, namespace)
+
+    assert actual == args

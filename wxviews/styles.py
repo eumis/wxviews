@@ -2,7 +2,6 @@
 
 from typing import Any, List
 
-from injectool import resolve
 from pyviews.core import PyViewsError, Setter, Node, XmlNode, InheritedDict, XmlAttr
 from pyviews.expression import parse_expression, is_expression, execute
 from pyviews.pipes import render_children, get_setter
