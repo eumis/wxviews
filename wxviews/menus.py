@@ -7,15 +7,15 @@ from pyviews.rendering import RenderingPipeline, get_type
 
 from wxviews.core import WxRenderingContext, setup_instance_node_setter, apply_attributes, \
     get_attr_args, get_init_value
-from wxviews.widgets import WidgetNode
+from wxviews.widgets import WxNode
 
 
-def create_menu_node(context: WxRenderingContext) -> WidgetNode:
+def create_menu_node(context: WxRenderingContext) -> WxNode:
     """Creates node from xml node using namespace as module and tag name as class name"""
     inst_type = get_type(context.xml_node)
     args = get_attr_args(context.xml_node, 'init', context.node_globals)
     inst = inst_type(**args)
-    return WidgetNode(inst, context.xml_node, node_globals=context.node_globals)
+    return WxNode(inst, context.xml_node, node_globals=context.node_globals)
 
 
 def get_menu_bar_pipeline() -> RenderingPipeline:
@@ -61,7 +61,7 @@ def get_menu_pipeline() -> RenderingPipeline:
     ], create_node=create_menu_node)
 
 
-def set_to_menu_bar(node: WidgetNode, context: WxRenderingContext):
+def set_to_menu_bar(node: WxNode, context: WxRenderingContext):
     """Adds menu to parent MenuBar"""
     if not isinstance(context.parent, MenuBar):
         msg = 'parent for Menu should be MenuBar, but it is {0}'.format(context.parent)

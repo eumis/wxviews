@@ -16,7 +16,7 @@ from wxviews.menus import get_menu_item_pipeline, get_menu_pipeline, get_menu_ba
 from wxviews.sizers import get_growable_col_pipeline, get_growable_row_pipeline, get_sizer_pipeline
 from wxviews.styles import get_styles_view_pipeline, get_style_pipeline
 from wxviews.widgets import get_frame_pipeline, get_app_pipeline, get_wx_pipeline, \
-    WidgetNode, add_events_rules
+    WxNode, add_events_rules
 
 
 def register_dependencies():
@@ -71,5 +71,5 @@ def get_pipeline_resolver() -> SingletonResolver:
 def launch(context: WxRenderingContext, root_view=None):
     """Runs application. Widgets are created from passed xml_files"""
     root_view = 'root' if root_view is None else root_view
-    root = cast(WidgetNode, render_view(root_view, context))
+    root = cast(WxNode, render_view(root_view, context))
     root.instance.MainLoop()

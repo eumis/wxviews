@@ -8,7 +8,7 @@ from pyviews.core import XmlAttr, Node
 from pyviews.core import InheritedDict, ObservableEntity
 from pyviews.binding import TwoWaysBinding, BindingContext
 
-from wxviews.widgets import WidgetNode
+from wxviews.widgets import WxNode
 from wxviews.widgets.binding import EventBinding, bind_text_and_expression, \
     check_control_and_property, bind_check_and_expression
 
@@ -127,7 +127,7 @@ class TextViewModel(ObservableEntity):
 @fixture
 def text_binding_fixture(request):
     text, vm = TextEntryStub(), TextViewModel()
-    node = WidgetNode(text, Mock(), InheritedDict({'vm': vm}))
+    node = WxNode(text, Mock(), InheritedDict({'vm': vm}))
 
     context = BindingContext()
     context.node = node
@@ -189,7 +189,7 @@ class CheckViewModel(ObservableEntity):
 @fixture
 def check_binding_fixture(request):
     checkbox, vm = CheckBoxStub(), CheckViewModel()
-    node = WidgetNode(checkbox, Mock(), InheritedDict({'vm': vm}))
+    node = WxNode(checkbox, Mock(), InheritedDict({'vm': vm}))
 
     context = BindingContext()
     context.node = node
@@ -242,25 +242,25 @@ class BindCheckAndExpressionTests:
 
 @mark.parametrize('control_type, binding_context, expected', [
     (TextEntryStub,
-     {'node': WidgetNode(TextEntryStub(), Mock()), 'xml_attr': XmlAttr('Value')},
+     {'node': WxNode(TextEntryStub(), Mock()), 'xml_attr': XmlAttr('Value')},
      True),
     (TextEntryStub,
-     {'node': WidgetNode(CheckBoxStub(), Mock()), 'xml_attr': XmlAttr('Value')},
+     {'node': WxNode(CheckBoxStub(), Mock()), 'xml_attr': XmlAttr('Value')},
      False),
     (TextEntryStub,
-     {'node': WidgetNode(TextEntryStub(), Mock()), 'xml_attr': XmlAttr('Property')},
+     {'node': WxNode(TextEntryStub(), Mock()), 'xml_attr': XmlAttr('Property')},
      False),
     (CheckBoxStub,
-     {'node': WidgetNode(CheckBoxStub(), Mock()), 'xml_attr': XmlAttr('Value')},
+     {'node': WxNode(CheckBoxStub(), Mock()), 'xml_attr': XmlAttr('Value')},
      True),
     (CheckBoxStub,
-     {'node': WidgetNode(TextEntryStub(), Mock()), 'xml_attr': XmlAttr('Value')},
+     {'node': WxNode(TextEntryStub(), Mock()), 'xml_attr': XmlAttr('Value')},
      False),
     (CheckBoxStub,
-     {'node': WidgetNode(CheckBoxStub(), Mock()), 'xml_attr': XmlAttr('Property')},
+     {'node': WxNode(CheckBoxStub(), Mock()), 'xml_attr': XmlAttr('Property')},
      False),
     (CheckBoxStub, {}, False),
-    (TextEntryStub, {'node': WidgetNode(TextEntryStub(), Mock())}, False),
+    (TextEntryStub, {'node': WxNode(TextEntryStub(), Mock())}, False),
     (CheckBoxStub, {'xml_attr': XmlAttr('text')}, False),
     (TextEntryStub, {'node': Node(Mock()), 'xml_attr': XmlAttr('text')}, False)
 ])

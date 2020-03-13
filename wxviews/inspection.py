@@ -14,7 +14,7 @@ from wx import Menu, MenuItem, Window, Sizer, SizerItem
 from wx.lib.agw.customtreectrl import GenericTreeItem
 from wx.lib.inspection import InspectionTree, InspectionFrame, InspectionInfoPanel
 
-from wxviews.widgets import WidgetNode, get_root, EventBinding
+from wxviews.widgets import WxNode, get_root, EventBinding
 
 
 class ViewInspectionTool:
@@ -32,7 +32,7 @@ class ViewInspectionTool:
         self._config = config
         self._crust_locals: dict = crust_locals
         if not hasattr(self, '_app'):
-            self._app: WidgetNode = get_root()
+            self._app: WxNode = get_root()
 
     def show(self, select_obj: Any = None):
         """

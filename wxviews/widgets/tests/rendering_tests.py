@@ -7,7 +7,7 @@ from wx import EVT_MENU, EVT_BUTTON
 
 from wxviews import widgets
 from wxviews.core import WxRenderingContext
-from wxviews.widgets.rendering import render_wx_children, WidgetNode, store_root, get_root
+from wxviews.widgets.rendering import render_wx_children, WxNode, store_root, get_root
 
 
 class WidgetNodeTests:
@@ -17,7 +17,7 @@ class WidgetNodeTests:
     def test_destroy():
         """should destroy instance"""
         instance = Mock()
-        node = WidgetNode(instance, XmlNode('', ''))
+        node = WxNode(instance, XmlNode('', ''))
 
         node.destroy()
 
@@ -33,7 +33,7 @@ class WidgetNodeTests:
         """should call bind for instance"""
         instance = Mock()
         instance.bind = Mock()
-        node = WidgetNode(instance, XmlNode('', ''))
+        node = WxNode(instance, XmlNode('', ''))
 
         node.bind(event, callback, **args)
 
@@ -50,7 +50,7 @@ def test_root():
 
 
 def test_get_root():
-    store_root(cast(WidgetNode, None), WxRenderingContext())
+    store_root(cast(WxNode, None), WxRenderingContext())
 
     with raises(ValueError):
         get_root()

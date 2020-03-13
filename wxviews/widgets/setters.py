@@ -5,10 +5,10 @@ from typing import Tuple, Callable
 import wx
 from wx import Event
 
-from wxviews.widgets import WidgetNode
+from wxviews.widgets import WxNode
 
 
-def bind(node: WidgetNode, key: str,
+def bind(node: WxNode, key: str,
          value: (Callable[[Event], None], Tuple[Callable[[Event], None], dict])):
     """Calls node bind method"""
     event = wx.__dict__[key]

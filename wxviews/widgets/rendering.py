@@ -11,10 +11,10 @@ from wxviews.core import Sizerable, WxRenderingContext, get_attr_args
 from wxviews.core import setup_instance_node_setter, apply_attributes, add_to_sizer
 
 
-class WidgetNode(InstanceNode, Sizerable):
+class WxNode(InstanceNode, Sizerable):
     """Wrapper under wx widget"""
 
-    Root: 'WidgetNode' = None
+    Root: 'WxNode' = None
 
     def __init__(self, instance, xml_node: XmlNode, node_globals: InheritedDict = None):
         super().__init__(instance, xml_node, node_globals=node_globals)
@@ -47,14 +47,14 @@ def get_wx_pipeline() -> RenderingPipeline:
     ], create_node=_create_widget_node)
 
 
-def _create_widget_node(context: WxRenderingContext) -> WidgetNode:
+def _create_widget_node(context: WxRenderingContext) -> WxNode:
     inst_type = get_type(context.xml_node)
     args = get_attr_args(context.xml_node, 'init', context.node_globals)
     inst = inst_type(context.parent, **args)
-    return WidgetNode(inst, context.xml_node, node_globals=context.node_globals)
+    return WxNode(inst, context.xml_node, node_globals=context.node_globals)
 
 
-def render_wx_children(node: WidgetNode, context: WxRenderingContext):
+def render_wx_children(node: WxNode, context: WxRenderingContext):
     """Renders WidgetNode children"""
     render_children(node, context, lambda xn, n, ctx: WxRenderingContext({
         'parent': n.instance,
@@ -84,12 +84,12 @@ def get_app_pipeline():
     ], create_node=_create_widget_node)
 
 
-def store_root(node: WidgetNode, _: WxRenderingContext):
+def store_root(node: WxNode, _: WxRenderingContext):
     """Store root node to global property"""
-    WidgetNode.Root = node
+    WxNode.Root = node
 
 
-def render_app_children(node: WidgetNode, context: WxRenderingContext):
+def render_app_children(node: WxNode, context: WxRenderingContext):
     """Renders App children"""
     render_children(node, context, lambda x, n, ctx: WxRenderingContext({
         'xml_node': x,
@@ -98,8 +98,8 @@ def render_app_children(node: WidgetNode, context: WxRenderingContext):
     }))
 
 
-def get_root() -> WidgetNode:
+def get_root() -> WxNode:
     """returns root"""
-    if WidgetNode.Root is None:
+    if WxNode.Root is None:
         raise ValueError("Root is not set")
-    return WidgetNode.Root
+    return WxNode.Root

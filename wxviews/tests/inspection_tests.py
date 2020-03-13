@@ -5,13 +5,13 @@ from pytest import fixture, mark
 from wxviews import inspection
 from wxviews.inspection import ViewInspectionFrame, ViewInspectionTool
 from wxviews.inspection import ViewInspectionTree, ViewInspectionInfoPanel
-from wxviews.widgets import WidgetNode
+from wxviews.widgets import WxNode
 
 
 @fixture
 def tool_fixture(request):
     with patch(f'{inspection.__name__}.get_root') as get_root:
-        root = WidgetNode(Mock(), Mock())
+        root = WxNode(Mock(), Mock())
         top_window = Mock()
         root.instance.GetTopWindow = Mock()
         root.instance.GetTopWindow.side_effect = lambda: top_window
@@ -105,7 +105,7 @@ class ViewInspectionFrameTests:
 @fixture
 def tree_fixture(request):
     with patch(f'{inspection.__name__}.get_root') as get_root:
-        root = WidgetNode(Mock(), Mock())
+        root = WxNode(Mock(), Mock())
         get_root.side_effect = lambda: root
         request.cls.root = root
         with patch(f'{inspection.__name__}.InspectionTree.__init__') as tree_init:
@@ -142,7 +142,7 @@ class Item:
 
 
 def _node(name, children=None):
-    node = WidgetNode(name, Mock())
+    node = WxNode(name, Mock())
     node._children = children if children else []
     return node
 
@@ -166,7 +166,7 @@ class ViewInspectionTreeTests:
 
     def test_sets_root_node(self):
         """should set app node as tree root"""
-        self.tree.BuildTree(WidgetNode(Mock(), Mock()))
+        self.tree.BuildTree(WxNode(Mock(), Mock()))
 
         # noinspection PyProtectedMember
         assert self.tree.AddRoot.call_args == call(self.tree._get_node_name(self.root))
@@ -222,14 +222,14 @@ class ViewInspectionTreeTests:
 
     def test_selects_obj(self):
         """should select start node"""
-        node = WidgetNode(Mock(), Mock())
+        node = WxNode(Mock(), Mock())
         self.tree.BuildTree(node)
 
         assert self.tree.SelectObj.call_args == call(node)
 
     def test_sets_built_flag(self):
         """should set built flag to true"""
-        self.tree.BuildTree(WidgetNode(Mock(), Mock()))
+        self.tree.BuildTree(WxNode(Mock(), Mock()))
 
         assert self.tree.built
 

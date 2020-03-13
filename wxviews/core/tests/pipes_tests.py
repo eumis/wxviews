@@ -5,7 +5,7 @@ from pyviews.core import XmlAttr
 
 from wxviews.core import pipes, WxRenderingContext
 from wxviews.core.pipes import setup_instance_node_setter, apply_attributes, add_to_sizer
-from wxviews.widgets import WidgetNode
+from wxviews.widgets import WxNode
 
 
 class TestControl:
@@ -14,7 +14,7 @@ class TestControl:
         self.instance_key = None
 
 
-class TestNode(WidgetNode):
+class TestNode(WxNode):
     def __init__(self, widget):
         super().__init__(widget, Mock())
         self.node_key = None
