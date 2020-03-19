@@ -5,7 +5,7 @@
                xmlns:style='wxviews.style'
                xmlns:init='init'
 
-               xmlns:sizer='wxviews.sizer'
+               xmlns:sizer='wxviews.set_sizer'
                import:wx='wx'>
 
     <wxv:StylesView name="sizers_styles"/>

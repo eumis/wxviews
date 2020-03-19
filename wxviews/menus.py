@@ -1,9 +1,9 @@
 """Rendering pipeline for menus"""
 
-from pyviews.pipes import render_children
-from wx import Frame, MenuBar, Menu
 from pyviews.core import InstanceNode, InheritedDict, XmlNode
+from pyviews.pipes import render_children
 from pyviews.rendering import RenderingPipeline, get_type
+from wx import Frame, MenuBar, Menu
 
 from wxviews.core import WxRenderingContext, setup_instance_node_setter, apply_attributes, \
     get_attr_args, get_init_value

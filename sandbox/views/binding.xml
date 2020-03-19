@@ -2,7 +2,7 @@
                xmlns:wxv='wxviews'
                xmlns:init='init'
 
-               xmlns:sizer='wxviews.sizer'
+               xmlns:sizer='wxviews.set_sizer'
                xmlns:import='wxviews.import_global'
                xmlns:global='wxviews.set_global'
 

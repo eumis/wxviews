@@ -2,6 +2,10 @@
 
 # Dev
 
+  - updated pyviews to 3.0.0
+  - WidgetNode is renamed to WxNode
+  - sizer() modifier is renamed to set_sizer
+
 ## 0.4.0
 
   - fixed passing parent to For and If children

@@ -2,10 +2,10 @@
 
 from typing import Any
 
-from pyviews.pipes import render_children
-from wx import Sizer, GridSizer, StaticBoxSizer
 from pyviews.core import InheritedDict, InstanceNode, Node, XmlNode
+from pyviews.pipes import render_children
 from pyviews.rendering import RenderingPipeline, get_type
+from wx import Sizer, GridSizer, StaticBoxSizer
 
 from wxviews.core import Sizerable, WxRenderingContext, apply_attributes, add_to_sizer, \
     instance_node_setter, get_init_value, get_attr_args
@@ -146,7 +146,7 @@ def add_growable_col_to_sizer(node: GrowableCol, context: WxRenderingContext):
     context.sizer.AddGrowableCol(node.idx, node.proportion)
 
 
-def sizer(node: Sizerable, key: str, value: Any):
+def set_sizer(node: Sizerable, key: str, value: Any):
     """Sets sizer argument"""
     if key == '':
         node.sizer_args = {**node.sizer_args, **value}

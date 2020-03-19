@@ -5,7 +5,7 @@ from wx import Sizer
 
 from wxviews.core import WxRenderingContext, instance_node_setter
 from wxviews import sizers
-from wxviews.sizers import SizerNode, GrowableCol, GrowableRow, sizer
+from wxviews.sizers import SizerNode, GrowableCol, GrowableRow, set_sizer
 from wxviews.sizers import setup_setter, render_sizer_children, set_sizer_to_parent
 from wxviews.sizers import add_growable_row_to_sizer, add_growable_col_to_sizer
 
@@ -144,6 +144,6 @@ def test_sizer(key, value, expected_args):
     """sizer should add key value to sizer_args property"""
     node = Mock(sizer_args={})
 
-    sizer(node, key, value)
+    set_sizer(node, key, value)
 
     assert expected_args == node.sizer_args
