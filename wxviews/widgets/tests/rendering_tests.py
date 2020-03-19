@@ -1,13 +1,12 @@
 from typing import cast
-from unittest.mock import Mock, call, patch
+from unittest.mock import Mock, call
 
 from pytest import mark, raises
 from pyviews.core import XmlNode
 from wx import EVT_MENU, EVT_BUTTON
 
-from wxviews import widgets
 from wxviews.core import WxRenderingContext
-from wxviews.widgets.rendering import render_wx_children, WxNode, store_root, get_root
+from wxviews.widgets.rendering import WxNode, store_root, get_root
 
 
 class WidgetNodeTests:

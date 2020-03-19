@@ -83,6 +83,10 @@ def bind_check_and_expression(context: BindingContext) -> TwoWaysBinding:
 
 
 def check_control_and_property(control_type: Type[EvtHandler], context: BindingContext) -> bool:
+    """
+    Returns True if passed control type equals xml attribute type
+    and xml attribute name equals 'Value
+    '"""
     try:
         return context.node is not None and isinstance(context.node.instance, control_type) \
                and context.xml_attr is not None and context.xml_attr.name == 'Value'

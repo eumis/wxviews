@@ -1,14 +1,14 @@
 from unittest.mock import Mock, call
 
 from pytest import mark, fixture
-from pyviews.pipes import call_set_attr
-from wx import TextCtrl, CheckBox
-from wx import EVT_TEXT, EVT_CHECKBOX
-from pyviews.core import XmlAttr, Node
-from pyviews.core import InheritedDict, ObservableEntity
 from pyviews.binding import TwoWaysBinding, BindingContext
+from pyviews.core import InheritedDict, ObservableEntity
+from pyviews.core import XmlAttr, Node
+from pyviews.pipes import call_set_attr
+from wx import EVT_TEXT, EVT_CHECKBOX
+from wx import TextCtrl, CheckBox
 
-from wxviews.widgets import WxNode
+from wxviews.widgets.rendering import WxNode
 from wxviews.widgets.binding import EventBinding, bind_text_and_expression, \
     check_control_and_property, bind_check_and_expression
 

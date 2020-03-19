@@ -5,7 +5,7 @@ from typing import Tuple, Callable
 import wx
 from wx import Event
 
-from wxviews.widgets import WxNode
+from wxviews.widgets.rendering import WxNode
 
 
 def bind(node: WxNode, key: str,
