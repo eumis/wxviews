@@ -6,18 +6,16 @@ from traceback import format_exc
 from typing import Any, Union, List
 from unittest.mock import patch
 
-from pyviews.binding import ExpressionBinding, PropertyTarget, FunctionTarget
-from pyviews.binding import GlobalValueExpressionTarget, ObservableBinding, TwoWaysBinding
-from pyviews.binding import PropertyExpressionTarget
+from pyviews.binding import ExpressionBinding, ObservableBinding, TwoWaysBinding
 from pyviews.core import Node, InstanceNode
 import wx
 from wx import Point, DefaultPosition, Size, MenuBar
 from wx import Menu, MenuItem, Window, Sizer, SizerItem
+from wx.lib import inspection
 from wx.lib.agw.customtreectrl import GenericTreeItem
 from wx.lib.inspection import InspectionTree, InspectionFrame, InspectionInfoPanel
 
-from wxviews.binding import EventBinding
-from wxviews.widgets import WidgetNode, get_root
+from wxviews.widgets import WxNode, get_root, EventBinding
 
 
 class ViewInspectionTool:
@@ -35,7 +33,7 @@ class ViewInspectionTool:
         self._config = config
         self._crust_locals: dict = crust_locals
         if not hasattr(self, '_app'):
-            self._app: WidgetNode = get_root()
+            self._app: WxNode = get_root()
 
     def show(self, select_obj: Any = None):
         """
@@ -69,8 +67,6 @@ class ViewInspectionFrame(InspectionFrame):
     """
 
     def __init__(self, *args, root=None, **kwargs):
-        from wx.lib import inspection
-
         with patch(f'{inspection.__name__}.{InspectionTree.__name__}',
                    ViewInspectionTree):
             with patch(f'{inspection.__name__}.{InspectionInfoPanel.__name__}',
@@ -228,7 +224,7 @@ class ViewInspectionInfoPanel(InspectionInfoPanel):
             source = f'{binding._observable.__class__.__name__}.{binding._prop}'
             lines.append(f'    {binding_name}: {target} <= {source}')
         elif isinstance(binding, EventBinding):
-            target = self._get_target(binding._target)
+            target = self._get_target(binding._callback)
             source = self._evt_names[binding._event.typeId]
             lines.append(f'    {binding_name}: {target} <= {source}')
         elif isinstance(binding, TwoWaysBinding):
@@ -240,14 +236,14 @@ class ViewInspectionInfoPanel(InspectionInfoPanel):
     # noinspection PyProtectedMember
     @staticmethod
     def _get_target(target) -> str:
-        if isinstance(target, PropertyTarget):
-            return f'{target.inst.__class__.__name__}.{target.prop}'
-        if isinstance(target, FunctionTarget):
-            return str(target.func)
-        if isinstance(target, PropertyExpressionTarget):
-            return target._expression_code
-        if isinstance(target, GlobalValueExpressionTarget):
-            return f'node_globals["{target._key}"]'
+        # if isinstance(target, PropertyTarget):
+        #     return f'{target.inst.__class__.__name__}.{target.prop}'
+        # if isinstance(target, FunctionTarget):
+        #     return str(target.func)
+        # if isinstance(target, PropertyExpressionTarget):
+        #     return target._expression_code
+        # if isinstance(target, GlobalValueExpressionTarget):
+        #     return f'node_globals["{target._key}"]'
         return target.__class__.__name__
 
     def format_menu_bar(self, obj: MenuBar):

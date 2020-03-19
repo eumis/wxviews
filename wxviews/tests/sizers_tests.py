@@ -1,12 +1,13 @@
 from unittest.mock import Mock, call, patch
 
+from injectool import add_singleton
 from pytest import fail, mark
+from pyviews.rendering import render
 from wx import Sizer
 
-from wxviews.core import WxRenderingContext
-from wxviews.core.pipeline import instance_node_setter
+from wxviews.core import WxRenderingContext, instance_node_setter
 from wxviews import sizers
-from wxviews.sizers import SizerNode, GrowableCol, GrowableRow, sizer
+from wxviews.sizers import SizerNode, GrowableCol, GrowableRow, set_sizer
 from wxviews.sizers import setup_setter, render_sizer_children, set_sizer_to_parent
 from wxviews.sizers import add_growable_row_to_sizer, add_growable_col_to_sizer
 
@@ -44,24 +45,29 @@ def test_setup_setter():
     assert node.attr_setter == instance_node_setter  # pylint: disable=comparison-with-callable
 
 
-@patch(sizers.__name__ + '.render_children')
-@patch(sizers.__name__ + '.InheritedDict')
-def test_render_sizer_children(inherited_dict: Mock, render_children: Mock):
-    """should pass right child args to render_children"""
-    node = Mock(instance=Mock(), node_globals=Mock())
-    parent = Mock()
-    child_globals = Mock()
-    inherited_dict.side_effect = lambda a: child_globals
-    expected_args = {
-        'parent_node': node,
-        'parent': parent,
-        'node_globals': child_globals,
-        'sizer': node.instance
-    }
+@mark.usefixtures('container_fixture')
+@mark.parametrize('nodes_count', [1, 2, 5])
+def test_render_sizer_children(nodes_count):
+    """should render all xml children for every item"""
+    render_mock = Mock()
+    add_singleton(render, render_mock)
+    with patch(sizers.__name__ + '.InheritedDict') as inherited_dict_mock:
+        inherited_dict_mock.side_effect = lambda p: {'source': p} if p else p
+        xml_node = Mock(children=[Mock() for _ in range(nodes_count)])
+        parent, node = Mock(), SizerNode(Mock(), xml_node)
+        context = WxRenderingContext({'node': node, 'parent': parent})
 
-    render_sizer_children(node, WxRenderingContext({'parent': parent}))
+        render_sizer_children(node, context)
 
-    assert render_children.call_args == call(node, WxRenderingContext(expected_args))
+        for actual_call, child_xml_node in zip(render_mock.call_args_list, xml_node.children):
+            child_context = WxRenderingContext({
+                'parent_node': node,
+                'parent': parent,
+                'node_globals': inherited_dict_mock(node.node_globals),
+                'sizer': node.instance,
+                'xml_node': child_xml_node
+            })
+            assert actual_call == call(child_context)
 
 
 class AnySizer(Sizer):
@@ -145,6 +151,6 @@ def test_sizer(key, value, expected_args):
     """sizer should add key value to sizer_args property"""
     node = Mock(sizer_args={})
 
-    sizer(node, key, value)
+    set_sizer(node, key, value)
 
     assert expected_args == node.sizer_args

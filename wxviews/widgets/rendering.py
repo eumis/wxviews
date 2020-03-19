@@ -3,17 +3,18 @@
 from typing import Callable
 
 from pyviews.core import InheritedDict, InstanceNode, XmlNode
-from pyviews.rendering import RenderingPipeline, render_children
+from pyviews.pipes import render_children
+from pyviews.rendering import RenderingPipeline, get_type
 from wx import PyEventBinder, Event
 
-from wxviews.core import Sizerable, WxRenderingContext
-from wxviews.core.pipeline import setup_instance_node_setter, apply_attributes, add_to_sizer
+from wxviews.core import Sizerable, WxRenderingContext, get_attr_args
+from wxviews.core import setup_instance_node_setter, apply_attributes, add_to_sizer
 
 
-class WidgetNode(InstanceNode, Sizerable):
+class WxNode(InstanceNode, Sizerable):
     """Wrapper under wx widget"""
 
-    Root: 'WidgetNode' = None
+    Root: 'WxNode' = None
 
     def __init__(self, instance, xml_node: XmlNode, node_globals: InheritedDict = None):
         super().__init__(instance, xml_node, node_globals=node_globals)
@@ -38,58 +39,67 @@ class WidgetNode(InstanceNode, Sizerable):
 
 def get_wx_pipeline() -> RenderingPipeline:
     """Returns rendering pipeline for WidgetNode"""
-    return RenderingPipeline(steps=[
+    return RenderingPipeline(pipes=[
         setup_instance_node_setter,
         apply_attributes,
         add_to_sizer,
         render_wx_children
-    ])
+    ], create_node=_create_widget_node)
 
 
-def render_wx_children(node: WidgetNode, _: WxRenderingContext):
+def _create_widget_node(context: WxRenderingContext) -> WxNode:
+    inst_type = get_type(context.xml_node)
+    args = get_attr_args(context.xml_node, 'init', context.node_globals)
+    inst = inst_type(context.parent, **args)
+    return WxNode(inst, context.xml_node, node_globals=context.node_globals)
+
+
+def render_wx_children(node: WxNode, context: WxRenderingContext):
     """Renders WidgetNode children"""
-    render_children(node, WxRenderingContext({
-        'parent': node.instance,
-        'parent_node': node,
-        'node_globals': InheritedDict(node.node_globals)
+    render_children(node, context, lambda xn, n, ctx: WxRenderingContext({
+        'parent': n.instance,
+        'parent_node': n,
+        'node_globals': InheritedDict(n.node_globals),
+        'xml_node': xn
     }))
 
 
 def get_frame_pipeline():
     """Returns rendering pipeline for Frame"""
-    return RenderingPipeline(steps=[
+    return RenderingPipeline(pipes=[
         setup_instance_node_setter,
         apply_attributes,
         render_wx_children,
         lambda node, ctx: node.instance.Show()
-    ])
+    ], create_node=_create_widget_node)
 
 
 def get_app_pipeline():
     """Returns rendering pipeline for App"""
-    return RenderingPipeline(steps=[
+    return RenderingPipeline(pipes=[
         store_root,
         setup_instance_node_setter,
         apply_attributes,
         render_app_children,
-    ])
+    ], create_node=_create_widget_node)
 
 
-def store_root(node: WidgetNode, _: WxRenderingContext):
+def store_root(node: WxNode, _: WxRenderingContext):
     """Store root node to global property"""
-    WidgetNode.Root = node
+    WxNode.Root = node
 
 
-def render_app_children(node: WidgetNode, _: WxRenderingContext):
+def render_app_children(node: WxNode, context: WxRenderingContext):
     """Renders App children"""
-    render_children(node, WxRenderingContext({
-        'parent_node': node,
+    render_children(node, context, lambda x, n, ctx: WxRenderingContext({
+        'xml_node': x,
+        'parent_node': n,
         'node_globals': InheritedDict(node.node_globals)
     }))
 
 
-def get_root() -> WidgetNode:
+def get_root() -> WxNode:
     """returns root"""
-    if WidgetNode.Root is None:
+    if WxNode.Root is None:
         raise ValueError("Root is not set")
-    return WidgetNode.Root
+    return WxNode.Root

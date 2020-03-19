@@ -26,7 +26,7 @@ def setup_package():
             'Programming Language :: Python :: 3.6'
         ],
         python_requires='>=3.6',
-        install_requires=['pyviews>=2.3.0', 'wxpython'],
+        install_requires=['pyviews>=3.*.*,<4.*.*', 'wxpython'],
         keywords='binding wxpython pyviews python mvvm wx',
         packages=find_packages(exclude=['sandbox', '*.tests']))
 

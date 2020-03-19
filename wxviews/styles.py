@@ -2,32 +2,33 @@
 
 from typing import Any, List
 
-from injectool import resolve
-from pyviews.core import XmlAttr, InheritedDict, Node, CoreError, Modifier, XmlNode, Expression
-from pyviews.compilation import is_expression, parse_expression
-from pyviews.rendering import get_setter, render_children, RenderingPipeline, apply_attributes
-from wxviews.containers import render_view_children
-from wxviews.core import WxRenderingContext
+from pyviews.core import PyViewsError, Setter, Node, XmlNode, InheritedDict, XmlAttr
+from pyviews.expression import parse_expression, is_expression, execute
+from pyviews.pipes import render_children, get_setter
+from pyviews.rendering import RenderingPipeline
+
+from wxviews.containers import render_view_content
+from wxviews.core import WxRenderingContext, apply_attributes
 
 STYLES_KEY = '_node_styles'
 
 
-class StyleError(CoreError):
+class StyleError(PyViewsError):
     """Error for style"""
 
 
 class StyleItem:
     """Wrapper under option"""
 
-    def __init__(self, modifier: Modifier, name: str, value: Any):
-        self._modifier = modifier
+    def __init__(self, setter: Setter, name: str, value: Any):
+        self._setter = setter
         self._name = name
         self._value = value
 
     @property
     def setter(self):
         """Returns setter"""
-        return self._modifier
+        return self._setter
 
     @property
     def name(self):
@@ -41,10 +42,10 @@ class StyleItem:
 
     def apply(self, node: Node):
         """Applies option to passed node"""
-        self._modifier(node, self._name, self._value)
+        self._setter(node, self._name, self._value)
 
     def __hash__(self):
-        return hash((self._name, self._modifier))
+        return hash((self._name, self._setter))
 
     def __eq__(self, other):
         return hash(self) == hash(other)
@@ -61,7 +62,7 @@ class Style(Node):
 
 def get_style_pipeline() -> RenderingPipeline:
     """Returns pipeline for style node"""
-    return RenderingPipeline(steps=[
+    return RenderingPipeline(pipes=[
         setup_node_styles,
         apply_style_items,
         apply_parent_items,
@@ -97,8 +98,8 @@ def _get_style_item(node: Style, attr: XmlAttr):
     setter = get_setter(attr)
     value = attr.value if attr.value else ''
     if is_expression(value):
-        expression_ = resolve(Expression, parse_expression(value)[1])
-        value = expression_.execute(node.node_globals.to_dictionary())
+        expression_body = parse_expression(value).body
+        value = execute(expression_body, node.node_globals.to_dictionary())
     return StyleItem(setter, attr.name, value)
 
 
@@ -115,10 +116,11 @@ def store_to_node_styles(node: Style, context: WxRenderingContext):
 
 def render_child_styles(node: Style, context: WxRenderingContext):
     """Renders child styles"""
-    render_children(node, WxRenderingContext({
-        'parent_node': node,
+    render_children(node, context, lambda x, n, ctx: WxRenderingContext({
+        'parent_node': n,
         'node_globals': InheritedDict(node.node_globals),
-        'node_styles': _get_styles(context)
+        'node_styles': _get_styles(context),
+        'xml_node': x
     }))
 
 
@@ -132,9 +134,9 @@ class StylesView(Node):
 
 def get_styles_view_pipeline() -> RenderingPipeline:
     """Returns setup for container"""
-    return RenderingPipeline(steps=[
+    return RenderingPipeline(pipes=[
         apply_attributes,
-        render_view_children,
+        render_view_content,
         store_to_globals
     ])
 

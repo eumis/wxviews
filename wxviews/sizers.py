@@ -1,12 +1,14 @@
 """Rendering pipeline for SizerNode"""
+
 from typing import Any
 
-from wx import Sizer
 from pyviews.core import InheritedDict, InstanceNode, Node, XmlNode
-from pyviews.rendering import RenderingPipeline, render_children
+from pyviews.pipes import render_children
+from pyviews.rendering import RenderingPipeline, get_type
+from wx import Sizer, GridSizer, StaticBoxSizer
 
-from wxviews.core import Sizerable, WxRenderingContext
-from wxviews.core.pipeline import instance_node_setter, apply_attributes, add_to_sizer
+from wxviews.core import Sizerable, WxRenderingContext, apply_attributes, add_to_sizer, \
+    instance_node_setter, get_init_value, get_attr_args
 
 
 class SizerNode(InstanceNode, Sizerable):
@@ -35,13 +37,47 @@ class SizerNode(InstanceNode, Sizerable):
 
 def get_sizer_pipeline() -> RenderingPipeline:
     """Returns rendering pipeline for SizerNode"""
-    return RenderingPipeline(steps=[
+    return RenderingPipeline(pipes=[
         setup_setter,
         apply_attributes,
         add_to_sizer,
         render_sizer_children,
         set_sizer_to_parent
-    ])
+    ], create_node=_create_sizer_node)
+
+
+def _create_sizer_node(context: WxRenderingContext) -> SizerNode:
+    inst_type = get_type(context.xml_node)
+    if issubclass(inst_type, GridSizer):
+        args = _get_init_values(context.xml_node, context.node_globals)
+        inst = inst_type(*args)
+        return SizerNode(inst, context.xml_node, node_globals=context.node_globals)
+
+    if issubclass(inst_type, StaticBoxSizer):
+        init_args = get_attr_args(context.xml_node, 'init', context.node_globals)
+        args = []
+        try:
+            static_box = init_args.pop('box')
+            args.append(static_box)
+        except KeyError:
+            args.append(init_args.pop('orient'))
+            args.append(context.parent)
+        inst = inst_type(*args, **init_args)
+        return SizerNode(inst, context.xml_node,
+                         node_globals=context.node_globals,
+                         parent=inst.GetStaticBox(),
+                         sizer=context.sizer)
+    args = get_attr_args(context.xml_node, 'init', context.node_globals)
+    inst = inst_type(**args)
+    return SizerNode(inst, context.xml_node,
+                     node_globals=context.node_globals,
+                     parent=context.parent,
+                     sizer=context.sizer)
+
+
+def _get_init_values(xml_node: XmlNode, node_globals: InheritedDict = None) -> list:
+    init_attrs = [attr for attr in xml_node.attrs if attr.namespace == 'init']
+    return [get_init_value(attr, node_globals) for attr in init_attrs]
 
 
 def setup_setter(node: SizerNode, _: WxRenderingContext):
@@ -51,11 +87,12 @@ def setup_setter(node: SizerNode, _: WxRenderingContext):
 
 def render_sizer_children(node: SizerNode, context: WxRenderingContext):
     """Renders sizer children"""
-    render_children(node, WxRenderingContext({
-        'parent_node': node,
-        'parent': context.parent,
+    render_children(node, context, lambda x, n, ctx: WxRenderingContext({
+        'parent_node': n,
+        'parent': ctx.parent,
         'node_globals': InheritedDict(node.node_globals),
-        'sizer': node.instance
+        'sizer': node.instance,
+        'xml_node': x
     }))
 
 
@@ -76,7 +113,7 @@ class GrowableRow(Node):
 
 def get_growable_row_pipeline() -> RenderingPipeline:
     """Returns rendering pipeline for GrowableRow"""
-    return RenderingPipeline(steps=[
+    return RenderingPipeline(pipes=[
         apply_attributes,
         add_growable_row_to_sizer
     ])
@@ -98,7 +135,7 @@ class GrowableCol(Node):
 
 def get_growable_col_pipeline() -> RenderingPipeline:
     """Returns rendering pipeline for GrowableRow"""
-    return RenderingPipeline(steps=[
+    return RenderingPipeline(pipes=[
         apply_attributes,
         add_growable_col_to_sizer
     ])
@@ -109,7 +146,7 @@ def add_growable_col_to_sizer(node: GrowableCol, context: WxRenderingContext):
     context.sizer.AddGrowableCol(node.idx, node.proportion)
 
 
-def sizer(node: Sizerable, key: str, value: Any):
+def set_sizer(node: Sizerable, key: str, value: Any):
     """Sets sizer argument"""
     if key == '':
         node.sizer_args = {**node.sizer_args, **value}

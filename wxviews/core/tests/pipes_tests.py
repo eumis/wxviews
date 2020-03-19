@@ -1,68 +1,56 @@
 from unittest.mock import Mock, call, patch
 
-from injectool import add_function_resolver
 from pytest import fixture, mark, fail
-from pyviews.core import InstanceNode, XmlAttr, Expression
-from pyviews.compilation import CompiledExpression
-from wxviews.core import pipeline, WxRenderingContext
-from wxviews.core.pipeline import setup_instance_node_setter, instance_node_setter, apply_attributes, add_to_sizer
+from pyviews.core import XmlAttr
 
-add_function_resolver(Expression, lambda c, p: CompiledExpression(p))
-
-
-def test_setup_instance_node_setter():
-    """setup_instance_node_setter should set attr_setter"""
-    node = Mock()
-
-    setup_instance_node_setter(node, WxRenderingContext())
-
-    assert node.attr_setter == instance_node_setter  # pylint: disable=comparison-with-callable
+from wxviews.core import pipes, WxRenderingContext
+from wxviews.core.pipes import setup_instance_node_setter, apply_attributes, add_to_sizer
+from wxviews.widgets import WxNode
 
 
-class InstanceNodeSetterTests:
-    """instance_node_setter() tests"""
+class TestControl:
+    def __init__(self):
+        self.node_key = None
+        self.instance_key = None
 
-    @staticmethod
-    def _data(inst=None):
-        return InstanceNode(inst if inst else Mock(), Mock()), 'key', 'value'
 
-    def test_sets_properties(self):
-        """should set properties """
-        node, key, value = self._data()
-        setter = Mock()
-        node.properties = {key: Mock(set=setter)}
+class TestNode(WxNode):
+    def __init__(self, widget):
+        super().__init__(widget, Mock())
+        self.node_key = None
 
-        instance_node_setter(node, key, value)
 
-        assert setter.call_args == call(value)
+@fixture
+def setter_fixture(request):
+    inst = TestControl()
+    test_node = TestNode(inst)
+    setup_instance_node_setter(test_node, WxRenderingContext())
 
-    def test_sets_node_property(self):
-        """should setup set to node property"""
-        node, key, value = self._data()
-        setattr(node, key, None)
+    request.cls.inst = inst
+    request.cls.node = test_node
 
-        instance_node_setter(node, key, value)
 
-        assert getattr(node, key) == value
+@mark.usefixtures('setter_fixture')
+class SetupWidgetSetterTests:
+    @mark.parametrize('value', [1, 'value'])
+    def test_sets_node_key(self, value):
+        """should set node attribute if it exists"""
+        self.node.set_attr('node_key', value)
 
-    def test_sets_instance_property(self):
-        """should setup set to instance property"""
+        assert self.node.node_key == value
+        assert self.inst.node_key is None
 
-        class Instance:
-            pass
+    @mark.parametrize('value', [1, 'value'])
+    def test_sets_instance_key(self, value):
+        """should set widget attribute if it exists"""
+        self.node.set_attr('instance_key', value)
 
-        inst = Instance()
-        node, key, value = self._data(inst)
-        setattr(inst, key, None)
-
-        instance_node_setter(node, key, value)
-
-        assert getattr(inst, key) == value
+        assert self.inst.instance_key == value
 
 
 @fixture
 def apply_attribute_fixture(request):
-    with patch(pipeline.__name__ + '.apply_attribute') as apply_attribute_mock:
+    with patch(pipes.__name__ + '.apply_attribute') as apply_attribute_mock:
         request.cls.apply_attribute = apply_attribute_mock
         yield apply_attribute_mock
 
@@ -85,14 +73,14 @@ class ApplyAttributesTests:
 
     @mark.parametrize('attrs', [
         [XmlAttr('key', 'value')],
-        [XmlAttr('key', 'value', ''), XmlAttr('other_key', 1, 'some namespace')]
+        [XmlAttr('key', 'value', ''), XmlAttr('other_key', 'key', 'some namespace')]
     ])
     def test_apply_attributes(self, attrs):
         """should apply passed attributes"""
         self.apply_attribute.reset_mock()
         node = Mock(xml_node=Mock(attrs=attrs))
 
-        apply_attributes(node, WxRenderingContext)
+        apply_attributes(node, WxRenderingContext())
 
         assert self.apply_attribute.call_args_list == [call(node, attr) for attr in attrs]
 

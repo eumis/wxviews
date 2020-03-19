@@ -5,7 +5,7 @@
                xmlns:style='wxviews.style'
                xmlns:init='init'
 
-               xmlns:sizer='wxviews.sizer'
+               xmlns:sizer='wxviews.set_sizer'
                import:wx='wx'>
 
     <wxv:StylesView name="sizers_styles"/>
@@ -56,6 +56,9 @@
                    sizer:flag='{wx.EXPAND|wx.ALL}'
                    sizer:border='{1}'>
             <wxv:For items='{list(range(16))}'>
+                <wxv:Code>
+                    print(index)
+                </wxv:Code>
                 <Panel sizer:proportion='{0}'
                        sizer:flag='{wx.EXPAND}'
                        style:='green'>
