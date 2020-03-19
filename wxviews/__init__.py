@@ -8,4 +8,4 @@ from wxviews.sizers import GrowableCol, GrowableRow, set_sizer
 from wxviews.widgets import get_root, bind
 from wxviews.styles import Style, StylesView, style
 
-__version__ = '0.4.0'
+__version__ = '0.5.0'

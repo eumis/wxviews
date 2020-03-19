@@ -1,6 +1,6 @@
 # Changelog
 
-# Dev
+# 0.5.0
 
   - updated pyviews to 3.0.0
   - WidgetNode is renamed to WxNode
