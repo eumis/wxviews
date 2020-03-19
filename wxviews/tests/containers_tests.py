@@ -21,7 +21,7 @@ def test_render_container_children(nodes_count):
     render_mock = Mock()
     add_singleton(render, render_mock)
     with patch(containers.__name__ + '.InheritedDict') as inherited_dict_mock:
-        inherited_dict_mock.side_effect = lambda parent: {'source': parent} if parent else parent
+        inherited_dict_mock.side_effect = lambda p: {'source': p} if p else p
         xml_node = Mock(children=[Mock() for _ in range(nodes_count)])
         node, parent, sizer = Container(xml_node), Mock(), Mock()
         context = WxRenderingContext({'node': node, 'parent': parent, 'sizer': sizer})

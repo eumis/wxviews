@@ -11,6 +11,7 @@ from pyviews.core import Node, InstanceNode
 import wx
 from wx import Point, DefaultPosition, Size, MenuBar
 from wx import Menu, MenuItem, Window, Sizer, SizerItem
+from wx.lib import inspection
 from wx.lib.agw.customtreectrl import GenericTreeItem
 from wx.lib.inspection import InspectionTree, InspectionFrame, InspectionInfoPanel
 
@@ -66,8 +67,6 @@ class ViewInspectionFrame(InspectionFrame):
     """
 
     def __init__(self, *args, root=None, **kwargs):
-        from wx.lib import inspection
-
         with patch(f'{inspection.__name__}.{InspectionTree.__name__}',
                    ViewInspectionTree):
             with patch(f'{inspection.__name__}.{InspectionInfoPanel.__name__}',

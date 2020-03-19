@@ -53,6 +53,7 @@ def get_attr_args(xml_node, namespace: str, node_globals: InheritedDict = None) 
 
 
 def get_init_value(attr: XmlAttr, node_globals: InheritedDict) -> Any:
+    """Evaluates attribute value and returns it"""
     stripped_value = attr.value.strip() if attr.value else ''
     if is_expression(stripped_value):
         body = parse_expression(stripped_value)[1]
