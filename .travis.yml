@@ -4,7 +4,7 @@ python: 3.7
 # command to install dependencies
 install:
   - pip install pipenv
-  - pipenv run pip install -f https://extras.wxpython.org/wxPython4/extras/linux/gtk3/ubuntu-16.04 "wxPython==4.0.7"
+  - pipenv run pip install -U -f https://extras.wxpython.org/wxPython4/extras/linux/gtk3/ubuntu-16.04 "wxPython==4.0.7"
   - pipenv install
 # command to run tests
 script:
