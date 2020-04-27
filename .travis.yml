@@ -3,12 +3,12 @@ language: python
 python: 3.7
 # command to install dependencies
 install:
-  - pip install pipenv
-  - pipenv run pip install -U -f https://extras.wxpython.org/wxPython4/extras/linux/gtk3/ubuntu-16.04 "wxPython==4.0.7"
-  - pipenv install
+  - pip install -U -f https://extras.wxpython.org/wxPython4/extras/linux/gtk3/ubuntu-16.04 "wxPython==4.0.7"
+  - pip install -e .
+  - pip install pytest
 # command to run tests
 script:
-  - pipenv run python -m pytest
+  - python -m pytest
 deploy:
   on:
     branch: dev
