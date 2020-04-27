@@ -1,5 +1,9 @@
 # Changelog
 
+# 0.5.1
+
+  - added inline binding by default
+
 # 0.5.0
 
   - updated pyviews to 3.0.0

@@ -4,7 +4,7 @@ from os.path import abspath
 from typing import cast
 
 from injectool import add_singleton, SingletonResolver, add_resolver
-from pyviews.binding import Binder, run_once, bind_setter_to_expression
+from pyviews.binding import Binder, run_once, bind_setter_to_expression, bind_inline
 from pyviews.code import run_code
 from pyviews.rendering import RenderingPipeline
 from pyviews.rendering.views import render_view
@@ -32,6 +32,8 @@ def setup_binder() -> Binder:
     binder = Binder()
     binder.add_rule('once', run_once)
     binder.add_rule('oneway', bind_setter_to_expression)
+    binder.add_rule('oneway', bind_setter_to_expression)
+    binder.add_rule('inline', bind_inline)
     add_events_rules(binder)
     return binder
 
