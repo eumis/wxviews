@@ -77,10 +77,6 @@ def setup_node_styles(_: Style, context: WxRenderingContext):
         context.parent_node.node_globals[STYLES_KEY] = InheritedDict()
 
 
-def _get_styles(context: WxRenderingContext) -> InheritedDict:
-    return context.parent_node.node_globals[STYLES_KEY]
-
-
 def apply_style_items(node: Style, _: WxRenderingContext):
     """Parsing step. Parses attributes to style items and sets them to style"""
     attrs = node.xml_node.attrs
@@ -112,6 +108,10 @@ def apply_parent_items(node: Style, context: WxRenderingContext):
 def store_to_node_styles(node: Style, context: WxRenderingContext):
     """Store styles to node styles"""
     _get_styles(context)[node.name] = node.items.values()
+
+
+def _get_styles(context: WxRenderingContext) -> InheritedDict:
+    return context.parent_node.node_globals[STYLES_KEY]
 
 
 def render_child_styles(node: Style, context: WxRenderingContext):

@@ -1,5 +1,10 @@
 # Changelog
 
+# Dev
+
+  - instance setter refactoring
+  - setup refactoring
+
 # 0.5.1
 
   - added inline binding by default

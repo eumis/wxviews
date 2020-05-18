@@ -3,6 +3,7 @@
 from functools import partial
 from typing import Callable, Any, Type, cast
 
+from injectool import inject
 from pyviews.binding import ExpressionBinding, TwoWaysBinding, BindingContext, \
     get_expression_callback, Binder
 from pyviews.core import Binding, BindingCallback
@@ -41,7 +42,8 @@ class EventBinding(Binding):
             self._bound = False
 
 
-def add_events_rules(binder: Binder):
+@inject(binder=Binder)
+def use_events_binding(binder: Binder):
     """Adds twoways binding rules"""
     binder.add_rule('twoways', bind_text_and_expression,
                     lambda ctx: check_control_and_property(cast(Type[EvtHandler], TextEntry), ctx))
