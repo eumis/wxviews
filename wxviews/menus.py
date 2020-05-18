@@ -5,7 +5,7 @@ from pyviews.pipes import render_children
 from pyviews.rendering import RenderingPipeline, get_type
 from wx import Frame, MenuBar, Menu
 
-from wxviews.core import WxRenderingContext, setup_instance_node_setter, apply_attributes, \
+from wxviews.core import WxRenderingContext, apply_attributes, \
     get_attr_args, get_init_value
 from wxviews.widgets import WxNode
 
@@ -21,7 +21,6 @@ def create_menu_node(context: WxRenderingContext) -> WxNode:
 def get_menu_bar_pipeline() -> RenderingPipeline:
     """Return render pipeline for MenuBar"""
     return RenderingPipeline(pipes=[
-        setup_instance_node_setter,
         apply_attributes,
         render_menu_children,
         set_to_frame
@@ -54,7 +53,6 @@ def set_to_frame(node: InstanceNode, context: WxRenderingContext):
 def get_menu_pipeline() -> RenderingPipeline:
     """Return render pipeline for Menu"""
     return RenderingPipeline(pipes=[
-        setup_instance_node_setter,
         apply_attributes,
         render_menu_children,
         set_to_menu_bar
@@ -78,7 +76,6 @@ def set_to_menu_bar(node: WxNode, context: WxRenderingContext):
 def get_menu_item_pipeline() -> RenderingPipeline:
     """Returns rendering pipeline for menu item"""
     return RenderingPipeline(pipes=[
-        setup_instance_node_setter,
         apply_attributes,
         set_to_menu
     ], create_node=create_menu_node)

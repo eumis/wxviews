@@ -8,7 +8,7 @@ from pyviews.rendering import RenderingPipeline, get_type
 from wx import Sizer, GridSizer, StaticBoxSizer
 
 from wxviews.core import Sizerable, WxRenderingContext, apply_attributes, add_to_sizer, \
-    instance_node_setter, get_init_value, get_attr_args
+    get_init_value, get_attr_args
 
 
 class SizerNode(InstanceNode, Sizerable):
@@ -38,7 +38,6 @@ class SizerNode(InstanceNode, Sizerable):
 def get_sizer_pipeline() -> RenderingPipeline:
     """Returns rendering pipeline for SizerNode"""
     return RenderingPipeline(pipes=[
-        setup_setter,
         apply_attributes,
         add_to_sizer,
         render_sizer_children,
@@ -78,11 +77,6 @@ def _create_sizer_node(context: WxRenderingContext) -> SizerNode:
 def _get_init_values(xml_node: XmlNode, node_globals: InheritedDict = None) -> list:
     init_attrs = [attr for attr in xml_node.attrs if attr.namespace == 'init']
     return [get_init_value(attr, node_globals) for attr in init_attrs]
-
-
-def setup_setter(node: SizerNode, _: WxRenderingContext):
-    """Sets attr_setter for SizerNode"""
-    node.attr_setter = instance_node_setter
 
 
 def render_sizer_children(node: SizerNode, context: WxRenderingContext):
