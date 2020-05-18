@@ -5,11 +5,11 @@ from pytest import fail, mark
 from pyviews.rendering import render
 from wx import Sizer
 
-from wxviews.core import WxRenderingContext, instance_node_setter
 from wxviews import sizers
+from wxviews.core import WxRenderingContext
 from wxviews.sizers import SizerNode, GrowableCol, GrowableRow, set_sizer
-from wxviews.sizers import setup_setter, render_sizer_children, set_sizer_to_parent
 from wxviews.sizers import add_growable_row_to_sizer, add_growable_col_to_sizer
+from wxviews.sizers import render_sizer_children, set_sizer_to_parent
 
 
 class SizerNodeTests:
@@ -34,15 +34,6 @@ class SizerNodeTests:
         node.destroy()
 
         assert not parent.SetSizer.called
-
-
-def test_setup_setter():
-    """setup_setter should set instance_node_setter"""
-    node = Mock()
-
-    setup_setter(node, WxRenderingContext())
-
-    assert node.attr_setter == instance_node_setter  # pylint: disable=comparison-with-callable
 
 
 @mark.usefixtures('container_fixture')

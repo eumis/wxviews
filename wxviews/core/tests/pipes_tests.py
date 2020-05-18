@@ -4,7 +4,7 @@ from pytest import fixture, mark, fail
 from pyviews.core import XmlAttr
 
 from wxviews.core import pipes, WxRenderingContext
-from wxviews.core.pipes import setup_instance_node_setter, apply_attributes, add_to_sizer
+from wxviews.core.pipes import apply_attributes, add_to_sizer
 from wxviews.widgets import WxNode
 
 
@@ -18,34 +18,6 @@ class TestNode(WxNode):
     def __init__(self, widget):
         super().__init__(widget, Mock())
         self.node_key = None
-
-
-@fixture
-def setter_fixture(request):
-    inst = TestControl()
-    test_node = TestNode(inst)
-    setup_instance_node_setter(test_node, WxRenderingContext())
-
-    request.cls.inst = inst
-    request.cls.node = test_node
-
-
-@mark.usefixtures('setter_fixture')
-class SetupWidgetSetterTests:
-    @mark.parametrize('value', [1, 'value'])
-    def test_sets_node_key(self, value):
-        """should set node attribute if it exists"""
-        self.node.set_attr('node_key', value)
-
-        assert self.node.node_key == value
-        assert self.inst.node_key is None
-
-    @mark.parametrize('value', [1, 'value'])
-    def test_sets_instance_key(self, value):
-        """should set widget attribute if it exists"""
-        self.node.set_attr('instance_key', value)
-
-        assert self.inst.instance_key == value
 
 
 @fixture

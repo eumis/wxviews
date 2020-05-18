@@ -1,25 +1,10 @@
 """Common pipeline functionality"""
 
-from typing import Any
-
 from pyviews.core import InstanceNode, Node
 from pyviews.pipes import apply_attribute
 
-from .rendering import WxRenderingContext
 from .node import Sizerable
-
-
-def setup_instance_node_setter(node: InstanceNode, _: WxRenderingContext):
-    """Sets attr_setter for WidgetNode"""
-    node.attr_setter = instance_node_setter
-
-
-def instance_node_setter(node: InstanceNode, key: str, value: Any):
-    """Sets default wxviews attr_setter"""
-    if hasattr(node, key):
-        setattr(node, key, value)
-    elif hasattr(node.instance, key):
-        setattr(node.instance, key, value)
+from .rendering import WxRenderingContext
 
 
 def apply_attributes(node: Node, _: WxRenderingContext):

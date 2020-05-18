@@ -8,7 +8,7 @@ from pyviews.rendering import RenderingPipeline, get_type
 from wx import PyEventBinder, Event
 
 from wxviews.core import Sizerable, WxRenderingContext, get_attr_args
-from wxviews.core import setup_instance_node_setter, apply_attributes, add_to_sizer
+from wxviews.core import apply_attributes, add_to_sizer
 
 
 class WxNode(InstanceNode, Sizerable):
@@ -40,7 +40,6 @@ class WxNode(InstanceNode, Sizerable):
 def get_wx_pipeline() -> RenderingPipeline:
     """Returns rendering pipeline for WidgetNode"""
     return RenderingPipeline(pipes=[
-        setup_instance_node_setter,
         apply_attributes,
         add_to_sizer,
         render_wx_children
@@ -67,7 +66,6 @@ def render_wx_children(node: WxNode, context: WxRenderingContext):
 def get_frame_pipeline():
     """Returns rendering pipeline for Frame"""
     return RenderingPipeline(pipes=[
-        setup_instance_node_setter,
         apply_attributes,
         render_wx_children,
         lambda node, ctx: node.instance.Show()
@@ -78,7 +76,6 @@ def get_app_pipeline():
     """Returns rendering pipeline for App"""
     return RenderingPipeline(pipes=[
         store_root,
-        setup_instance_node_setter,
         apply_attributes,
         render_app_children,
     ], create_node=_create_widget_node)
