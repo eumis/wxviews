@@ -14,3 +14,4 @@ pyvenv.cfg
 .idea/dictionaries/
 .idea/workspace.xml
 Pipfile.lock
+venv/
