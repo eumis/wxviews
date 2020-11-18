@@ -1,5 +1,7 @@
 setuptools
 wheel
+injectool
+pyviews
 -e .
 pylint
 pytest

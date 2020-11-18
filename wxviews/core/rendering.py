@@ -2,7 +2,7 @@
 
 from typing import Any
 
-from pyviews.core import InheritedDict, XmlAttr
+from pyviews.core import InheritedDict, XmlAttr, XmlNode, Node
 from pyviews.expression import is_expression, parse_expression, execute
 from pyviews.rendering.common import RenderingContext
 from wx import Sizer
@@ -60,3 +60,15 @@ def get_init_value(attr: XmlAttr, node_globals: InheritedDict) -> Any:
         parameters = node_globals.to_dictionary() if node_globals else {}
         return execute(body, parameters)
     return attr.value
+
+
+def get_wx_child_context(xml_node: XmlNode, parent_node: Node,
+                         context: WxRenderingContext) -> WxRenderingContext:
+    """Return child node context"""
+    return WxRenderingContext({
+        'parent_node': parent_node,
+        'parent': context.parent,
+        'node_globals': InheritedDict(parent_node.node_globals),
+        'sizer': context.sizer,
+        'xml_node': xml_node
+    })

@@ -42,7 +42,7 @@ def get_sizer_pipeline() -> RenderingPipeline:
         add_to_sizer,
         render_sizer_children,
         set_sizer_to_parent
-    ], create_node=_create_sizer_node)
+    ], create_node=_create_sizer_node, name='sizer pipeline')
 
 
 def _create_sizer_node(context: WxRenderingContext) -> SizerNode:
@@ -110,7 +110,7 @@ def get_growable_row_pipeline() -> RenderingPipeline:
     return RenderingPipeline(pipes=[
         apply_attributes,
         add_growable_row_to_sizer
-    ])
+    ], name='growable row pipeline')
 
 
 def add_growable_row_to_sizer(node: GrowableRow, context: WxRenderingContext):
@@ -132,7 +132,7 @@ def get_growable_col_pipeline() -> RenderingPipeline:
     return RenderingPipeline(pipes=[
         apply_attributes,
         add_growable_col_to_sizer
-    ])
+    ], name='growable col pipeline')
 
 
 def add_growable_col_to_sizer(node: GrowableCol, context: WxRenderingContext):

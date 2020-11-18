@@ -4,6 +4,9 @@
 
   - instance setter refactoring
   - setup refactoring
+  - added presenter
+  - added pipeline name to display in error info
+  - added getting current rendering context
 
 # 0.5.1
 

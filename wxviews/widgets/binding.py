@@ -43,7 +43,7 @@ class EventBinding(Binding):
 
 
 @inject(binder=Binder)
-def use_events_binding(binder: Binder):
+def use_events_binding(binder: Binder = None):
     """Adds twoways binding rules"""
     binder.add_rule('twoways', bind_text_and_expression,
                     lambda ctx: check_control_and_property(cast(Type[EvtHandler], TextEntry), ctx))

@@ -2,15 +2,18 @@
 
 from typing import cast
 
+from injectool import add_singleton
 from pyviews.binding import use_binding
 from pyviews.code import run_code
-from pyviews.rendering import RenderingPipeline, use_rendering
+from pyviews.presenter import get_presenter_pipeline
+from pyviews.rendering import RenderingPipeline, use_rendering, get_child_context
 from pyviews.rendering.pipeline import use_pipeline
 from pyviews.rendering.views import render_view
 
 from wxviews.containers import get_if_pipeline, get_for_pipeline
 from wxviews.containers import get_view_pipeline, get_container_pipeline
 from wxviews.core import WxRenderingContext
+from wxviews.core.rendering import get_wx_child_context
 from wxviews.menus import get_menu_item_pipeline, get_menu_pipeline, get_menu_bar_pipeline
 from wxviews.sizers import get_growable_col_pipeline, get_growable_row_pipeline, get_sizer_pipeline
 from wxviews.styles import get_styles_view_pipeline, get_style_pipeline
@@ -28,6 +31,8 @@ def register_dependencies():
 
 def use_wx_pipelines():
     """Returns resolver for RenderingPipeline"""
+    add_singleton(get_child_context, get_wx_child_context)
+
     use_pipeline(get_wx_pipeline(), 'wx')
     use_pipeline(get_app_pipeline(), 'wx.App')
     use_pipeline(get_frame_pipeline(), 'wx.Frame')
@@ -52,6 +57,8 @@ def use_wx_pipelines():
     use_pipeline(get_style_pipeline(), 'wxviews.Style')
     use_pipeline(get_styles_view_pipeline(), 'wxviews.StylesView')
     use_pipeline(RenderingPipeline(pipes=[run_code]), 'wxviews.Code')
+
+    use_pipeline(get_presenter_pipeline(), 'wxviews.PresenterNode')
 
 
 def launch(context: WxRenderingContext, root_view=None):
