@@ -1,12 +1,13 @@
 # Changelog
 
-# Dev
+# 0.6.0
 
   - instance setter refactoring
   - setup refactoring
   - added presenter
   - added pipeline name to display in error info
   - added getting current rendering context
+  - added call_args
 
 # 0.5.1
 
