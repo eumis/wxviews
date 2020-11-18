@@ -24,7 +24,7 @@ def get_menu_bar_pipeline() -> RenderingPipeline:
         apply_attributes,
         render_menu_children,
         set_to_frame
-    ], create_node=create_menu_node)
+    ], create_node=create_menu_node, name='menu bar pipeline')
 
 
 def render_menu_children(node: InstanceNode, context: WxRenderingContext):
@@ -56,7 +56,7 @@ def get_menu_pipeline() -> RenderingPipeline:
         apply_attributes,
         render_menu_children,
         set_to_menu_bar
-    ], create_node=create_menu_node)
+    ], create_node=create_menu_node, name='menu pipeline')
 
 
 def set_to_menu_bar(node: WxNode, context: WxRenderingContext):
@@ -78,7 +78,7 @@ def get_menu_item_pipeline() -> RenderingPipeline:
     return RenderingPipeline(pipes=[
         apply_attributes,
         set_to_menu
-    ], create_node=create_menu_node)
+    ], create_node=create_menu_node, name='menu item pipeline')
 
 
 def set_to_menu(node: InstanceNode, context: WxRenderingContext):

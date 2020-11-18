@@ -284,7 +284,7 @@ class ViewInspectionInfoPanelTests:
         self.super_update_info.side_effect = lambda obj: self._raise(error)
         self.info.UpdateInfo(Mock())
 
-        assert self.result.startswith(f'Failed to show info.')
+        assert self.result.startswith('Failed to show info.')
 
     @staticmethod
     def _raise(error):

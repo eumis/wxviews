@@ -68,7 +68,7 @@ def get_style_pipeline() -> RenderingPipeline:
         apply_parent_items,
         store_to_node_styles,
         render_child_styles
-    ])
+    ], name='style pipeline')
 
 
 def setup_node_styles(_: Style, context: WxRenderingContext):
@@ -138,7 +138,7 @@ def get_styles_view_pipeline() -> RenderingPipeline:
         apply_attributes,
         render_view_content,
         store_to_globals
-    ])
+    ], name='styles view pipeline')
 
 
 def store_to_globals(view: StylesView, context: WxRenderingContext):
