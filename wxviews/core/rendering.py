@@ -1,6 +1,6 @@
 """Common"""
 
-from typing import Any
+from typing import Any, Optional
 
 from pyviews.core import InheritedDict, XmlAttr, XmlNode, Node
 from pyviews.expression import is_expression, parse_expression, execute
@@ -39,7 +39,7 @@ class WxRenderingContext(RenderingContext):
         self['node_styles'] = value
 
 
-def get_attr_args(xml_node, namespace: str, node_globals: InheritedDict = None) -> dict:
+def get_attr_args(xml_node, namespace: str, node_globals: Optional[InheritedDict] = None) -> dict:
     """Returns args from attributes with provided namespace"""
     init_attrs = [attr for attr in xml_node.attrs if attr.namespace == namespace]
     args = {}
@@ -52,7 +52,7 @@ def get_attr_args(xml_node, namespace: str, node_globals: InheritedDict = None) 
     return args
 
 
-def get_init_value(attr: XmlAttr, node_globals: InheritedDict) -> Any:
+def get_init_value(attr: XmlAttr, node_globals: Optional[InheritedDict]) -> Any:
     """Evaluates attribute value and returns it"""
     stripped_value = attr.value.strip() if attr.value else ''
     if is_expression(stripped_value):

@@ -1,6 +1,6 @@
 """Bind setters"""
 
-from typing import Tuple, Callable
+from typing import Tuple, Callable, Union
 
 import wx
 from wx import Event
@@ -9,7 +9,7 @@ from wxviews.widgets.rendering import WxNode
 
 
 def bind(node: WxNode, key: str,
-         value: (Callable[[Event], None], Tuple[Callable[[Event], None], dict])):
+         value: Union[Callable[[Event], None], Tuple[Callable[[Event], None], dict]]):
     """Calls node bind method"""
     event = wx.__dict__[key]
     if not isinstance(value, tuple):

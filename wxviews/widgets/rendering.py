@@ -1,6 +1,6 @@
 """Rendering pipeline for WidgetNode"""
 
-from typing import Callable
+from typing import Callable, Optional
 
 from pyviews.core import InheritedDict, InstanceNode, XmlNode
 from pyviews.pipes import render_children
@@ -14,19 +14,11 @@ from wxviews.core import apply_attributes, add_to_sizer
 class WxNode(InstanceNode, Sizerable):
     """Wrapper under wx widget"""
 
-    Root: 'WxNode' = None
+    Root: Optional['WxNode'] = None
 
-    def __init__(self, instance, xml_node: XmlNode, node_globals: InheritedDict = None):
-        super().__init__(instance, xml_node, node_globals=node_globals)
-        self._sizer_args: dict = {}
-
-    @property
-    def sizer_args(self) -> dict:
-        return self._sizer_args
-
-    @sizer_args.setter
-    def sizer_args(self, value):
-        self._sizer_args = value
+    def __init__(self, instance, xml_node: XmlNode, node_globals: Optional[InheritedDict] = None):
+        InstanceNode.__init__(self, instance, xml_node, node_globals=node_globals)
+        Sizerable.__init__(self)
 
     def bind(self, event: PyEventBinder, handler: Callable[[Event], None], **args):
         """Binds handler to event"""

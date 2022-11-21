@@ -18,16 +18,16 @@ def create_menu_node(context: WxRenderingContext) -> WxNode:
     return WxNode(inst, context.xml_node, node_globals=context.node_globals)
 
 
-def get_menu_bar_pipeline() -> RenderingPipeline:
+def get_menu_bar_pipeline() -> RenderingPipeline[WxNode, WxRenderingContext]:
     """Return render pipeline for MenuBar"""
-    return RenderingPipeline(pipes=[
+    return RenderingPipeline[WxNode, WxRenderingContext](pipes=[
         apply_attributes,
         render_menu_children,
         set_to_frame
     ], create_node=create_menu_node, name='menu bar pipeline')
 
 
-def render_menu_children(node: InstanceNode, context: WxRenderingContext):
+def render_menu_children(node: WxNode, context: WxRenderingContext):
     """Renders sizer children"""
     render_children(node, context, _get_menu_child_context)
 
@@ -45,7 +45,7 @@ def _get_menu_child_context(child_xml_node: XmlNode, node: InstanceNode,
 def set_to_frame(node: InstanceNode, context: WxRenderingContext):
     """Sets menu bar for parent Frame"""
     if not isinstance(context.parent, Frame):
-        msg = 'parent for MenuBar should be Frame, but it is {0}'.format(context.parent)
+        msg = f'parent for MenuBar should be Frame, but it is {context.parent}'
         raise TypeError(msg)
     context.parent.SetMenuBar(node.instance)
 
@@ -62,7 +62,7 @@ def get_menu_pipeline() -> RenderingPipeline:
 def set_to_menu_bar(node: WxNode, context: WxRenderingContext):
     """Adds menu to parent MenuBar"""
     if not isinstance(context.parent, MenuBar):
-        msg = 'parent for Menu should be MenuBar, but it is {0}'.format(context.parent)
+        msg = f'parent for Menu should be MenuBar, but it is {context.parent}'
         raise TypeError(msg)
     # context.parent.Append(node.instance, node.properties['title'].get())
     try:
@@ -84,6 +84,6 @@ def get_menu_item_pipeline() -> RenderingPipeline:
 def set_to_menu(node: InstanceNode, context: WxRenderingContext):
     """Adds menu item to parent Menu"""
     if not isinstance(context.parent, Menu):
-        msg = 'parent for MenuItem should be Menu, but it is {0}'.format(context.parent)
+        msg = f'parent for MenuItem should be Menu, but it is {context.parent}'
         raise TypeError(msg)
     context.parent.Append(node.instance)

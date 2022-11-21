@@ -15,6 +15,8 @@ def rendering_context_fixture(request):
 class WxRenderingContextTests:
     """RenderingContext tests"""
 
+    context: WxRenderingContext
+
     def test_parent(self):
         """parent property should use key 'parent'"""
         value = Mock()

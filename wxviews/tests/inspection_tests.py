@@ -1,3 +1,4 @@
+from typing import Optional
 from unittest.mock import patch, Mock, call
 
 from pytest import fixture, mark
@@ -31,6 +32,12 @@ def tool_fixture(request):
 @mark.usefixtures('tool_fixture')
 class ViewInspectionToolTests:
     """ViewInspectionTool tests"""
+
+    frame: Mock
+    frame_init: Mock
+    top_window: Mock
+    root: WxNode
+    tool: ViewInspectionTool
 
     def test_creates_frame(self):
         """should create frame with parameters"""
@@ -78,6 +85,8 @@ def _frame_init(frame, *_, **__):
 @mark.usefixtures('frame_fixture')
 class ViewInspectionFrameTests:
     """ViewInspectionFrame tests"""
+
+    frame_init: Mock
 
     def tests_sets_root_to_locals(self):
         """should add root node to crust locals"""
@@ -151,6 +160,11 @@ def _node(name, children=None):
 class ViewInspectionTreeTests:
     """ViewInspectionTree tests"""
 
+    root: WxNode
+    tree: ViewInspectionTree
+    root_item: Mock
+    super_build: Mock
+
     @mark.parametrize('items_count, should_clear', [
         (0, False),
         (1, True),
@@ -168,7 +182,6 @@ class ViewInspectionTreeTests:
         """should set app node as tree root"""
         self.tree.BuildTree(WxNode(Mock(), Mock()))
 
-        # noinspection PyProtectedMember
         assert self.tree.AddRoot.call_args == call(self.tree._get_node_name(self.root))
         assert self.tree.SetItemData.call_args_list[0] == call(self.root_item, self.root)
         assert self.tree.roots == [self.root_item]
@@ -207,8 +220,8 @@ class ViewInspectionTreeTests:
         actual_items = []
         self.root._children = children
         self.root._instance = 'root'
-        self.tree.AddRoot.side_effect = lambda name: Item('')
-        self.tree.AppendItem.side_effect = lambda parent, text: Item(parent.name)
+        self.tree.AddRoot.side_effect = lambda _: Item('')
+        self.tree.AppendItem.side_effect = lambda parent, _: Item(parent.name)
         self.tree.SetItemData.side_effect = lambda item, node: self._set_item_data(item, node, actual_items)
 
         self.tree.BuildTree(self.root)
@@ -265,6 +278,10 @@ def info_fixture(request):
 class ViewInspectionInfoPanelTests:
     """ViewInspectionInfoPanel tests"""
 
+    info: ViewInspectionInfoPanel
+    super_update_info: Mock
+    result: Optional[str]
+
     def test_checks_object_none(self):
         """Should set message that object is None"""
         self.info.UpdateInfo(None)
@@ -280,10 +297,11 @@ class ViewInspectionInfoPanelTests:
 
     @mark.parametrize('error', [RuntimeError()])
     def test_handles_error(self, error: Exception):
-        """should handle errors and say that can't show info"""
-        self.super_update_info.side_effect = lambda obj: self._raise(error)
+        """should str errors and say that can't show info"""
+        self.super_update_info.side_effect = lambda _: self._raise(error)
         self.info.UpdateInfo(Mock())
 
+        assert self.result is not None
         assert self.result.startswith('Failed to show info.')
 
     @staticmethod

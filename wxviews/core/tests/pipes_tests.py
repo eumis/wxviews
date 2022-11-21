@@ -31,6 +31,8 @@ def apply_attribute_fixture(request):
 class ApplyAttributesTests:
     """apply_attributes() step tests"""
 
+    apply_attribute: Mock
+
     @mark.parametrize('attr', [
         XmlAttr('key', 'value', 'init')
     ])
