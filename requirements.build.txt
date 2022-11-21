@@ -1,4 +1,4 @@
-contextvars;python_version<'3.7'
+attrdict;python_version='3.7'
 pyviews
 pytest
 coverage
