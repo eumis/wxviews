@@ -3,6 +3,7 @@
 # Dev
 
   - added show setter
+  - Sizerable.instance is renamed to sizer_item
 
 # 0.6.0
 
