@@ -18,6 +18,7 @@ jobs:
           python-version: ${{ matrix.python-version }}
       - name: Install wx dependencies
         run: |
+          sudo apt install libsdl2-2.0-0
           sudo apt install python3-wxgtk4.0
       - name: Install pip dependencies
         run: |
