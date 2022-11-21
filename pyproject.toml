@@ -6,7 +6,7 @@ build-backend = "setuptools.build_meta"
 name = "wxviews"
 description = "Package for creating wx applications in declarative way."
 keywords = ['binding', 'wxviews', 'wxpython', 'pyviews', 'python', 'mvvm', 'wx']
-version = "0.6.0"
+version = "0.7.0"
 readme = "README.md"
 requires-python = ">=3.6"
 classifiers = [

@@ -1,6 +1,6 @@
 # Changelog
 
-# Dev
+# 0.7.0
 
   - added show setter
   - Sizerable.instance is renamed to sizer_item

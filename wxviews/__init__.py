@@ -10,4 +10,4 @@ from wxviews.widgets import get_root, bind
 from wxviews.widgets.setters import show
 from wxviews.styles import Style, StylesView, style
 
-__version__ = '0.6.0'
+__version__ = '0.7.0'
