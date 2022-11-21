@@ -1,5 +1,9 @@
 # Changelog
 
+# Dev
+
+  - added show setter
+
 # 0.6.0
 
   - instance setter refactoring
