@@ -3,8 +3,7 @@
 from typing import Any, Tuple, Callable, Union
 
 import wx
-from wx import Event
-from wx.core import Sizer
+from wx import Event, Sizer
 from wx._core import wxAssertionError
 
 from wxviews.widgets.rendering import WxNode
