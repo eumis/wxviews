@@ -21,6 +21,10 @@ class SizerNode(InstanceNode, Sizerable):
         self._parent = parent
         self._parent_sizer = sizer
 
+    @property
+    def sizer_item(self) -> Any:
+        return self._instance
+
     def destroy(self):
         super().destroy()
         if self._parent_sizer is None and self._parent is not None:

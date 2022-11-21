@@ -6,6 +6,7 @@ from pyviews.core import InheritedDict, InstanceNode, XmlNode
 from pyviews.pipes import render_children
 from pyviews.rendering import RenderingPipeline, get_type
 from wx import PyEventBinder, Event
+from wx.py.dispatcher import Any
 
 from wxviews.core import Sizerable, WxRenderingContext, get_attr_args
 from wxviews.core import apply_attributes, add_to_sizer
@@ -19,6 +20,10 @@ class WxNode(InstanceNode, Sizerable):
     def __init__(self, instance, xml_node: XmlNode, node_globals: Optional[InheritedDict] = None):
         InstanceNode.__init__(self, instance, xml_node, node_globals=node_globals)
         Sizerable.__init__(self)
+
+    @property
+    def sizer_item(self) -> Any:
+        return self._instance
 
     def bind(self, event: PyEventBinder, handler: Callable[[Event], None], **args):
         """Binds handler to event"""

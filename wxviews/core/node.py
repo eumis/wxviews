@@ -21,5 +21,5 @@ class Sizerable(ABC):
 
     @property
     @abstractmethod
-    def instance(self) -> Any:
+    def sizer_item(self) -> Any:
         """instance to add to sizer"""

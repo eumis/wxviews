@@ -18,4 +18,4 @@ def add_to_sizer(node: Sizerable, context: WxRenderingContext):
     """Adds to wx instance to sizer"""
     if context.sizer is None:
         return
-    context.sizer.Add(node.instance, **node.sizer_args)
+    context.sizer.Add(node.sizer_item, **node.sizer_args)
