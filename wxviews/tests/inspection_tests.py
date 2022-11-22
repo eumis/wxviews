@@ -149,6 +149,9 @@ class Item:
     def __eq__(self, other):
         return self.parent == other.parent and self.name == other.name
 
+    def __hash__(self):
+        return hash((self.parent, self.name))
+
 
 def _node(name, children=None):
     node = WxNode(name, Mock())
