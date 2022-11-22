@@ -14,7 +14,7 @@ class WxRenderingContext(RenderingContext):
     @property
     def parent(self) -> Any:
         """parent control"""
-        return self.get('parent', None)
+        return self.get('parent')
 
     @parent.setter
     def parent(self, value: Any):
@@ -23,7 +23,7 @@ class WxRenderingContext(RenderingContext):
     @property
     def sizer(self) -> Sizer:
         """Current sizer"""
-        return self.get('sizer', None)
+        return self.get('sizer')
 
     @sizer.setter
     def sizer(self, value: Sizer):
@@ -32,7 +32,7 @@ class WxRenderingContext(RenderingContext):
     @property
     def node_styles(self) -> InheritedDict:
         """Node styles"""
-        return self.get('node_styles', None)
+        return self.get('node_styles')
 
     @node_styles.setter
     def node_styles(self, value: InheritedDict):

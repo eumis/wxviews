@@ -260,17 +260,17 @@ class ViewInspectionTreeTests:
 
 @fixture
 def info_fixture(request):
-    with patch(f'{inspection.__name__}.InspectionInfoPanel.__init__'):
-        with patch(f'{inspection.__name__}.InspectionInfoPanel.UpdateInfo') as super_update_info:
-            request.cls.result = None
-            info = ViewInspectionInfoPanel()
-            info.SetText = Mock()
-            info.SetText.side_effect = lambda text, test=request.cls: setattr(test, 'result', text)
-            info.SetReadOnly = Mock()
+    with patch(f'{inspection.__name__}.InspectionInfoPanel.__init__'), \
+            patch(f'{inspection.__name__}.InspectionInfoPanel.UpdateInfo') as super_update_info:
+        request.cls.result = None
+        info = ViewInspectionInfoPanel()
+        info.SetText = Mock()
+        info.SetText.side_effect = lambda text, test=request.cls: setattr(test, 'result', text)
+        info.SetReadOnly = Mock()
 
-            request.cls.info = info
-            request.cls.super_update_info = super_update_info
-            yield super_update_info
+        request.cls.info = info
+        request.cls.super_update_info = super_update_info
+        yield super_update_info
 
 
 @mark.usefixtures('info_fixture')

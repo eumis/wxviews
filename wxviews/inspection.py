@@ -66,12 +66,10 @@ class ViewInspectionFrame(InspectionFrame):
     """
 
     def __init__(self, *args, root=None, **kwargs):
-        with patch(f'{inspection.__name__}.{InspectionTree.__name__}',
-                   ViewInspectionTree):
-            with patch(f'{inspection.__name__}.{InspectionInfoPanel.__name__}',
-                       ViewInspectionInfoPanel):
-                InspectionFrame.__init__(self, *args, **kwargs)
-                self.locals['root'] = root
+        with patch(f'{inspection.__name__}.{InspectionTree.__name__}', ViewInspectionTree),\
+         patch(f'{inspection.__name__}.{InspectionInfoPanel.__name__}', ViewInspectionInfoPanel):
+            InspectionFrame.__init__(self, *args, **kwargs)
+            self.locals['root'] = root
 
 
 class ViewInspectionTree(InspectionTree):
@@ -195,10 +193,10 @@ class ViewInspectionInfoPanel(InspectionInfoPanel):
             "Node:",
             self.Fmt('class', obj.__class__),
             self.Fmt('bases', obj.__class__.__bases__),
-            self.Fmt('module', inspect.getmodule(obj))
+            self.Fmt('module', inspect.getmodule(obj)),
+            "node_globals:"
         ]
 
-        lines.append("node_globals:")
         for key, value in obj.node_globals.to_dictionary().items():
             lines.append(self.Fmt(key, value))
 
