@@ -36,3 +36,9 @@ jobs:
         run: |
           export CODACY_PROJECT_TOKEN=${{ secrets.CODACY_PROJECT_TOKEN }}
           bash <(curl -Ls https://coverage.codacy.com/get.sh)
+      - name: Publish deepsource coverage
+        if: ${{ matrix.python-version == 3.10 && success() }}
+        run: |
+          curl https://deepsource.io/cli | sh
+          export DEEPSOURCE_DSN=${{ secrets.DEEPSOURCE_DSN }}
+          ./bin/deepsource report --analyzer test-coverage --key python --value-file ./cobertura.xml
