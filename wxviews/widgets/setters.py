@@ -18,6 +18,7 @@ def bind(node: WxNode, key: str,
     command, args = value
     node.bind(event, command, **args)
 
+
 def show(node: WxNode, key: str, value: bool):
     """calls sizer.Show() if value is true and sizer.Hide() for false"""
     try:
@@ -29,6 +30,7 @@ def show(node: WxNode, key: str, value: bool):
     except wxAssertionError:
         sizer: Sizer = node.node_globals[key]
         wx.CallAfter(_show, sizer, node.instance, value)
+
 
 def _show(sizer: Sizer, instance: Any, value: bool):
     sizer.Show(instance, show=value)

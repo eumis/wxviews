@@ -29,6 +29,7 @@ class BindTests:
 
         assert node.bind.call_args == call(wx.__dict__[event_key], command, **args)
 
+
 @fixture
 def show_fixture(request):
     sizer = Mock()

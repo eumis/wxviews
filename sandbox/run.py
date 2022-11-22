@@ -1,8 +1,8 @@
 from injectool import set_container, Container
 from pyviews.core import InheritedDict
+from wxviews.core import WxRenderingContext
 from wxviews.app import register_dependencies, launch
 from sandbox.viewmodel import SandboxViews
-from wxviews.core import WxRenderingContext
 
 
 def run_sandbox():
