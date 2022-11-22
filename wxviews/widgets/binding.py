@@ -1,7 +1,7 @@
 """Binding based on events"""
 
 from functools import partial
-from typing import Callable, Any, Type, cast
+from typing import Callable, Any, Optional, Type, cast
 
 from injectool import inject
 from pyviews.binding import ExpressionBinding, TwoWaysBinding, BindingContext, \
@@ -19,7 +19,7 @@ class EventBinding(Binding):
                  callback: BindingCallback,
                  evt_handler: EvtHandler,
                  event: Event,
-                 get_value: Callable[[CommandEvent], Any] = None):
+                 get_value: Optional[Callable[[CommandEvent], Any]] = None):
         super().__init__()
         self._callback = callback
         self._evt_handler = evt_handler

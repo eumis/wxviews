@@ -1,6 +1,6 @@
 """Contains rendering steps for style nodes"""
 
-from typing import Any, List
+from typing import Any, List, Optional
 
 from pyviews.core import PyViewsError, Setter, Node, XmlNode, InheritedDict, XmlAttr
 from pyviews.expression import parse_expression, is_expression, execute
@@ -54,10 +54,10 @@ class StyleItem:
 class Style(Node):
     """Node for storing config options"""
 
-    def __init__(self, xml_node: XmlNode, node_globals: InheritedDict = None):
+    def __init__(self, xml_node: XmlNode, node_globals: Optional[InheritedDict] = None):
         super().__init__(xml_node, node_globals)
-        self.name = None
-        self.items = {}
+        self.name: Optional[str] = None
+        self.items: dict = {}
 
 
 def get_style_pipeline() -> RenderingPipeline:
@@ -82,8 +82,8 @@ def apply_style_items(node: Style, _: WxRenderingContext):
     attrs = node.xml_node.attrs
     try:
         node.name = next(attr.value for attr in attrs if attr.name == 'name')
-    except StopIteration:
-        raise StyleError('Style name is missing', node.xml_node.view_info)
+    except StopIteration as err:
+        raise StyleError('Style name is missing', node.xml_node.view_info) from err
     node.items = {
         f'{attr.namespace}{attr.name}':
             _get_style_item(node, attr) for attr in attrs if attr.name != 'name'
@@ -116,7 +116,7 @@ def _get_styles(context: WxRenderingContext) -> InheritedDict:
 
 def render_child_styles(node: Style, context: WxRenderingContext):
     """Renders child styles"""
-    render_children(node, context, lambda x, n, ctx: WxRenderingContext({
+    render_children(node, context, lambda x, n, _: WxRenderingContext({
         'parent_node': n,
         'node_globals': InheritedDict(node.node_globals),
         'node_styles': _get_styles(context),
@@ -127,7 +127,7 @@ def render_child_styles(node: Style, context: WxRenderingContext):
 class StylesView(Node):
     """Loads styles from separate file"""
 
-    def __init__(self, xml_node: XmlNode, node_globals: InheritedDict = None):
+    def __init__(self, xml_node: XmlNode, node_globals: Optional[InheritedDict] = None):
         super().__init__(xml_node, node_globals)
         self.name = None
 

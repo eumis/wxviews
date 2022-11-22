@@ -1,3 +1,4 @@
+from typing import Tuple
 from unittest.mock import Mock, call, patch
 
 from pytest import fixture, mark, fail
@@ -31,6 +32,8 @@ def apply_attribute_fixture(request):
 class ApplyAttributesTests:
     """apply_attributes() step tests"""
 
+    apply_attribute: Mock
+
     @mark.parametrize('attr', [
         XmlAttr('key', 'value', 'init')
     ])
@@ -61,7 +64,7 @@ class AddToSizerTests:
     """add_to_sizer() step tests"""
 
     @staticmethod
-    def _get_mocks(sizer_args=None, node_globals=None):
+    def _get_mocks(sizer_args=None, node_globals=None) -> Tuple[Mock, Mock]:
         sizer_args = sizer_args if sizer_args else {}
         node = Mock(sizer_args=sizer_args, node_globals=node_globals, instace=Mock())
         return node, Mock()
@@ -77,7 +80,7 @@ class AddToSizerTests:
 
         add_to_sizer(node, WxRenderingContext({'sizer': sizer}))
 
-        assert sizer.Add.call_args == call(node.instance, **sizer_args)
+        assert sizer.Add.call_args == call(node.sizer_item, **sizer_args)
 
     def test_skips_if_sizer_missed(self):
         """should skip if sizer is missed"""

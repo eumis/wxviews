@@ -1,10 +1,7 @@
-# pylint: disable=unused-argument,redefined-outer-name
-
 from injectool import use_container, set_container, Container
 from pytest import fixture
 
 
-# noinspection PyUnusedLocal
 def pytest_configure(config):
     set_container(Container())
 

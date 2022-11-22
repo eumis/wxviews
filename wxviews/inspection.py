@@ -3,7 +3,7 @@
 from os import linesep
 import inspect
 from traceback import format_exc
-from typing import Any, Union, List
+from typing import Any, Optional, Union, List
 from unittest.mock import patch
 
 from pyviews.binding import ExpressionBinding, ObservableBinding, TwoWaysBinding
@@ -24,14 +24,13 @@ class ViewInspectionTool:
     showing an :class:`ViewInspectionFrame`.
     """
 
-    # noinspection PyTypeChecker
     def __init__(self, pos: Point = DefaultPosition, size: Size = Size(850, 700),
-                 config=None, crust_locals: dict = None):
-        self._frame: ViewInspectionFrame = None
+                 config=None, crust_locals: Optional[dict] = None):
+        self._frame: Optional[ViewInspectionFrame] = None
         self._pos: Point = pos
         self._size: Size = size
         self._config = config
-        self._crust_locals: dict = crust_locals
+        self._crust_locals: Optional[dict] = crust_locals
         if not hasattr(self, '_app'):
             self._app: WxNode = get_root()
 
@@ -78,7 +77,6 @@ class ViewInspectionFrame(InspectionFrame):
 class ViewInspectionTree(InspectionTree):
     """Extends wx.lib.inspection.InspectionTree to show view nodes"""
 
-    # noinspection PyPep8Naming
     def BuildTree(self, startWidget, includeSizers=False, expandFrame=False):
         """setup root"""
         if isinstance(startWidget, Node):
@@ -191,7 +189,6 @@ class ViewInspectionInfoPanel(InspectionInfoPanel):
 
         return []
 
-    # noinspection PyProtectedMember, PyListCreation
     def format_node(self, obj: Node) -> List[str]:
         """Formats Node info"""
         lines = [
@@ -212,7 +209,6 @@ class ViewInspectionInfoPanel(InspectionInfoPanel):
 
         return lines
 
-    # noinspection PyProtectedMember
     def _get_binding(self, binding, lines: List[str]):
         binding_name = binding.__class__.__name__
         if isinstance(binding, ExpressionBinding):
@@ -233,7 +229,6 @@ class ViewInspectionInfoPanel(InspectionInfoPanel):
         else:
             lines.append(f'    {binding_name}')
 
-    # noinspection PyProtectedMember
     @staticmethod
     def _get_target(target) -> str:
         # if isinstance(target, PropertyTarget):

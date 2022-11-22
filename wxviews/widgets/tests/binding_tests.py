@@ -13,7 +13,6 @@ from wxviews.widgets.binding import EventBinding, bind_text_and_expression, \
     check_control_and_property, bind_check_and_expression
 
 
-# noinspection PyPep8Naming
 class EventHandlerStub:
     def __init__(self, event):
         self._handler = None
@@ -28,7 +27,6 @@ class EventHandlerStub:
             self._handler = None
 
 
-# noinspection PyPep8Naming
 class TextEntryStub(EventHandlerStub, TextCtrl):
     def __init__(self):
         EventHandlerStub.__init__(self, EVT_TEXT)
@@ -50,7 +48,6 @@ class TextEntryStub(EventHandlerStub, TextCtrl):
             self._handler(event)
 
 
-# noinspection PyPep8Naming
 class CheckBoxStub(EventHandlerStub, CheckBox):
     def __init__(self):
         EventHandlerStub.__init__(self, EVT_CHECKBOX)
@@ -144,6 +141,10 @@ def text_binding_fixture(request):
 class BindTextAndExpressionTests:
     """bind_text_and_expression() tests"""
 
+    context: BindingContext
+    text: TextEntryStub
+    vm: TextViewModel
+
     def test_returns_binding(self):
         """should return TwoWaysBinding()"""
 
@@ -205,6 +206,10 @@ def check_binding_fixture(request):
 @mark.usefixtures('check_binding_fixture')
 class BindCheckAndExpressionTests:
     """bind_check_and_expression() tests"""
+
+    context: BindingContext
+    checkbox: CheckBoxStub
+    vm: CheckViewModel
 
     def test_returns_binding(self):
         """should return TwoWaysBinding()"""

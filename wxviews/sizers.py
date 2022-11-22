@@ -1,6 +1,6 @@
 """Rendering pipeline for SizerNode"""
 
-from typing import Any
+from typing import Any, Optional
 
 from pyviews.core import InheritedDict, InstanceNode, Node, XmlNode
 from pyviews.pipes import render_children
@@ -15,19 +15,15 @@ class SizerNode(InstanceNode, Sizerable):
     """Wrapper under sizer"""
 
     def __init__(self, instance: Sizer, xml_node: XmlNode,
-                 node_globals: InheritedDict = None, parent=None, sizer=None):
-        super().__init__(instance, xml_node, node_globals=node_globals)
+                 node_globals: Optional[InheritedDict] = None, parent=None, sizer=None):
+        InstanceNode.__init__(self, instance, xml_node, node_globals=node_globals)
+        Sizerable.__init__(self)
         self._parent = parent
         self._parent_sizer = sizer
-        self._sizer_args: dict = {}
 
     @property
-    def sizer_args(self) -> dict:
-        return self._sizer_args
-
-    @sizer_args.setter
-    def sizer_args(self, value):
-        self._sizer_args = value
+    def sizer_item(self) -> Any:
+        return self._instance
 
     def destroy(self):
         super().destroy()
@@ -74,7 +70,7 @@ def _create_sizer_node(context: WxRenderingContext) -> SizerNode:
                      sizer=context.sizer)
 
 
-def _get_init_values(xml_node: XmlNode, node_globals: InheritedDict = None) -> list:
+def _get_init_values(xml_node: XmlNode, node_globals: Optional[InheritedDict] = None) -> list:
     init_attrs = [attr for attr in xml_node.attrs if attr.namespace == 'init']
     return [get_init_value(attr, node_globals) for attr in init_attrs]
 
@@ -99,7 +95,7 @@ def set_sizer_to_parent(node, context: WxRenderingContext):
 class GrowableRow(Node):
     """Represents FlexGridSizer.AddGrowableRow method"""
 
-    def __init__(self, xml_node: XmlNode, node_globals: InheritedDict = None):
+    def __init__(self, xml_node: XmlNode, node_globals: Optional[InheritedDict] = None):
         super().__init__(xml_node, node_globals=node_globals)
         self.idx = None
         self.proportion = 0
@@ -121,7 +117,7 @@ def add_growable_row_to_sizer(node: GrowableRow, context: WxRenderingContext):
 class GrowableCol(Node):
     """Represents FlexGridSizer.AddGrowableRow method"""
 
-    def __init__(self, xml_node: XmlNode, node_globals: InheritedDict = None):
+    def __init__(self, xml_node: XmlNode, node_globals: Optional[InheritedDict] = None):
         super().__init__(xml_node, node_globals=node_globals)
         self.idx = None
         self.proportion = 0

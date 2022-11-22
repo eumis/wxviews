@@ -1,6 +1,6 @@
 """Common pipeline functionality"""
 
-from pyviews.core import InstanceNode, Node
+from pyviews.core import Node
 from pyviews.pipes import apply_attribute
 
 from .node import Sizerable
@@ -14,8 +14,8 @@ def apply_attributes(node: Node, _: WxRenderingContext):
         apply_attribute(node, attr)
 
 
-def add_to_sizer(node: (InstanceNode, Sizerable), context: WxRenderingContext):
+def add_to_sizer(node: Sizerable, context: WxRenderingContext):
     """Adds to wx instance to sizer"""
     if context.sizer is None:
         return
-    context.sizer.Add(node.instance, **node.sizer_args)
+    context.sizer.Add(node.sizer_item, **node.sizer_args)

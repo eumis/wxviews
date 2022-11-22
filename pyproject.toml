@@ -1,0 +1,49 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "wxviews"
+description = "Package for creating wx applications in declarative way."
+keywords = ['binding', 'wxviews', 'wxpython', 'pyviews', 'python', 'mvvm', 'wx']
+version = "0.7.0"
+readme = "README.md"
+requires-python = ">=3.6"
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "Topic :: Software Development :: Libraries",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3 :: Only",
+    "Programming Language :: Python :: 3.6",
+    "Programming Language :: Python :: 3.7",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10"
+]
+dependencies = [
+    'pyviews>=3.*.*,<4.*.*',
+    'wxPython'
+]
+
+[tool.setuptools]
+include-package-data = false
+
+[tool.setuptools.packages.find]
+include = ["wxviews*"]
+exclude = ["*tests*"]
+
+[project.urls]
+Homepage = "https://github.com/eumis/wxviews"
+
+[tool.pylint.main]
+disable = ["too-few-public-methods", "missing-class-docstring", "missing-function-docstring", "missing-module-docstring", "invalid-name", "abstract-class-instantiated"]
+max-line-length = 120
+extension-pkg-whitelist = ['wx']
+
+
+[tool.pytest.ini_options]
+python_files = '*_tests.py'
+python_classes = '*Tests'
+
