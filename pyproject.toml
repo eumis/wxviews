@@ -38,7 +38,7 @@ exclude = ["*tests*"]
 Homepage = "https://github.com/eumis/wxviews"
 
 [tool.pylint.main]
-disable = ["too-few-public-methods", "missing-class-docstring", "missing-function-docstring", "missing-module-docstring", "invalid-name"]
+disable = ["too-few-public-methods", "missing-class-docstring", "missing-function-docstring", "missing-module-docstring", "invalid-name", "abstract-class-instantiated"]
 max-line-length = 120
 extension-pkg-whitelist = ['wx']
 

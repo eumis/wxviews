@@ -19,6 +19,7 @@ class WxNode(InstanceNode, Sizerable):
 
     def __init__(self, instance, xml_node: XmlNode, node_globals: Optional[InheritedDict] = None):
         InstanceNode.__init__(self, instance, xml_node, node_globals=node_globals)
+        Sizerable.__init__(self)
 
     @property
     def sizer_item(self) -> Any:
