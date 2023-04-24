@@ -42,7 +42,6 @@ disable = ["too-few-public-methods", "missing-class-docstring", "missing-functio
 max-line-length = 120
 extension-pkg-whitelist = ['wx']
 
-
 [tool.pytest.ini_options]
 python_files = '*_tests.py'
 python_classes = '*Tests'
