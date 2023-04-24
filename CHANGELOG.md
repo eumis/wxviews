@@ -1,6 +1,6 @@
 # Changelog
 
-# Dev
+# 0.8.0
 
 - upgraded pyviews to 4.0.0
 
