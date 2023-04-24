@@ -1,13 +1,14 @@
 """Rendering pipeline for menus"""
 
-from pyviews.core import InstanceNode, InheritedDict, XmlNode
+from pyviews.core.rendering import InstanceNode, NodeGlobals
+from pyviews.core.xml import XmlNode
 from pyviews.pipes import render_children
-from pyviews.rendering import RenderingPipeline, get_type
-from wx import Frame, MenuBar, Menu
+from pyviews.rendering.pipeline import RenderingPipeline, get_type
+from wx import Frame, Menu, MenuBar
 
-from wxviews.core import WxRenderingContext, apply_attributes, \
-    get_attr_args, get_init_value
-from wxviews.widgets import WxNode
+from wxviews.core.pipes import apply_attributes
+from wxviews.core.rendering import WxRenderingContext, get_attr_args, get_init_value
+from wxviews.widgets.rendering import WxNode
 
 
 def create_menu_node(context: WxRenderingContext) -> WxNode:
@@ -15,16 +16,16 @@ def create_menu_node(context: WxRenderingContext) -> WxNode:
     inst_type = get_type(context.xml_node)
     args = get_attr_args(context.xml_node, 'init', context.node_globals)
     inst = inst_type(**args)
-    return WxNode(inst, context.xml_node, node_globals=context.node_globals)
+    return WxNode(inst, context.xml_node, node_globals = context.node_globals)
 
 
 def get_menu_bar_pipeline() -> RenderingPipeline[WxNode, WxRenderingContext]:
     """Return render pipeline for MenuBar"""
-    return RenderingPipeline[WxNode, WxRenderingContext](pipes=[
-        apply_attributes,
-        render_menu_children,
-        set_to_frame
-    ], create_node=create_menu_node, name='menu bar pipeline')
+    return RenderingPipeline[WxNode, WxRenderingContext](
+        pipes = [apply_attributes, render_menu_children, set_to_frame],
+        create_node = create_menu_node,
+        name = 'menu bar pipeline'
+    )
 
 
 def render_menu_children(node: WxNode, context: WxRenderingContext):
@@ -32,12 +33,11 @@ def render_menu_children(node: WxNode, context: WxRenderingContext):
     render_children(node, context, _get_menu_child_context)
 
 
-def _get_menu_child_context(child_xml_node: XmlNode, node: InstanceNode,
-                            _: WxRenderingContext) -> WxRenderingContext:
+def _get_menu_child_context(child_xml_node: XmlNode, node: InstanceNode, _: WxRenderingContext) -> WxRenderingContext:
     return WxRenderingContext({
         'parent_node': node,
         'parent': node.instance,
-        'node_globals': InheritedDict(node.node_globals),
+        'node_globals': NodeGlobals(node.node_globals),
         'xml_node': child_xml_node
     })
 
@@ -52,11 +52,11 @@ def set_to_frame(node: InstanceNode, context: WxRenderingContext):
 
 def get_menu_pipeline() -> RenderingPipeline:
     """Return render pipeline for Menu"""
-    return RenderingPipeline(pipes=[
-        apply_attributes,
-        render_menu_children,
-        set_to_menu_bar
-    ], create_node=create_menu_node, name='menu pipeline')
+    return RenderingPipeline(
+        pipes = [apply_attributes, render_menu_children, set_to_menu_bar],
+        create_node = create_menu_node,
+        name = 'menu pipeline'
+    )
 
 
 def set_to_menu_bar(node: WxNode, context: WxRenderingContext):
@@ -75,10 +75,9 @@ def set_to_menu_bar(node: WxNode, context: WxRenderingContext):
 
 def get_menu_item_pipeline() -> RenderingPipeline:
     """Returns rendering pipeline for menu item"""
-    return RenderingPipeline(pipes=[
-        apply_attributes,
-        set_to_menu
-    ], create_node=create_menu_node, name='menu item pipeline')
+    return RenderingPipeline(
+        pipes = [apply_attributes, set_to_menu], create_node = create_menu_node, name = 'menu item pipeline'
+    )
 
 
 def set_to_menu(node: InstanceNode, context: WxRenderingContext):

@@ -2,11 +2,11 @@ from typing import Any
 from unittest.mock import Mock, call
 
 from pytest import mark, raises
-from pyviews.core import XmlNode, XmlAttr
-from wx import Frame, MenuBar, Menu
+from pyviews.core.xml import XmlAttr, XmlNode
+from wx import Frame, Menu, MenuBar
 
-from wxviews.core import WxRenderingContext
-from wxviews.menus import set_to_frame, set_to_menu_bar, set_to_menu
+from wxviews.core.rendering import WxRenderingContext
+from wxviews.menus import set_to_frame, set_to_menu, set_to_menu_bar
 
 
 class EmptyClass:
@@ -14,6 +14,7 @@ class EmptyClass:
 
 
 class FrameStub(Frame):
+
     def __init__(self):
         self.SetMenuBar = Mock()
 
@@ -42,6 +43,7 @@ class SetToFrameTests:
 
 
 class MenuBarStub(MenuBar):
+
     def __init__(self):
         self.Append = Mock()
 
@@ -62,7 +64,7 @@ class SetToMenuBarTests:
     def test_sets_menu_to_bar():
         """should call Append on menu baar and pass menu instance"""
         title = 'some title'
-        node = Mock(properties={}, xml_node=XmlNode('wx', 'Menu', attrs=[XmlAttr('title', title)]))
+        node = Mock(properties = {}, xml_node = XmlNode('wx', 'Menu', attrs = [XmlAttr('title', title)]))
         menu_bar = MenuBarStub()
 
         set_to_menu_bar(node, WxRenderingContext({'parent': menu_bar}))
@@ -71,6 +73,7 @@ class SetToMenuBarTests:
 
 
 class MenuStub(Menu):
+
     def __init__(self):
         self.Append = Mock()
 

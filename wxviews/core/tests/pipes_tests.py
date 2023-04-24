@@ -1,21 +1,24 @@
 from typing import Tuple
 from unittest.mock import Mock, call, patch
 
-from pytest import fixture, mark, fail
-from pyviews.core import XmlAttr
+from pytest import fail, fixture, mark
+from pyviews.core.xml import XmlAttr
 
-from wxviews.core import pipes, WxRenderingContext
-from wxviews.core.pipes import apply_attributes, add_to_sizer
-from wxviews.widgets import WxNode
+from wxviews.core import pipes
+from wxviews.core.pipes import add_to_sizer, apply_attributes
+from wxviews.core.rendering import WxRenderingContext
+from wxviews.widgets.rendering import WxNode
 
 
 class TestControl:
+
     def __init__(self):
         self.node_key = None
         self.instance_key = None
 
 
 class TestNode(WxNode):
+
     def __init__(self, widget):
         super().__init__(widget, Mock())
         self.node_key = None
@@ -34,13 +37,11 @@ class ApplyAttributesTests:
 
     apply_attribute: Mock
 
-    @mark.parametrize('attr', [
-        XmlAttr('key', 'value', 'init')
-    ])
+    @mark.parametrize('attr', [XmlAttr('key', 'value', 'init')])
     def test_skip_special_attributes(self, attr):
         """should skip attributes with "init" and "sizer" namespaces"""
         self.apply_attribute.reset_mock()
-        node = Mock(xml_node=Mock(attrs=[attr]))
+        node = Mock(xml_node = Mock(attrs = [attr]))
 
         apply_attributes(node, WxRenderingContext())
 
@@ -49,11 +50,11 @@ class ApplyAttributesTests:
     @mark.parametrize('attrs', [
         [XmlAttr('key', 'value')],
         [XmlAttr('key', 'value', ''), XmlAttr('other_key', 'key', 'some namespace')]
-    ])
+    ]) # yapf: disable
     def test_apply_attributes(self, attrs):
         """should apply passed attributes"""
         self.apply_attribute.reset_mock()
-        node = Mock(xml_node=Mock(attrs=attrs))
+        node = Mock(xml_node = Mock(attrs = attrs))
 
         apply_attributes(node, WxRenderingContext())
 
@@ -64,16 +65,16 @@ class AddToSizerTests:
     """add_to_sizer() step tests"""
 
     @staticmethod
-    def _get_mocks(sizer_args=None, node_globals=None) -> Tuple[Mock, Mock]:
+    def _get_mocks(sizer_args = None, node_globals = None) -> Tuple[Mock, Mock]:
         sizer_args = sizer_args if sizer_args else {}
-        node = Mock(sizer_args=sizer_args, node_globals=node_globals, instace=Mock())
+        node = Mock(sizer_args = sizer_args, node_globals = node_globals, instace = Mock())
         return node, Mock()
 
     @mark.parametrize('sizer_args', [
         {},
         {'key': 'value'},
         {'key': 'value', 'one': 1}
-    ])
+    ]) # yapf: disable
     def test_passes_attr_args(self, sizer_args):
         """should call sizer.Add with node.sizer_args"""
         node, sizer = self._get_mocks(sizer_args)

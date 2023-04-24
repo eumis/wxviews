@@ -1,12 +1,11 @@
 from typing import Optional
-from unittest.mock import patch, Mock, call
+from unittest.mock import Mock, call, patch
 
 from pytest import fixture, mark
 
 from wxviews import inspection
-from wxviews.inspection import ViewInspectionFrame, ViewInspectionTool
-from wxviews.inspection import ViewInspectionTree, ViewInspectionInfoPanel
-from wxviews.widgets import WxNode
+from wxviews.inspection import ViewInspectionFrame, ViewInspectionInfoPanel, ViewInspectionTool, ViewInspectionTree
+from wxviews.widgets.rendering import WxNode
 
 
 @fixture
@@ -45,12 +44,19 @@ class ViewInspectionToolTests:
         size = Mock()
         config = Mock()
         crust_locals = Mock()
-        tool = ViewInspectionTool(pos=pos, size=size, config=config, crust_locals=crust_locals)
+        tool = ViewInspectionTool(pos = pos, size = size, config = config, crust_locals = crust_locals)
 
         tool.show()
 
-        assert self.frame_init.call_args == call(parent=self.top_window, pos=pos, size=size, config=config,
-                                                 locals=crust_locals, app=self.root.instance, root=self.root)
+        assert self.frame_init.call_args == call(
+            parent = self.top_window,
+            pos = pos,
+            size = size,
+            config = config,
+            locals = crust_locals,
+            app = self.root.instance,
+            root = self.root
+        )
 
     @mark.parametrize('select_obj', [None, Mock()])
     def test_sets_passed_object(self, select_obj):
@@ -98,16 +104,13 @@ class ViewInspectionFrameTests:
         parent = Mock()
         app = Mock()
 
-        frame = ViewInspectionFrame(parent=parent,
-                                    pos=pos,
-                                    size=size,
-                                    config=config,
-                                    locals=crust_locals,
-                                    app=app,
-                                    root=root)
+        frame = ViewInspectionFrame(
+            parent = parent, pos = pos, size = size, config = config, locals = crust_locals, app = app, root = root
+        )
 
-        assert self.frame_init.call_args == call(frame, parent=parent, pos=pos, size=size, config=config,
-                                                 locals=crust_locals, app=app)
+        assert self.frame_init.call_args == call(
+            frame, parent = parent, pos = pos, size = size, config = config, locals = crust_locals, app = app
+        )
         assert frame.locals['root'] == root
 
 
@@ -142,7 +145,8 @@ def tree_fixture(request):
 
 
 class Item:
-    def __init__(self, parent, name=None):
+
+    def __init__(self, parent, name = None):
         self.parent: str = parent
         self.name: str = name
 
@@ -153,7 +157,7 @@ class Item:
         return hash((self.parent, self.name))
 
 
-def _node(name, children=None):
+def _node(name, children = None):
     node = WxNode(name, Mock())
     node._children = children if children else []
     return node
@@ -172,10 +176,10 @@ class ViewInspectionTreeTests:
         (0, False),
         (1, True),
         (5, True)
-    ])
+    ]) # yapf: disable
     def test_clears_tree_before_build(self, items_count, should_clear):
         """should clear tree before build"""
-        self.tree.GetCount.side_effect = lambda c=items_count: c
+        self.tree.GetCount.side_effect = lambda c = items_count: c
 
         self.tree.BuildTree(self.root)
 
@@ -216,7 +220,7 @@ class ViewInspectionTreeTests:
              Item('2', '2.1'), Item('2.1', '2.1.1'),
              Item('2', '2.2'), Item('2.2', '2.2.1'), Item('2.2', '2.2.2')
          ])
-    ])
+     ]) # yapf: disable
     def test_adds_children(self, children, items):
         """Should add node children to tree"""
         actual_items = []
@@ -248,17 +252,17 @@ class ViewInspectionTreeTests:
 
         assert self.tree.built
 
-    @mark.parametrize('start_widget, include_sizers, expand_frame', [
-        (Mock(), False, True),
-        (Item(''), True, False),
-        (Mock(), True, True),
-        (Item('root'), False, False)
-    ])
+    @mark.parametrize(
+        'start_widget, include_sizers, expand_frame', [(Mock(), False, True), (Item(''), True, False),
+                                                       (Mock(), True, True), (Item('root'), False, False)]
+    )
     def test_builds_widget_tree_for_widget(self, start_widget, include_sizers, expand_frame):
         """should build default widget tree if passed object other then Node"""
         self.tree.BuildTree(start_widget, include_sizers, expand_frame)
 
-        assert self.super_build.call_args == call(start_widget, includeSizers=include_sizers, expandFrame=expand_frame)
+        assert self.super_build.call_args == call(
+            start_widget, includeSizers = include_sizers, expandFrame = expand_frame
+        )
 
 
 @fixture
@@ -268,7 +272,7 @@ def info_fixture(request):
         request.cls.result = None
         info = ViewInspectionInfoPanel()
         info.SetText = Mock()
-        info.SetText.side_effect = lambda text, test=request.cls: setattr(test, 'result', text)
+        info.SetText.side_effect = lambda text, test = request.cls: setattr(test, 'result', text)
         info.SetReadOnly = Mock()
 
         request.cls.info = info

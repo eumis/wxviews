@@ -2,14 +2,13 @@ from unittest.mock import Mock, call, patch
 
 from injectool import add_singleton
 from pytest import fail, mark
-from pyviews.rendering import render
+from pyviews.rendering.pipeline import render
 from wx import Sizer
 
 from wxviews import sizers
-from wxviews.core import WxRenderingContext
-from wxviews.sizers import SizerNode, GrowableCol, GrowableRow, set_sizer
-from wxviews.sizers import add_growable_row_to_sizer, add_growable_col_to_sizer
-from wxviews.sizers import render_sizer_children, set_sizer_to_parent
+from wxviews.core.rendering import WxRenderingContext
+from wxviews.sizers import (GrowableCol, GrowableRow, SizerNode, add_growable_col_to_sizer, add_growable_row_to_sizer,
+                            render_sizer_children, set_sizer, set_sizer_to_parent)
 
 
 class SizerNodeTests:
@@ -19,7 +18,7 @@ class SizerNodeTests:
     def test_removes_sizer_from_parent():
         """should remove sizer from parent"""
         parent = Mock()
-        node = SizerNode(Mock(), Mock(), parent=parent)
+        node = SizerNode(Mock(), Mock(), parent = parent)
 
         node.destroy()
 
@@ -29,7 +28,7 @@ class SizerNodeTests:
     def test_do_nothing_if_has_parent_sizer():
         """should do nothing if has parent sizer"""
         parent = Mock()
-        node = SizerNode(Mock(), Mock(), parent=parent, sizer=Mock())
+        node = SizerNode(Mock(), Mock(), parent = parent, sizer = Mock())
 
         node.destroy()
 
@@ -42,9 +41,9 @@ def test_render_sizer_children(nodes_count):
     """should render all xml children for every item"""
     render_mock = Mock()
     add_singleton(render, render_mock)
-    with patch(sizers.__name__ + '.InheritedDict') as inherited_dict_mock:
+    with patch(sizers.__name__ + '.NodeGlobals') as inherited_dict_mock:
         inherited_dict_mock.side_effect = lambda p: {'source': p} if p else p
-        xml_node = Mock(children=[Mock() for _ in range(nodes_count)])
+        xml_node = Mock(children = [Mock() for _ in range(nodes_count)])
         parent, node = Mock(), SizerNode(Mock(), xml_node)
         context = WxRenderingContext({'node': node, 'parent': parent})
 
@@ -62,6 +61,7 @@ def test_render_sizer_children(nodes_count):
 
 
 class AnySizer(Sizer):
+
     def __init__(self):
         self.SetSizer = Mock()
 
@@ -104,8 +104,8 @@ class SetSizerToParentTests:
     ({'idx': 1}, call(1, 0)),
     ({'idx': 1, 'proportion': 1}, call(1, 1)),
     ({'proportion': 1}, call(None, 1))
-])
-def test_add_growable_row_to_sizer(properties: dict, expected_call: call):
+]) # yapf: disable
+def test_add_growable_row_to_sizer(properties: dict, expected_call):
     """should call AddGrowableRow with parameters"""
     node = GrowableRow(Mock())
     sizer_ = Mock()
@@ -121,8 +121,8 @@ def test_add_growable_row_to_sizer(properties: dict, expected_call: call):
     ({'idx': 1}, call(1, 0)),
     ({'idx': 1, 'proportion': 1}, call(1, 1)),
     ({'proportion': 1}, call(None, 1))
-])
-def test_add_glowable_col(properties: dict, expected_call: call):
+]) # yapf: disable
+def test_add_glowable_col(properties: dict, expected_call):
     """should call AddGrowableCol with parameters"""
     node = GrowableCol(Mock())
     sizer_ = Mock()
@@ -137,10 +137,10 @@ def test_add_glowable_col(properties: dict, expected_call: call):
 @mark.parametrize('key, value, expected_args', [
     ('key', 'value', {'key': 'value'}),
     ('', {'key': 'value'}, {'key': 'value'})
-])
+]) # yapf: disable
 def test_sizer(key, value, expected_args):
     """sizer should add key value to sizer_args property"""
-    node = Mock(sizer_args={})
+    node = Mock(sizer_args = {})
 
     set_sizer(node, key, value)
 

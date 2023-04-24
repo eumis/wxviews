@@ -3,22 +3,20 @@
 from typing import cast
 
 from injectool import add_singleton
-from pyviews.binding import use_binding
+from pyviews.binding.config import use_binding
 from pyviews.code import run_code
 from pyviews.presenter import get_presenter_pipeline
-from pyviews.rendering import RenderingPipeline, use_rendering, get_child_context
-from pyviews.rendering.pipeline import use_pipeline
-from pyviews.rendering.views import render_view
+from pyviews.rendering.context import get_child_context
+from pyviews.rendering.pipeline import RenderingPipeline, render_view, use_pipeline
+from pyviews.rendering.config import use_rendering
 
-from wxviews.containers import get_if_pipeline, get_for_pipeline
-from wxviews.containers import get_view_pipeline, get_container_pipeline
-from wxviews.core import WxRenderingContext
-from wxviews.core.rendering import get_wx_child_context
-from wxviews.menus import get_menu_item_pipeline, get_menu_pipeline, get_menu_bar_pipeline
+from wxviews.containers import get_container_pipeline, get_for_pipeline, get_if_pipeline, get_view_pipeline
+from wxviews.core.rendering import WxRenderingContext, get_wx_child_context
+from wxviews.menus import get_menu_bar_pipeline, get_menu_item_pipeline, get_menu_pipeline
 from wxviews.sizers import get_growable_col_pipeline, get_growable_row_pipeline, get_sizer_pipeline
-from wxviews.styles import get_styles_view_pipeline, get_style_pipeline
-from wxviews.widgets import get_frame_pipeline, get_app_pipeline, get_wx_pipeline, WxNode
+from wxviews.styles import get_style_pipeline, get_styles_view_pipeline
 from wxviews.widgets.binding import use_events_binding
+from wxviews.widgets.rendering import WxNode, get_app_pipeline, get_frame_pipeline, get_wx_pipeline
 
 
 def register_dependencies():
@@ -56,12 +54,12 @@ def use_wx_pipelines():
 
     use_pipeline(get_style_pipeline(), 'wxviews.Style')
     use_pipeline(get_styles_view_pipeline(), 'wxviews.StylesView')
-    use_pipeline(RenderingPipeline(pipes=[run_code]), 'wxviews.Code')
+    use_pipeline(RenderingPipeline(pipes = [run_code]), 'wxviews.Code')
 
     use_pipeline(get_presenter_pipeline(), 'wxviews.PresenterNode')
 
 
-def launch(context: WxRenderingContext, root_view=None):
+def launch(context: WxRenderingContext, root_view = None):
     """Runs application. Widgets are created from passed xml_files"""
     root_view = 'root' if root_view is None else root_view
     root = cast(WxNode, render_view(root_view, context))

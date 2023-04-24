@@ -1,10 +1,10 @@
 """Common pipeline functionality"""
 
-from pyviews.core import Node
+from pyviews.core.rendering import Node
 from pyviews.pipes import apply_attribute
 
-from .node import Sizerable
-from .rendering import WxRenderingContext
+from wxviews.core.node import Sizerable
+from wxviews.core.rendering import WxRenderingContext
 
 
 def apply_attributes(node: Node, _: WxRenderingContext):

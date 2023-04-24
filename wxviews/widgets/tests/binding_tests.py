@@ -1,19 +1,21 @@
 from unittest.mock import Mock, call
 
-from pytest import mark, fixture
-from pyviews.binding import TwoWaysBinding, BindingContext
-from pyviews.core import InheritedDict, ObservableEntity
-from pyviews.core import XmlAttr, Node
+from pytest import fixture, mark
+from pyviews.binding.binder import BindingContext
+from pyviews.binding.twoways import TwoWaysBinding
+from pyviews.core.binding import BindableEntity
+from pyviews.core.rendering import Node, NodeGlobals
+from pyviews.core.xml import XmlAttr
 from pyviews.pipes import call_set_attr
-from wx import EVT_TEXT, EVT_CHECKBOX
-from wx import TextCtrl, CheckBox
+from wx import EVT_CHECKBOX, EVT_TEXT, CheckBox, TextCtrl
 
+from wxviews.widgets.binding import (EventBinding, bind_check_and_expression, bind_text_and_expression,
+                                     check_control_and_property)
 from wxviews.widgets.rendering import WxNode
-from wxviews.widgets.binding import EventBinding, bind_text_and_expression, \
-    check_control_and_property, bind_check_and_expression
 
 
 class EventHandlerStub:
+
     def __init__(self, event):
         self._handler = None
         self._event = event
@@ -22,12 +24,13 @@ class EventHandlerStub:
         if event == self._event:
             self._handler = handler
 
-    def Unbind(self, event, handler=None):
+    def Unbind(self, event, handler = None):
         if event == self._event and self._handler == handler:
             self._handler = None
 
 
 class TextEntryStub(EventHandlerStub, TextCtrl):
+
     def __init__(self):
         EventHandlerStub.__init__(self, EVT_TEXT)
         self._value = None
@@ -49,6 +52,7 @@ class TextEntryStub(EventHandlerStub, TextCtrl):
 
 
 class CheckBoxStub(EventHandlerStub, CheckBox):
+
     def __init__(self):
         EventHandlerStub.__init__(self, EVT_CHECKBOX)
         self._value = None
@@ -115,8 +119,9 @@ class EventBindingTests:
         assert not target.on_change.called
 
 
-class TextViewModel(ObservableEntity):
-    def __init__(self, value=None):
+class TextViewModel(BindableEntity):
+
+    def __init__(self, value = None):
         super().__init__()
         self.text_value = value
 
@@ -124,7 +129,7 @@ class TextViewModel(ObservableEntity):
 @fixture
 def text_binding_fixture(request):
     text, vm = TextEntryStub(), TextViewModel()
-    node = WxNode(text, Mock(), InheritedDict({'vm': vm}))
+    node = WxNode(text, Mock(), NodeGlobals({'vm': vm}))
 
     context = BindingContext()
     context.node = node
@@ -156,7 +161,7 @@ class BindTextAndExpressionTests:
         ('one', 'two'),
         ('two', 'two'),
         ('two', 'three')
-    ])
+    ]) # yapf: disable
     def tests_binds_control_value_to_expression(self, init_value, new_value):
         """should bind TextEntry.Value to expression"""
         self.vm.text_value = init_value
@@ -170,7 +175,7 @@ class BindTextAndExpressionTests:
         ('one', 'two'),
         ('two', 'two'),
         ('two', 'three')
-    ])
+    ]) # yapf: disable
     def tests_binds_expression_to_control(self, init_value, new_value):
         """should bind bind view model to control value"""
         self.vm.text_value = init_value
@@ -181,8 +186,9 @@ class BindTextAndExpressionTests:
         assert self.vm.text_value == new_value
 
 
-class CheckViewModel(ObservableEntity):
-    def __init__(self, value=None):
+class CheckViewModel(BindableEntity):
+
+    def __init__(self, value = None):
         super().__init__()
         self.value = value
 
@@ -190,7 +196,7 @@ class CheckViewModel(ObservableEntity):
 @fixture
 def check_binding_fixture(request):
     checkbox, vm = CheckBoxStub(), CheckViewModel()
-    node = WxNode(checkbox, Mock(), InheritedDict({'vm': vm}))
+    node = WxNode(checkbox, Mock(), NodeGlobals({'vm': vm}))
 
     context = BindingContext()
     context.node = node
@@ -221,7 +227,7 @@ class BindCheckAndExpressionTests:
     @mark.parametrize('init_value, new_value', [
         (True, False),
         (False, True)
-    ])
+    ]) # yapf: disable
     def tests_binds_control_value_to_expression(self, init_value, new_value):
         """should bind CheckBox.Value to expression"""
         self.vm.value = init_value
@@ -234,7 +240,7 @@ class BindCheckAndExpressionTests:
     @mark.parametrize('init_value, new_value', [
         (True, False),
         (False, True)
-    ])
+    ]) # yapf: disable
     def tests_binds_expression_to_control(self, init_value, new_value):
         """should bind bind view model to control value"""
         self.vm.value = init_value
@@ -268,7 +274,7 @@ class BindCheckAndExpressionTests:
     (TextEntryStub, {'node': WxNode(TextEntryStub(), Mock())}, False),
     (CheckBoxStub, {'xml_attr': XmlAttr('text')}, False),
     (TextEntryStub, {'node': Node(Mock()), 'xml_attr': XmlAttr('text')}, False)
-])
+]) # yapf: disable
 def test_check_control_and_property(control_type, binding_context, expected):
     """should return true if control type and value property equal to items from context"""
     actual = check_control_and_property(control_type, BindingContext(**binding_context))

@@ -3,11 +3,12 @@
 from functools import partial
 from typing import Callable, Any, Optional, Type, cast
 
-from injectool import inject
-from pyviews.binding import ExpressionBinding, TwoWaysBinding, BindingContext, \
-    get_expression_callback, Binder
-from pyviews.core import Binding, BindingCallback
-from pyviews.expression import Expression
+from injectool import In, inject
+from pyviews.binding.binder import Binder, BindingContext
+from pyviews.binding.twoways import TwoWaysBinding
+from pyviews.binding.expression import ExpressionBinding, get_expression_callback
+from pyviews.core.binding import Binding, BindingCallback
+from pyviews.core.expression import Expression
 from wx import Event, CommandEvent, EVT_TEXT, EVT_CHECKBOX
 from wx import EvtHandler, TextEntry, CheckBox
 
@@ -43,7 +44,7 @@ class EventBinding(Binding):
 
 
 @inject(binder=Binder)
-def use_events_binding(binder: Binder = None):
+def use_events_binding(binder: Binder = In):
     """Adds twoways binding rules"""
     binder.add_rule('twoways', bind_text_and_expression,
                     lambda ctx: check_control_and_property(cast(Type[EvtHandler], TextEntry), ctx))

@@ -2,11 +2,11 @@ from typing import cast
 from unittest.mock import Mock, call
 
 from pytest import mark, raises
-from pyviews.core import XmlNode
-from wx import EVT_MENU, EVT_BUTTON
+from pyviews.core.rendering import XmlNode
+from wx import EVT_BUTTON, EVT_MENU
 
-from wxviews.core import WxRenderingContext
-from wxviews.widgets.rendering import WxNode, store_root, get_root
+from wxviews.core.rendering import WxRenderingContext
+from wxviews.widgets.rendering import WxNode, get_root, store_root
 
 
 class WidgetNodeTests:
@@ -27,7 +27,7 @@ class WidgetNodeTests:
         (EVT_MENU, lambda evt: None, {}),
         (EVT_MENU, lambda evt: None, {'id': 105}),
         (EVT_BUTTON, lambda evt: print('button'), {})
-    ])
+    ]) # yapf: disable
     def test_bind(event, callback, args: dict):
         """should call bind for instance"""
         instance = Mock()
