@@ -1,86 +1,34 @@
 """Extension of wxpython InspectionTool to show view nodes"""
 
-from os import linesep
 import inspect
+from os import linesep
 from traceback import format_exc
-from typing import Any, Optional, Union, List
+from typing import Any, List, Optional, Union
 from unittest.mock import patch
 
-from pyviews.binding import ExpressionBinding, ObservableBinding, TwoWaysBinding
-from pyviews.core import Node, InstanceNode
 import wx
-from wx import Point, DefaultPosition, Size, MenuBar
-from wx import Menu, MenuItem, Window, Sizer, SizerItem
+from pyviews.binding.expression import ExpressionBinding
+from pyviews.binding.observable import ObservableBinding
+from pyviews.binding.twoways import TwoWaysBinding
+from pyviews.core.rendering import InstanceNode, Node
+from wx import DefaultPosition, Menu, MenuBar, MenuItem, Point, Size, Sizer, SizerItem, Window
 from wx.lib import inspection
 from wx.lib.agw.customtreectrl import GenericTreeItem
-from wx.lib.inspection import InspectionTree, InspectionFrame, InspectionInfoPanel
+from wx.lib.inspection import InspectionFrame, InspectionInfoPanel, InspectionTree
 
-from wxviews.widgets import WxNode, get_root, EventBinding
-
-
-class ViewInspectionTool:
-    """
-    The :class:`ViewInspectionTool` is a singleton that manages creating and
-    showing an :class:`ViewInspectionFrame`.
-    """
-
-    def __init__(self, pos: Point = DefaultPosition, size: Size = Size(850, 700),
-                 config=None, crust_locals: Optional[dict] = None):
-        self._frame: Optional[ViewInspectionFrame] = None
-        self._pos: Point = pos
-        self._size: Size = size
-        self._config = config
-        self._crust_locals: Optional[dict] = crust_locals
-        if not hasattr(self, '_app'):
-            self._app: WxNode = get_root()
-
-    def show(self, select_obj: Any = None):
-        """
-        Creates the inspection frame if it hasn't been already, and
-        raises it if neccessary.
-
-        :param select_obj: Pass a widget or sizer to have that object be
-                     preselected in widget tree.
-        """
-        if not self._frame:
-            self._frame = ViewInspectionFrame(parent=self._app.instance.GetTopWindow(),
-                                              pos=self._pos,
-                                              size=self._size,
-                                              config=self._config,
-                                              locals=self._crust_locals,
-                                              app=self._app.instance,
-                                              root=self._app)
-        self._frame.SetObj(select_obj if select_obj else self._app)
-        self._frame.Show()
-        if self._frame.IsIconized():
-            self._frame.Iconize(False)
-        self._frame.Raise()
-
-
-class ViewInspectionFrame(InspectionFrame):
-    """
-    This class is the frame that holds the wxPython inspection tools.
-    The toolbar and AUI splitters/floating panes are also managed
-    here.  The contents of the tool windows are handled by other
-    classes.
-    """
-
-    def __init__(self, *args, root=None, **kwargs):
-        with patch(f'{inspection.__name__}.{InspectionTree.__name__}', ViewInspectionTree),\
-         patch(f'{inspection.__name__}.{InspectionInfoPanel.__name__}', ViewInspectionInfoPanel):
-            InspectionFrame.__init__(self, *args, **kwargs)
-            self.locals['root'] = root
+from wxviews.widgets.binding import EventBinding
+from wxviews.widgets.rendering import WxNode, get_root
 
 
 class ViewInspectionTree(InspectionTree):
     """Extends wx.lib.inspection.InspectionTree to show view nodes"""
 
-    def BuildTree(self, startWidget, includeSizers=False, expandFrame=False):
+    def BuildTree(self, startWidget, includeSizers = False, expandFrame = False):
         """setup root"""
         if isinstance(startWidget, Node):
             self.build_node_tree(startWidget)
         else:
-            super().BuildTree(startWidget, includeSizers=includeSizers, expandFrame=expandFrame)
+            super().BuildTree(startWidget, includeSizers = includeSizers, expandFrame = expandFrame)
 
     def build_node_tree(self, start_node: Node):
         """setup root"""
@@ -108,9 +56,7 @@ class ViewInspectionTree(InspectionTree):
         except AttributeError:
             return node_name
 
-    def add_node(self,
-                 parent_item: GenericTreeItem,
-                 node: Union[Node, InstanceNode]) -> GenericTreeItem:
+    def add_node(self, parent_item: GenericTreeItem, node: Union[Node, InstanceNode]) -> GenericTreeItem:
         """Adds node item"""
         text = self._get_node_name(node)
         item = self.AppendItem(parent_item, text)
@@ -197,7 +143,7 @@ class ViewInspectionInfoPanel(InspectionInfoPanel):
             "node_globals:"
         ]
 
-        for key, value in obj.node_globals.to_dictionary().items():
+        for key, value in obj.node_globals.items():
             lines.append(self.Fmt(key, value))
 
         if obj._bindings:
@@ -258,7 +204,8 @@ class ViewInspectionInfoPanel(InspectionInfoPanel):
             self.Fmt('bases', obj.__class__.__bases__),
             self.Fmt('module', inspect.getmodule(obj)),
             self.Fmt('style', obj.GetStyle()),
-            self.Fmt('title', obj.GetTitle())]
+            self.Fmt('title', obj.GetTitle())
+        ]
         return lines
 
     def format_menu_item(self, obj: MenuItem):
@@ -270,5 +217,66 @@ class ViewInspectionInfoPanel(InspectionInfoPanel):
             self.Fmt('module', inspect.getmodule(obj)),
             self.Fmt('id', obj.GetId()),
             self.Fmt('label', obj.GetLabel()),
-            self.Fmt('kind', obj.GetKind())]
+            self.Fmt('kind', obj.GetKind())
+        ]
         return lines
+
+
+class ViewInspectionTool:
+    """
+    The :class:`ViewInspectionTool` is a singleton that manages creating and
+    showing an :class:`ViewInspectionFrame`.
+    """
+
+    def __init__(
+        self,
+        pos: Point = DefaultPosition,
+        size: Size = Size(850, 700),
+        config = None,
+        crust_locals: Optional[dict] = None
+    ):
+        self._frame: Optional[ViewInspectionFrame] = None
+        self._pos: Point = pos
+        self._size: Size = size
+        self._config = config
+        self._crust_locals: Optional[dict] = crust_locals
+        if not hasattr(self, '_app'):
+            self._app: WxNode = get_root()
+
+    def show(self, select_obj: Any = None):
+        """
+        Creates the inspection frame if it hasn't been already, and
+        raises it if neccessary.
+        :param select_obj: Pass a widget or sizer to have that object be
+                     preselected in widget tree.
+        """
+        if not self._frame:
+            self._frame = ViewInspectionFrame(
+                parent = self._app.instance.GetTopWindow(),
+                pos = self._pos,
+                size = self._size,
+                config = self._config,
+                locals = self._crust_locals,
+                app = self._app.instance,
+                root = self._app
+            )
+        self._frame.SetObj(select_obj if select_obj else self._app)
+        self._frame.Show()
+        if self._frame.IsIconized():
+            self._frame.Iconize(False)
+        self._frame.Raise()
+
+
+class ViewInspectionFrame(InspectionFrame):
+    """
+    This class is the frame that holds the wxPython inspection tools.
+    The toolbar and AUI splitters/floating panes are also managed
+    here.  The contents of the tool windows are handled by other
+    classes.
+    """
+
+    def __init__(self, *args, root = None, **kwargs):
+        with patch(f'{inspection.__name__}.{InspectionTree.__name__}', ViewInspectionTree),\
+         patch(f'{inspection.__name__}.{InspectionInfoPanel.__name__}', ViewInspectionInfoPanel):
+            InspectionFrame.__init__(self, *args, **kwargs)
+            self.locals['root'] = root

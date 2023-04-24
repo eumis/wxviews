@@ -17,7 +17,7 @@
         <StaticText Label='Panel with border 20'
                     sizer:flag='{wx.EXPAND|wx.ALL}'/>
 
-        <Panel style:='white'
+        <Panel style:_='white'
                sizer:proportion='{1}'
                sizer:flag='{wx.EXPAND|wx.ALL}'
                sizer:border='{20}'>
@@ -31,15 +31,15 @@
         <BoxSizer init:orient='{wx.HORIZONTAL}'
                   sizer:proportion='{1}'
                   sizer:flag='{wx.EXPAND|wx.ALL}'>
-            <Panel style:='red'
+            <Panel style:_='red'
                    sizer:proportion='{1}'
                    sizer:flag='{wx.EXPAND|wx.RIGHT}'
                    sizer:border='{10}'/>
-            <Panel style:='green'
+            <Panel style:_='green'
                    sizer:proportion='{1}'
                    sizer:flag='{wx.EXPAND|wx.ALL}'
                    sizer:border='{10}'/>
-            <Panel style:='blue'
+            <Panel style:_='blue'
                    sizer:proportion='{2}'
                    sizer:flag='{wx.ALIGN_TOP|wx.ALL}'
                    sizer:border='{10}'/>
@@ -61,7 +61,7 @@
                 </wxv:Code>
                 <Panel sizer:proportion='{0}'
                        sizer:flag='{wx.EXPAND}'
-                       style:='green'>
+                       style:_='green'>
                     <StaticText Label='{str(index)}'/>
                 </Panel>
             </wxv:For>
@@ -84,7 +84,7 @@
             <wxv:For items='{list(range(6))}'>
                 <Panel sizer:proportion='{0}'
                        sizer:flag='{wx.EXPAND}'
-                       style:='green'>
+                       style:_='green'>
                     <StaticText Label='{str(index)}'/>
                 </Panel>
             </wxv:For>

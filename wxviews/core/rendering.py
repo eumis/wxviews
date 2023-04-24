@@ -2,9 +2,10 @@
 
 from typing import Any, Optional
 
-from pyviews.core import InheritedDict, XmlAttr, XmlNode, Node
-from pyviews.expression import is_expression, parse_expression, execute
-from pyviews.rendering.common import RenderingContext
+from pyviews.core.expression import execute, is_expression, parse_expression
+from pyviews.core.rendering import NodeGlobals
+from pyviews.core.xml import XmlAttr, XmlNode
+from pyviews.rendering.context import Node, RenderingContext
 from wx import Sizer
 
 
@@ -30,16 +31,16 @@ class WxRenderingContext(RenderingContext):
         self['sizer'] = value
 
     @property
-    def node_styles(self) -> InheritedDict:
+    def node_styles(self) -> NodeGlobals:
         """Node styles"""
         return self.get('node_styles')
 
     @node_styles.setter
-    def node_styles(self, value: InheritedDict):
+    def node_styles(self, value: NodeGlobals):
         self['node_styles'] = value
 
 
-def get_attr_args(xml_node, namespace: str, node_globals: Optional[InheritedDict] = None) -> dict:
+def get_attr_args(xml_node, namespace: str, node_globals: Optional[NodeGlobals] = None) -> dict:
     """Returns args from attributes with provided namespace"""
     init_attrs = [attr for attr in xml_node.attrs if attr.namespace == namespace]
     args = {}
@@ -52,23 +53,22 @@ def get_attr_args(xml_node, namespace: str, node_globals: Optional[InheritedDict
     return args
 
 
-def get_init_value(attr: XmlAttr, node_globals: Optional[InheritedDict]) -> Any:
+def get_init_value(attr: XmlAttr, node_globals: Optional[NodeGlobals]) -> Any:
     """Evaluates attribute value and returns it"""
     stripped_value = attr.value.strip() if attr.value else ''
     if is_expression(stripped_value):
         body = parse_expression(stripped_value)[1]
-        parameters = node_globals.to_dictionary() if node_globals else {}
+        parameters = node_globals if node_globals else {}
         return execute(body, parameters)
     return attr.value
 
 
-def get_wx_child_context(xml_node: XmlNode, parent_node: Node,
-                         context: WxRenderingContext) -> WxRenderingContext:
+def get_wx_child_context(xml_node: XmlNode, parent_node: Node, context: WxRenderingContext) -> WxRenderingContext:
     """Return child node context"""
     return WxRenderingContext({
         'parent_node': parent_node,
         'parent': context.parent,
-        'node_globals': InheritedDict(parent_node.node_globals),
+        'node_globals': NodeGlobals(parent_node.node_globals),
         'sizer': context.sizer,
         'xml_node': xml_node
     })

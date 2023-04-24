@@ -1,14 +1,16 @@
-from injectool import set_container, Container
-from pyviews.core import InheritedDict
-from wxviews.core import WxRenderingContext
-from wxviews.app import register_dependencies, launch
-from sandbox.viewmodel import SandboxViews
+from injectool import Container, set_default_container
+from pyviews.core.rendering import NodeGlobals
+from wxviews.app import launch, register_dependencies
+from wxviews.core.rendering import WxRenderingContext
+
+from viewmodel import SandboxViews
 
 
 def run_sandbox():
-    set_container(Container())
+    set_default_container(Container())
     register_dependencies()
-    node_globals = InheritedDict({'views': SandboxViews(['events', 'sizers', 'binding'])})
+    node_globals = NodeGlobals(
+        {'views': SandboxViews(['events', 'sizers', 'binding'])})
     launch(WxRenderingContext({'node_globals': node_globals}), 'app')
 
 
